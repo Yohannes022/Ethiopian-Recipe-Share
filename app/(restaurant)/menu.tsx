@@ -33,7 +33,7 @@ import {
   Check,
 } from "lucide-react-native";
 import colors from "@/constants/colors";
-import typography from "@/constants/typograpthy";
+import typography from "@/constants/typography";
 import { useAuthStore } from "@/store/authStore";
 import { useRestaurantStore } from "@/store/restaurantStore";
 import { MenuItem } from "@/types/restaurant";
