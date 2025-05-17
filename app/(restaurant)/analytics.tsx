@@ -1,21 +1,21 @@
-import React, { useState, useEffect } from "react";
-import {
-  StyleSheet,
-  View,
-  Text,
-  SafeAreaView,
-  ScrollView,
-  TouchableOpacity,
-  ActivityIndicator,
-  Platform,
-  Dimensions,
-} from "react-native";
-import { useRouter } from "expo-router";
-import { useAuthStore } from "@/store/authStore";
 import colors from "@/constants/colors";
 import typography from "@/constants/typography";
-import { ArrowLeft, Calendar, TrendingUp, Users, ShoppingBag } from "lucide-react-native";
 import { analyticsAPI } from "@/lib/api";
+import { useAuthStore } from "@/store/authStore";
+import { useRouter } from "expo-router";
+import { ArrowLeft, Calendar, ShoppingBag, TrendingUp, Users } from "lucide-react-native";
+import React, { useEffect, useState } from "react";
+import {
+  ActivityIndicator,
+  Dimensions,
+  Platform,
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
 // Web-compatible chart components
 const LineChart = Platform.OS === 'web' 

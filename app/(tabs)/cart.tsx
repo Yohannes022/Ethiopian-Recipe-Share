@@ -1,22 +1,22 @@
-import React, { useState } from "react";
-import {
-  StyleSheet,
-  View,
-  Text,
-  ScrollView,
-  TouchableOpacity,
-  Alert,
-} from "react-native";
-import { useRouter } from "expo-router";
-import { Image } from "expo-image";
-import { ShoppingBag, ArrowRight, MapPin, UtensilsCrossed, MapPinOff } from "lucide-react-native";
-import colors from "@/constants/colors";
-import typography from "@/constants/typography";
 import Button from "@/components/Button";
 import CartItem from "@/components/CartItem";
-import { useCartStore } from "@/store/cartStore";
+import colors from "@/constants/colors";
+import typography from "@/constants/typography";
 import { mockRestaurants } from "@/mocks/restaurants";
+import { useCartStore } from "@/store/cartStore";
 import { ServiceType } from "@/types/restaurant";
+import { Image } from "expo-image";
+import { useRouter } from "expo-router";
+import { MapPin, MapPinOff, ShoppingBag, UtensilsCrossed } from "lucide-react-native";
+import React from "react";
+import {
+  Alert,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
 export default function CartScreen() {
   const router = useRouter();
@@ -108,7 +108,7 @@ export default function CartScreen() {
         {restaurant && (
           <View style={styles.restaurantContainer}>
             <Image
-              source={{ uri: restaurant.imageUrl || restaurant.image }}
+              source={{ uri: restaurant.imageUrl }}
               style={styles.restaurantImage}
               contentFit="cover"
             />

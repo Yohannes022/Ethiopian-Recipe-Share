@@ -39,7 +39,7 @@ export default function MenuItemDetailScreen() {
   const [selectedServiceType, setSelectedServiceType] = useState<OrderServiceType>(serviceType);
   
   const restaurant = restaurants.find(r => r.id === restaurantId);
-  const menuItem = restaurant?.menu.find(item => item.id === itemId);
+  const menuItem = restaurant?.menu?.find(item => item.id === itemId);
   
   if (!restaurant || !menuItem) {
     return (

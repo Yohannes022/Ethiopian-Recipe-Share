@@ -1,21 +1,19 @@
-import React, { useState, useEffect } from "react";
-import {
-  StyleSheet,
-  View,
-  Text,
-  SafeAreaView,
-  ScrollView,
-  TouchableOpacity,
-  TextInput,
-  Alert,
-  Platform,
-} from "react-native";
-import { useRouter } from "expo-router";
-import { Image } from "expo-image";
-import { useAuthStore } from "@/store/authStore";
 import restaurantOwnerColors from "@/constants/restaurantOwnerColors";
 import typography from "@/constants/typography";
-import { Search, Filter, Clock, CheckCircle, XCircle, ChevronRight, AlertTriangle } from "lucide-react-native";
+import { useAuthStore } from "@/store/authStore";
+import { useRouter } from "expo-router";
+import { AlertTriangle, CheckCircle, ChevronRight, Clock, Search, XCircle } from "lucide-react-native";
+import React, { useEffect, useState } from "react";
+import {
+  Alert,
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View
+} from "react-native";
 
 // Mock order data
 const initialOrders = [

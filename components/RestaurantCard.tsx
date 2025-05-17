@@ -46,7 +46,7 @@ export default function RestaurantCard({ restaurant, onPress }: RestaurantCardPr
           <Text style={styles.name} numberOfLines={1}>{name}</Text>
           <View style={styles.ratingContainer}>
             <Star size={14} color={colors.yellow} fill={colors.yellow} />
-            <Text style={styles.rating}>{rating.toFixed(1)}</Text>
+            <Text style={styles.rating}>{rating !== undefined ? rating.toFixed(1) : "N/A"}</Text>
           </View>
         </View>
         
@@ -120,7 +120,7 @@ const styles = StyleSheet.create({
   ratingContainer: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: colors.ratingBackground,
+    backgroundColor: colors.white,
     paddingHorizontal: 6,
     paddingVertical: 2,
     borderRadius: 4,

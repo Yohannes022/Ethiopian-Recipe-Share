@@ -1,11 +1,11 @@
-import React from "react";
-import { StyleSheet, View, Text, TouchableOpacity } from "react-native";
-import { useRouter } from "expo-router";
-import { Image } from "expo-image";
-import { ChevronRight } from "lucide-react-native";
 import colors from "@/constants/colors";
 import typography from "@/constants/typography";
 import { useAuthStore } from "@/store/authStore";
+import { Image } from "expo-image";
+import { useRouter } from "expo-router";
+import { ChevronRight } from "lucide-react-native";
+import React from "react";
+import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 export default function CreateScreen() {
   const router = useRouter();

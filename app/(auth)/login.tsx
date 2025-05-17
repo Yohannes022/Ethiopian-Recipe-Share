@@ -1,25 +1,24 @@
-import React, { useState, useEffect } from "react";
+import Button from "@/components/Button";
+import CountryCodePicker from "@/components/CountryCodePicker";
+import colors from "@/constants/colors";
+import countryCodes, { formatPhoneNumber } from "@/constants/countryCodes";
+import typography from "@/constants/typography";
+import { useAuthStore } from "@/store/authStore";
+import { CountryCode, UserRole } from "@/types/auth";
+import { Image } from "expo-image";
+import { useRouter } from "expo-router";
+import { ChevronDown, ChevronRight } from "lucide-react-native";
+import React, { useState } from "react";
 import {
-  StyleSheet,
-  View,
-  Text,
-  TouchableOpacity,
-  TextInput,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
-  Alert,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View
 } from "react-native";
-import { Image } from "expo-image";
-import { useRouter } from "expo-router";
-import { useAuthStore } from "@/store/authStore";
-import colors from "@/constants/colors";
-import typography from "@/constants/typography";
-import Button from "@/components/Button";
-import CountryCodePicker from "@/components/CountryCodePicker";
-import { ChevronDown, ChevronRight } from "lucide-react-native";
-import countryCodes, { formatPhoneNumber } from "@/constants/countryCodes";
-import { CountryCode, UserRole } from "@/types/auth";
 
 export default function LoginScreen() {
   const router = useRouter();

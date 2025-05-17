@@ -1,21 +1,20 @@
-import React, { useState, useEffect } from "react";
-import {
-  StyleSheet,
-  View,
-  Text,
-  SafeAreaView,
-  ScrollView,
-  TouchableOpacity,
-  TextInput,
-  Alert,
-  Platform,
-} from "react-native";
-import { useRouter } from "expo-router";
-import { Image } from "expo-image";
-import { useAuthStore } from "@/store/authStore";
 import restaurantOwnerColors from "@/constants/restaurantOwnerColors";
 import typography from "@/constants/typography";
-import { Search, Filter, Star, Phone, Mail, MapPin, ChevronRight, Clock } from "lucide-react-native";
+import { useAuthStore } from "@/store/authStore";
+import { Image } from "expo-image";
+import { useRouter } from "expo-router";
+import { ChevronRight, Clock, Filter, Mail, Phone, Search, Star } from "lucide-react-native";
+import React, { useEffect, useState } from "react";
+import {
+  Alert,
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View
+} from "react-native";
 
 // Mock customer data
 const initialCustomers = [

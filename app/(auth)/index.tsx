@@ -1,10 +1,10 @@
-import React from "react";
-import { StyleSheet, View, Text, Image, SafeAreaView, Dimensions } from "react-native";
-import { useRouter } from "expo-router";
-import { LinearGradient } from "expo-linear-gradient";
 import Button from "@/components/Button";
 import colors from "@/constants/colors";
 import typography from "@/constants/typography";
+import { LinearGradient } from "expo-linear-gradient";
+import { useRouter } from "expo-router";
+import React from "react";
+import { Dimensions, Image, SafeAreaView, StyleSheet, Text, View } from "react-native";
 
 export default function WelcomeScreen() {
   const router = useRouter();

@@ -1,21 +1,21 @@
-import React, { useState, useEffect, useRef } from "react";
+import Button from "@/components/Button";
+import colors from "@/constants/colors";
+import typography from "@/constants/typography";
+import { useAuthStore } from "@/store/authStore";
+import { useRouter } from "expo-router";
+import { ArrowLeft } from "lucide-react-native";
+import React, { useEffect, useRef, useState } from "react";
 import {
-  StyleSheet,
-  View,
-  Text,
-  TouchableOpacity,
-  TextInput,
+  Alert,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
-  Alert,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
-import { useRouter } from "expo-router";
-import { useAuthStore } from "@/store/authStore";
-import colors from "@/constants/colors";
-import typography from "@/constants/typography";
-import Button from "@/components/Button";
-import { ArrowLeft } from "lucide-react-native";
 
 export default function VerifyScreen() {
   const router = useRouter();
@@ -165,7 +165,7 @@ export default function VerifyScreen() {
             {otp.map((digit, index) => (
               <TextInput
                 key={index}
-                ref={(ref) => (inputRefs.current[index] = ref)}
+                ref={(ref) => { inputRefs.current[index] = ref; }}
                 style={styles.otpInput}
                 value={digit}
                 onChangeText={(text) => handleOtpChange(text, index)}

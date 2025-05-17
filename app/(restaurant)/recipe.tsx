@@ -1,21 +1,20 @@
-import React, { useState, useEffect } from "react";
-import {
-  StyleSheet,
-  View,
-  Text,
-  SafeAreaView,
-  ScrollView,
-  TouchableOpacity,
-  TextInput,
-  Alert,
-  Platform,
-} from "react-native";
-import { useRouter } from "expo-router";
-import { Image } from "expo-image";
-import { useAuthStore } from "@/store/authStore";
 import restaurantOwnerColors from "@/constants/restaurantOwnerColors";
 import typography from "@/constants/typography";
-import { Plus, Edit2, Trash2, Search, Lock, Unlock, Eye } from "lucide-react-native";
+import { useAuthStore } from "@/store/authStore";
+import { Image } from "expo-image";
+import { useRouter } from "expo-router";
+import { Edit2, Eye, Lock, Plus, Search, Trash2, Unlock } from "lucide-react-native";
+import React, { useEffect, useState } from "react";
+import {
+  Alert,
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View
+} from "react-native";
 
 // Mock recipe data
 const initialRecipes = [

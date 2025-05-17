@@ -17,6 +17,12 @@ const colors = {
   lightGray: "#EEEEEE",
   border: "#E0E0E0",
   divider: "#EEEEEE",
+  shadow: "#00000029",
+  shadowLight: "#00000014",
+  shadowDark: "#0000004D",
+  yellow: "#FFEB3B",
+  green: "#4CAF50",
+  red: "#F44336",
   
   // Restaurant owner colors
   owner: "#8E44AD",

@@ -1,27 +1,26 @@
-import React, { useState } from "react";
-import {
-  StyleSheet,
-  View,
-  Text,
-  SafeAreaView,
-  KeyboardAvoidingView,
-  Platform,
-  TouchableWithoutFeedback,
-  Keyboard,
-  ScrollView,
-  TouchableOpacity,
-  Alert,
-} from "react-native";
-import { useRouter } from "expo-router";
-import { Image } from "expo-image";
-import Input from "@/components/Input";
 import Button from "@/components/Button";
+import Input from "@/components/Input";
 import colors from "@/constants/colors";
+import countryCodes, { formatPhoneNumber } from "@/constants/countryCodes";
 import typography from "@/constants/typography";
 import { useAuthStore } from "@/store/authStore";
-import CountryCodePicker from "@/components/CountryCodePicker";
-import countryCodes, { formatPhoneNumber } from "@/constants/countryCodes";
 import { CountryCode } from "@/types/auth";
+import { Image } from "expo-image";
+import { useRouter } from "expo-router";
+import React, { useState } from "react";
+import {
+  Alert,
+  Keyboard,
+  KeyboardAvoidingView,
+  Platform,
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  TouchableWithoutFeedback,
+  View,
+} from "react-native";
 
 export default function RestaurantOwnerSignup() {
   const router = useRouter();

@@ -1,20 +1,19 @@
-import React, { useState, useRef, useEffect } from "react";
+import colors from "@/constants/colors";
+import typography from "@/constants/typography";
+import { Send, User as UserIcon } from "lucide-react-native";
+import React, { useEffect, useRef, useState } from "react";
 import {
+  ActivityIndicator,
+  FlatList,
+  Keyboard,
+  KeyboardAvoidingView,
+  Platform,
   StyleSheet,
-  View,
   Text,
   TextInput,
   TouchableOpacity,
-  FlatList,
-  KeyboardAvoidingView,
-  Platform,
-  ActivityIndicator,
-  Keyboard,
+  View,
 } from "react-native";
-import { Image } from "expo-image";
-import { Send, User as UserIcon } from "lucide-react-native";
-import colors from "@/constants/colors";
-import typography from "@/constants/typography";
 
 type Message = {
   id: string;

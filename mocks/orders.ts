@@ -27,7 +27,7 @@ export const mockOrders: Order[] = [
     deliveryFee: 2.99,
     tax: 6.89,
     tip: 5.00,
-    total: 60.82,
+    totalAmount: 60.82,
     paymentMethod: {
       id: "payment1",
       type: "card",
@@ -55,7 +55,9 @@ export const mockOrders: Order[] = [
       }
     },
     createdAt: "2023-06-15T14:30:00Z",
-    estimatedDeliveryTime: 30
+    estimatedDeliveryTime: 30,
+    paymentStatus: "paid",
+    updatedAt: "2023-06-15T15:00:00Z"
   },
   {
     id: "order2",
@@ -85,12 +87,12 @@ export const mockOrders: Order[] = [
         quantity: 2
       }
     ],
-    status: "in-progress",
+    status: "pending",
     subtotal: 33.95,
     deliveryFee: 0,
     tax: 5.09,
     tip: 0,
-    total: 39.04,
+    totalAmount: 39.04,
     paymentMethod: {
       id: "payment2",
       type: "cash",
@@ -98,9 +100,11 @@ export const mockOrders: Order[] = [
     },
     serviceType: "pickup",
     pickupTime: "2023-06-20T18:30:00Z",
-    createdAt: "2023-06-20T17:45:00Z",
-    estimatedDeliveryTime: 0,
-    deliveryAddress: "Pickup"
+    deliveryAddress: "Pickup",
+    driverInfo: null,
+    paymentStatus: "pending",
+    updatedAt: "2023-06-20T18:00:00Z",
+    createdAt: "2023-06-20T18:00:00Z"
   },
   {
     id: "order3",
@@ -134,17 +138,19 @@ export const mockOrders: Order[] = [
     deliveryFee: 0,
     tax: 7.04,
     tip: 8.00,
-    total: 61.98,
+    totalAmount: 61.98,
     paymentMethod: {
       id: "payment3",
       type: "mobileMoney",
       name: "Mobile Money"
     },
     serviceType: "dine-in",
-    tableNumber: "12",
+    deliveryAddress: "Dine-in",
+    driverInfo: null,
+    paymentStatus: "paid",
+    updatedAt: "2023-06-25T19:30:00Z",
     createdAt: "2023-06-25T19:15:00Z",
-    estimatedDeliveryTime: 0,
-    deliveryAddress: "Dine-in"
+    estimatedDeliveryTime: 0
   },
   {
     id: "order4",
@@ -171,7 +177,7 @@ export const mockOrders: Order[] = [
     deliveryFee: 2.99,
     tax: 4.80,
     tip: 6.00,
-    total: 45.77,
+    totalAmount: 45.77,
     paymentMethod: {
       id: "payment4",
       type: "card",
@@ -194,12 +200,14 @@ export const mockOrders: Order[] = [
       phone: "+251911234567",
       photoUrl: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=200",
       currentLocation: {
-        latitude: 9.0280,
+        latitude: 9.0300,
         longitude: 38.7490
       }
     },
     createdAt: "2023-07-01T12:00:00Z",
-    estimatedDeliveryTime: 35
+    estimatedDeliveryTime: 35,
+    paymentStatus: "pending",
+    updatedAt: "2023-07-01T12:30:00Z"
   },
   {
     id: "order5",
@@ -226,17 +234,20 @@ export const mockOrders: Order[] = [
     deliveryFee: 0,
     tax: 7.19,
     tip: 0,
-    total: 55.13,
+    totalAmount: 55.13,
     paymentMethod: {
       id: "payment5",
       type: "cash",
-      name: "Cash payment"
+      name: "Cash on delivery"
     },
     serviceType: "dine-in",
     tableNumber: "8",
     createdAt: "2023-07-05T20:30:00Z",
     estimatedDeliveryTime: 0,
-    deliveryAddress: "Dine-in"
+    deliveryAddress: "Dine-in",
+    driverInfo: null,
+    paymentStatus: "paid",
+    updatedAt: "2023-07-05T21:00:00Z"
   }
 ];
 

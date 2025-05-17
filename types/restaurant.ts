@@ -24,6 +24,48 @@ export interface Restaurant {
   categories?: string[];
   createdAt: string;
   updatedAt: string;
+  deliveryFee?: number;
+  estimatedDeliveryTime?: string;
+  isFeatured?: boolean;
+  isPopular?: boolean;
+  isNew?: boolean;
+  isVerified?: boolean;
+  image: string;
+  coverImage: string;
+  website?: string;
+  distance?: string;
+  phone?: string;
+  websiteUrl?: string;
+}
+
+export interface Address {
+  id: string;
+  userId: string;
+  label: string;
+  addressLine1: string;
+  addressLine2?: string;
+  city: string;
+  state?: string;
+  postalCode?: string;
+  country?: string;
+  latitude?: number;
+  longitude?: number;
+  isDefault?: boolean;
+  instructions?: string;
+  createdAt: string;
+  updatedAt: string;
+  location?: {
+    latitude: number;
+    longitude: number;
+  };
+  type?: string; // e.g., "Home", "Work", etc.
+  isSelected?: boolean; // For UI purposes
+  isSaved?: boolean; // For UI purposes
+  isVisible?: boolean; // For UI purposes
+  expiryDate?: string; // For UI purposes
+  expiryMonth?: any; // For UI purposes
+  expiryYear?: any; // For UI purposes
+  isExpired?: boolean; // For UI purposes
 }
 
 export interface MenuItem {
@@ -33,6 +75,7 @@ export interface MenuItem {
   description?: string;
   price: number;
   category: string;
+  image?: string;
   imageUrl?: string;
   isAvailable?: boolean;
   preparationTime?: number;
@@ -51,6 +94,21 @@ export interface MenuItem {
   isGlutenFree?: boolean;
   createdAt: string;
   updatedAt: string;
+  tags?: string[];
+  spicy?: boolean;
+  popular?: boolean;
+  cousine?: string;
+  restaurant?: Restaurant;
+  reviews?: Review[];
+  isPopular?: boolean;
+  isNew?: boolean;
+  isRecommended?: boolean;
+  openingHours?: {
+    [key: string]: {
+      open: string;
+      close: string;
+    };
+  };
 }
 
 export interface Review {
@@ -74,16 +132,80 @@ export interface Order {
   items: OrderItem[];
   status: OrderStatus;
   totalAmount: number;
-  paymentMethod: string;
+  subtotal: number;
+  tax: number;
+  tip: number;
+  // paymentMethod: string;
   paymentStatus: PaymentStatus;
-  serviceType: ServiceType;
-  deliveryAddress?: string;
+  serviceType: OrderServiceType;
+  // deliveryAddress?: string;
+  driverInfo: {
+  name: string;
+  phone: string;
+  photoUrl: string;
+  currentLocation: {
+    latitude: number;
+    longitude: number;
+  };
+} | null;
   deliveryFee?: number;
   tableNumber?: string;
   pickupTime?: string;
   specialInstructions?: string;
   createdAt: string;
   updatedAt: string;
+  estimatedDeliveryTime?: number;
+  estimatedPickupTime?: number;
+  orderNumber?: string;
+  restaurant?: Restaurant;
+  user?: {
+    id: string;
+    name: string;
+    avatarUrl?: string;
+  };
+  paymentDetails?: {
+    transactionId: string;
+    paymentDate: string;
+    paymentMethod: string;
+    amount: number;
+    status: PaymentStatus;
+  };
+  orderHistory?: {
+    status: OrderStatus;
+    timestamp: string;
+  }[];
+  date?: string;
+  time?: string;
+  deliveryAddressDetails?: Address;
+  deliveryInstructions?: string;
+  orderType?: string; // e.g., "delivery", "pickup", "dine-in"
+  orderStatus?: string; // e.g., "pending", "confirmed", "in-progress", "completed"
+  orderItems?: {
+    [key: string]: {
+      id: string;
+      menuItemId: string;
+      name: string;
+      price: number;
+      quantity: number;
+      specialInstructions?: string;
+    };
+  };
+  paymentMethod: {
+  id: string;
+  type: string;
+  name: string;
+  last4?: string;
+}
+deliveryAddress: string | {
+  addressLine1: string;
+  addressLine2?: string;
+  city: string;
+  instructions?: string;
+  location: {
+    latitude: number;
+    longitude: number;
+  };
+};
 }
 
 export interface OrderItem {
@@ -106,7 +228,7 @@ export type OrderStatus =
 
 export type PaymentStatus = "pending" | "paid" | "failed";
 
-export type ServiceType = "delivery" | "pickup" | "dine-in";
+export type OrderServiceType = "delivery" | "pickup" | "dine-in";
 
 export interface RestaurantFilter {
   cuisine?: string[];
@@ -115,4 +237,19 @@ export interface RestaurantFilter {
   isOpen?: boolean;
   distance?: number;
   searchQuery?: string;
+}
+
+export interface PaymentMethod {
+  id: string;
+  userId: string;
+  type: "card" | "mobile-money";
+  cardBrand?: string;
+  last4?: string;
+  expiryMonth?: number;
+  expiryYear?: number;
+  provider?: string;
+  phoneNumber?: string;
+  isDefault?: boolean;
+  createdAt: string;
+  updatedAt: string;
 }

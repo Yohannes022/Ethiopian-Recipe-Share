@@ -62,7 +62,7 @@ export default function PaymentMethodCard({
             ) : (
               <>
                 <Text style={[styles.methodName, selected && styles.selectedText]}>
-                  {method.provider?.charAt(0).toUpperCase() + method.provider?.slice(1)}
+                  {(method.provider ? method.provider.charAt(0).toUpperCase() + method.provider.slice(1) : "")}
                 </Text>
                 <Text style={styles.methodDetails}>
                   {method.phoneNumber}

@@ -1,23 +1,23 @@
-import React, { useState, useEffect } from "react";
-import {
-  StyleSheet,
-  View,
-  Text,
-  SafeAreaView,
-  ScrollView,
-  TouchableOpacity,
-  Platform,
-  ActivityIndicator,
-  Alert,
-} from "react-native";
-import { useRouter } from "expo-router";
-import { Image } from "expo-image";
-import { useAuthStore } from "@/store/authStore";
 import colors from "@/constants/colors";
 import typography from "@/constants/typography";
-import { Dimensions } from "react-native";
-import { ChevronRight, Users, ShoppingBag, Utensils, BarChart3, Settings, Clock, DollarSign, AlertTriangle } from "lucide-react-native";
-import { analyticsAPI, restaurantAPI, orderAPI } from "@/lib/api";
+import { analyticsAPI, orderAPI } from "@/lib/api";
+import { useAuthStore } from "@/store/authStore";
+import { Image } from "expo-image";
+import { useRouter } from "expo-router";
+import { AlertTriangle, BarChart3, ChevronRight, Settings, ShoppingBag, Users, Utensils } from "lucide-react-native";
+import React, { useEffect, useState } from "react";
+import {
+  ActivityIndicator,
+  Alert,
+  Dimensions,
+  Platform,
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
 // Web-compatible chart component
 const LineChart = Platform.OS === 'web' 
