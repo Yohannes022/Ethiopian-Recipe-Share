@@ -16,7 +16,7 @@ export default function WelcomeScreen() {
   };
 
   const handleRestaurantOwner = () => {
-    router.push("/restaurant-owner-signup");
+    router.push("/restaurant-owner");
   };
 
   return (

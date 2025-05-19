@@ -73,7 +73,7 @@ export default function RestaurantDetailScreen() {
   const router = useRouter();
   const { user } = useAuthStore();
   const { items } = useCartStore();
-  const { getRestaurantById, addReview } = useRestaurantStore();
+  const { restaurants, addReview } = useRestaurantStore();
   
   const [selectedCategory, setSelectedCategory] = useState<string>("All");
   const [locationPermission, setLocationPermission] = useState<boolean | null>(null);
@@ -86,7 +86,7 @@ export default function RestaurantDetailScreen() {
   const [isSubmittingReview, setIsSubmittingReview] = useState(false);
   
   const scrollY = useRef(new Animated.Value(0)).current;
-  const restaurant = getRestaurantById(id || "");
+  const restaurant = restaurants?.find((r) => r.id === id);
   
   // Calculate cart items count directly
   const cartItemCount = items.reduce((count, item) => count + item.quantity, 0);
@@ -239,7 +239,7 @@ export default function RestaurantDetailScreen() {
     // Simulate API call
     setTimeout(() => {
       try {
-        addReview(restaurant.id, reviewRating, reviewComment, user.id);
+        addReview(restaurant.id, { rating: reviewRating, comments: reviewComment });
         
         setIsSubmittingReview(false);
         setShowReviewModal(false);
@@ -452,7 +452,11 @@ export default function RestaurantDetailScreen() {
               {restaurant.openingHours && Object.entries(restaurant.openingHours).map(([day, hours]) => (
                 <View key={day} style={styles.hourRow}>
                   <Text style={styles.dayText}>{day}</Text>
-                  <Text style={styles.hoursText}>{hours}</Text>
+                  <Text style={styles.hoursText}>
+                    {typeof hours === "object" && hours.open && hours.close
+                      ? `${hours.open} - ${hours.close}`
+                      : String(hours)}
+                  </Text>
                 </View>
               ))}
             </View>

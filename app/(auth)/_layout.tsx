@@ -37,7 +37,7 @@ export default function AuthLayout() {
         }}
       />
       <Stack.Screen
-        name="restaurant-owner-signup"
+        name="restaurant-owner"
         options={{
           title: "Restaurant Owner Signup",
         }}

@@ -55,13 +55,13 @@ export default function CreateScreen() {
           </View>
           <ChevronRight size={24} color={colors.primary} />
         </View>
-        <Image
+        {/* <Image
           source={{
             uri: "https://images.unsplash.com/photo-1567364816519-cbc9c4ffe1eb?q=80&w=500",
           }}
           style={styles.createCardImage}
           contentFit="cover"
-        />
+        /> */}
       </TouchableOpacity>
 
       <View style={styles.tipsContainer}>

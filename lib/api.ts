@@ -1,6 +1,6 @@
+import { API_CONFIG } from '@/constants/api';
 import axios from 'axios';
 import { Platform } from 'react-native';
-import { API_CONFIG } from '@/constants/api';
 
 // Determine the base URL based on platform
 const getBaseUrl = () => {
@@ -153,7 +153,7 @@ export const restaurantAPI = {
       console.error('Create restaurant error:', error);
       // For demo purposes, return mock data
       return {
-        id: "rest-" + Math.random().toString(36).substring(2),
+        id: Math.floor(Math.random() * 1000000).toString(), // Use numeric string ID
         ...restaurantData,
         rating: 0,
         ratingCount: 0,
@@ -178,6 +178,7 @@ export const restaurantAPI = {
   },
   
   getRestaurant: async (id: string) => {
+    console.log('Fetching restaurant with ID:', id);
     try {
       const response = await api.get(`/restaurants/${id}`);
       return response.data;

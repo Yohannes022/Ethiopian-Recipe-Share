@@ -82,13 +82,21 @@ export default function RestaurantsScreen() {
       filtered = filtered.filter(
         (restaurant) =>
           restaurant.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          (restaurant.cuisine && restaurant.cuisine.toLowerCase().includes(searchQuery.toLowerCase()))
+          (restaurant.cuisine && Array.isArray(restaurant.cuisine)
+            ? restaurant.cuisine.some(cuisine =>
+                cuisine.toLowerCase().includes(searchQuery.toLowerCase())
+              )
+            : (typeof restaurant.cuisine === "string" && 
+                (restaurant.cuisine as string).toLowerCase().includes(searchQuery.toLowerCase())))
       );
     }
     
     if (selectedCategory !== "All") {
       filtered = filtered.filter(
-        (restaurant) => restaurant.cuisine === selectedCategory
+        (restaurant) =>
+          (Array.isArray(restaurant.cuisine)
+            ? restaurant.cuisine.includes(selectedCategory)
+            : restaurant.cuisine === selectedCategory)
       );
     }
     

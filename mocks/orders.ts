@@ -4,7 +4,7 @@ export const mockOrders: Order[] = [
   {
     id: "order1",
     userId: "user1",
-    restaurantId: "rest1",
+    restaurantId: "1",
     items: [
       {
         id: "orderitem1",
@@ -62,7 +62,7 @@ export const mockOrders: Order[] = [
   {
     id: "order2",
     userId: "user1",
-    restaurantId: "rest2",
+    restaurantId: "2",
     items: [
       {
         id: "orderitem3",
@@ -109,7 +109,7 @@ export const mockOrders: Order[] = [
   {
     id: "order3",
     userId: "user1",
-    restaurantId: "rest3",
+    restaurantId: "3",
     items: [
       {
         id: "orderitem6",
@@ -152,103 +152,7 @@ export const mockOrders: Order[] = [
     createdAt: "2023-06-25T19:15:00Z",
     estimatedDeliveryTime: 0
   },
-  {
-    id: "order4",
-    userId: "user1",
-    restaurantId: "rest1",
-    items: [
-      {
-        id: "orderitem9",
-        menuItemId: "item1",
-        name: "Doro Wat",
-        price: 14.99,
-        quantity: 1
-      },
-      {
-        id: "orderitem10",
-        menuItemId: "item2",
-        name: "Tibs",
-        price: 16.99,
-        quantity: 1
-      }
-    ],
-    status: "pending",
-    subtotal: 31.98,
-    deliveryFee: 2.99,
-    tax: 4.80,
-    tip: 6.00,
-    totalAmount: 45.77,
-    paymentMethod: {
-      id: "payment4",
-      type: "card",
-      name: "Mastercard ending in 5678",
-      last4: "5678"
-    },
-    serviceType: "delivery",
-    deliveryAddress: {
-      addressLine1: "456 Oak Ave",
-      addressLine2: "",
-      city: "Addis Ababa",
-      instructions: "Leave at door",
-      location: {
-        latitude: 9.0300,
-        longitude: 38.7500
-      }
-    },
-    driverInfo: {
-      name: "Selam Tadesse",
-      phone: "+251911234567",
-      photoUrl: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=200",
-      currentLocation: {
-        latitude: 9.0300,
-        longitude: 38.7490
-      }
-    },
-    createdAt: "2023-07-01T12:00:00Z",
-    estimatedDeliveryTime: 35,
-    paymentStatus: "pending",
-    updatedAt: "2023-07-01T12:30:00Z"
-  },
-  {
-    id: "order5",
-    userId: "user1",
-    restaurantId: "rest2",
-    items: [
-      {
-        id: "orderitem11",
-        menuItemId: "item5",
-        name: "Kitfo",
-        price: 15.99,
-        quantity: 2
-      },
-      {
-        id: "orderitem12",
-        menuItemId: "item3",
-        name: "Injera",
-        price: 3.99,
-        quantity: 4
-      }
-    ],
-    status: "delivered",
-    subtotal: 47.94,
-    deliveryFee: 0,
-    tax: 7.19,
-    tip: 0,
-    totalAmount: 55.13,
-    paymentMethod: {
-      id: "payment5",
-      type: "cash",
-      name: "Cash on delivery"
-    },
-    serviceType: "dine-in",
-    tableNumber: "8",
-    createdAt: "2023-07-05T20:30:00Z",
-    estimatedDeliveryTime: 0,
-    deliveryAddress: "Dine-in",
-    driverInfo: null,
-    paymentStatus: "paid",
-    updatedAt: "2023-07-05T21:00:00Z"
-  }
+  
 ];
 
 export default mockOrders;

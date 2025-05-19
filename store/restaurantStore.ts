@@ -1,8 +1,8 @@
-import { create } from "zustand";
-import { persist, createJSONStorage } from "zustand/middleware";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { Restaurant, MenuItem, Review } from "@/types/restaurant";
 import { restaurantAPI } from "@/lib/api";
+import { MenuItem, Restaurant, Review } from "@/types/restaurant";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { create } from "zustand";
+import { createJSONStorage, persist } from "zustand/middleware";
 
 export interface RestaurantState {
   restaurants: Restaurant[];
@@ -35,7 +35,7 @@ export const useRestaurantStore = create<RestaurantState>()(
       error: null,
       
       fetchRestaurants: async () => {
-        set({ isLoading: true, error: null });
+        set({ isLoading: false, error: null });
         
         try {
           // Fetch restaurants from API
@@ -54,20 +54,12 @@ export const useRestaurantStore = create<RestaurantState>()(
       },
       
       fetchRestaurant: async (id: string) => {
-        set({ isLoading: true, error: null });
-        
+        set({ isLoading: false, error: null });
+        console.log("[fetchRestaurant] Fetching restaurant with id:", id);
         try {
-          // Check if restaurant is already in state
-          const existingRestaurant = get().restaurants.find(r => r.id === id);
-          
-          if (existingRestaurant) {
-            set({ currentRestaurant: existingRestaurant, isLoading: false });
-            return existingRestaurant;
-          }
-          
           // Fetch restaurant from API
           const restaurant = await restaurantAPI.getRestaurant(id);
-          
+          console.log("[fetchRestaurant] API response:", restaurant);
           if (restaurant) {
             set({ 
               currentRestaurant: restaurant,
@@ -76,7 +68,6 @@ export const useRestaurantStore = create<RestaurantState>()(
             });
             return restaurant;
           }
-          
           set({ 
             isLoading: false, 
             error: "Restaurant not found." 

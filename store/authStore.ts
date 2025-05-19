@@ -38,7 +38,7 @@ const mockUsers: User[] = [
     reviews: 18,
     role: "owner",
     createdAt: "2022-11-10T10:30:00Z",
-    restaurantId: "rest1",
+    restaurantId: "1",
   },
 ];
 

@@ -1,33 +1,33 @@
-import React, { useState } from "react";
-import {
-  StyleSheet,
-  View,
-  Text,
-  ScrollView,
-  TouchableOpacity,
-  TextInput,
-  Alert,
-  Platform,
-} from "react-native";
-import { useLocalSearchParams, useRouter } from "expo-router";
+import Button from "@/components/Button";
+import colors from "@/constants/colors";
+import typography from "@/constants/typography";
+import { restaurants } from "@/mocks/restaurants";
+import { useCartStore } from "@/store/cartStore";
+import { OrderServiceType } from "@/types/restaurant";
 import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import {
   ChevronLeft,
   Flame,
   Leaf,
+  MapPin,
+  MapPinOff,
   Minus,
   Plus,
-  MapPin,
   UtensilsCrossed,
-  MapPinOff,
 } from "lucide-react-native";
-import colors from "@/constants/colors";
-import typography from "@/constants/typography";
-import Button from "@/components/Button";
-import { restaurants } from "@/mocks/restaurants";
-import { useCartStore } from "@/store/cartStore";
-import { OrderServiceType } from "@/types/restaurant";
+import React, { useState } from "react";
+import {
+  Alert,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
 export default function MenuItemDetailScreen() {
   const { restaurantId, itemId } = useLocalSearchParams<{ restaurantId: string; itemId: string }>();

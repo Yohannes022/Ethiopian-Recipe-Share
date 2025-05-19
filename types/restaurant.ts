@@ -36,6 +36,17 @@ export interface Restaurant {
   distance?: string;
   phone?: string;
   websiteUrl?: string;
+  deliveryAvailable?: boolean;
+  pickupAvailable?: boolean;
+  dineInAvailable?: boolean;
+  deliveryTime?: string;
+  pickupTime?: string;
+  dineInTime?: string;
+  deliveryInstructions?: string;
+  pickupInstructions?: string;  
+  dineInInstructions?: string;
+  isSelected?: boolean; // For UI purposes
+  isSaved?: boolean; // For UI purposes
 }
 
 export interface Address {
@@ -118,6 +129,8 @@ export interface Review {
   userName: string;
   userAvatar?: string;
   rating: number;
+  comments: string;
+  response?: string;
   text: string;
   images?: string[];
   likes?: number;

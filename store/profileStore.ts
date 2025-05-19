@@ -9,7 +9,26 @@ export interface ProfileState {
   following: User[];
   isLoading: boolean;
   error: string | null;
-  
+  addresses: [] | null;
+  locationPermission: boolean | null;
+  location: {
+    latitude: number;
+    longitude: number;
+  } | null;
+  paymentMethods: {
+    id: string;
+    type: "card" | "mobile-money";
+    cardBrand?: string;
+    last4?: string;
+    expiryMonth?: number;
+    expiryYear?: number;
+    provider?: string;
+    phoneNumber?: string;
+    isDefault?: boolean;
+    createdAt: string;
+    updatedAt: string;
+  } | null;
+
   // Profile actions
   fetchProfile: (userId: string) => Promise<User | null>;
   fetchFollowers: (userId: string) => Promise<User[]>;
@@ -29,6 +48,10 @@ export const useProfileStore = create<ProfileState>()(
       following: [],
       isLoading: false,
       error: null,
+      addresses: null,
+      locationPermission: null,
+      location: null,
+      paymentMethods: null,
       
       fetchProfile: async (userId: string) => {
         set({ isLoading: true, error: null });

@@ -56,8 +56,10 @@ export default function ProfileScreen() {
   const userRecipes = recipes.filter((recipe) => recipe.authorId === user.id);
   const savedRecipes = recipes.filter((recipe) => recipe.isSaved);
   
-  const defaultAddress = addresses.find(a => a.isDefault);
-  const defaultPaymentMethod = paymentMethods.find(p => p.isDefault);
+  const defaultAddress = (addresses ?? []).find((a: { isDefault?: boolean }) => a.isDefault);
+  const defaultPaymentMethod = Array.isArray(paymentMethods)
+    ? paymentMethods.find(p => p.isDefault)
+    : undefined;
   const recentOrders = orders.slice(0, 3);
 
   const handleLogout = () => {
@@ -146,7 +148,7 @@ export default function ProfileScreen() {
           <View style={styles.statsContainer}>
             <TouchableOpacity 
               style={styles.statItem}
-              onPress={() => router.push("/profile/recipes")}
+              onPress={() => router.push("/profile")}
             >
               <Text style={styles.statNumber}>{userRecipes.length}</Text>
               <Text style={styles.statLabel}>Recipes</Text>

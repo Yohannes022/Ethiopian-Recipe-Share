@@ -1,4 +1,4 @@
-import { Restaurant, MenuItem } from "@/types/restaurant";
+import { MenuItem, Restaurant } from "@/types/restaurant";
 
 // Mock menu items
 const menuItems: MenuItem[] = [
@@ -11,7 +11,7 @@ const menuItems: MenuItem[] = [
     category: "Main Dishes",
     popular: true,
     spicy: true,
-    restaurantId: "rest1",
+    restaurantId: "1",
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   },
@@ -23,7 +23,7 @@ const menuItems: MenuItem[] = [
     image: "https://images.unsplash.com/photo-1511910849309-0dffb8785146?q=80&w=500",
     category: "Main Dishes",
     popular: true,
-    restaurantId: "rest1",
+    restaurantId: "1",
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   },
@@ -34,7 +34,7 @@ const menuItems: MenuItem[] = [
     price: 3.99,
     image: "https://images.unsplash.com/photo-1563227812-0ea4c22e6cc8?q=80&w=500",
     category: "Sides",
-    restaurantId: "rest1",
+    restaurantId: "1",
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   },
@@ -45,7 +45,7 @@ const menuItems: MenuItem[] = [
     price: 4.99,
     image: "https://images.unsplash.com/photo-1559496417-e7f25cb247f3?q=80&w=500",
     category: "Beverages",
-    restaurantId: "rest1",
+    restaurantId: "1",
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   },
@@ -57,7 +57,7 @@ const menuItems: MenuItem[] = [
     image: "https://images.unsplash.com/photo-1544025162-d76694265947?q=80&w=500",
     category: "Main Dishes",
     spicy: true,
-    restaurantId: "rest1",
+    restaurantId: "1",
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   },
@@ -66,7 +66,7 @@ const menuItems: MenuItem[] = [
 // Mock restaurants
 export const mockRestaurants: Restaurant[] = [
   {
-    id: "rest1",
+    id: "1",
     ownerId: "owner1",
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
@@ -102,7 +102,7 @@ export const mockRestaurants: Restaurant[] = [
     }
   },
   {
-    id: "rest2",
+    id: "2",
     ownerId: "owner2",
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
@@ -122,7 +122,7 @@ export const mockRestaurants: Restaurant[] = [
     isOpen: true,
     distance: "2.5 km",
     categories: ["Ethiopian", "Fusion", "Modern"],
-    menu: menuItems,
+    menu: menuItems.map(item => ({ ...item, restaurantId: "2" })),
     location: {
       latitude: 9.0300,
       longitude: 38.7500
@@ -138,7 +138,7 @@ export const mockRestaurants: Restaurant[] = [
     }
   },
   {
-    id: "rest3",
+    id: "3",
     ownerId: "owner3",
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
@@ -158,7 +158,7 @@ export const mockRestaurants: Restaurant[] = [
     isOpen: true,
     distance: "3.7 km",
     categories: ["Ethiopian", "Traditional", "Family-style"],
-    menu: menuItems,
+    menu: menuItems.map(item => ({ ...item, restaurantId: "3" })),
     location: {
       latitude: 9.0350,
       longitude: 38.7600
@@ -171,118 +171,6 @@ export const mockRestaurants: Restaurant[] = [
       "Wednesday": { open: "11:00 AM", close: "9:00 PM" },
       "Thursday": { open: "11:00 AM", close: "9:00 PM" },
       "Friday": { open: "11:00 AM", close: "10:00 PM" },
-    }
-  },
-  {
-    id: "rest4",
-    ownerId: "owner4",
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-    name: "Merkato Cafe",
-    image: "https://images.unsplash.com/photo-1521017432531-fbd92d768814?q=80&w=500",
-    imageUrl: "https://images.unsplash.com/photo-1521017432531-fbd92d768814?q=80&w=500",
-    coverImage: "https://images.unsplash.com/photo-1521017432531-fbd92d768814?q=80&w=500",
-    coverImageUrl: "https://images.unsplash.com/photo-1521017432531-fbd92d768814?q=80&w=500",
-    cuisine: ["Ethiopian Street Food"],
-    rating: 4.3,
-    reviewCount: 64,
-    deliveryFee: 0.99,
-    estimatedDeliveryTime: "20-35 min",
-    address: "101 Market St, Addis Ababa",
-    description: "Quick and delicious Ethiopian street food favorites",
-    priceLevel: "$",
-    isOpen: true,
-    distance: "1.8 km",
-    categories: ["Ethiopian", "Street Food", "Quick Bites"],
-    menu: menuItems,
-    location: {
-      latitude: 9.0100,
-      longitude: 38.7300
-    },
-    phone: "+251 11 456 7890",
-    website: "https://merkatocafe.com",
-    openingHours: {
-      "Monday": { open: "7:00 AM", close: "8:00 PM" },
-      "Tuesday": { open: "7:00 AM", close: "8:00 PM" },
-      "Wednesday": { open: "7:00 AM", close: "8:00 PM" },
-      "Thursday": { open: "7:00 AM", close: "8:00 PM" },
-      "Friday": { open: "7:00 AM", close: "9:00 PM" },
-    }
-  },
-  {
-    id: "rest5",
-    ownerId: "owner5",
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-    name: "Blue Nile Restaurant",
-    image: "https://images.unsplash.com/photo-1537047902294-62a40c20a6ae?q=80&w=500",
-    imageUrl: "https://images.unsplash.com/photo-1537047902294-62a40c20a6ae?q=80&w=500",
-    coverImage: "https://images.unsplash.com/photo-1537047902294-62a40c20a6ae?q=80&w=500",
-    coverImageUrl: "https://images.unsplash.com/photo-1537047902294-62a40c20a6ae?q=80&w=500",
-    cuisine: ["Ethiopian & Eritrean"],
-    rating: 4.6,
-    reviewCount: 98,
-    deliveryFee: 2.49,
-    estimatedDeliveryTime: "40-55 min",
-    address: "222 River Rd, Addis Ababa",
-    description: "Serving both Ethiopian and Eritrean specialties in a cozy setting",
-    priceLevel: "$$",
-    isOpen: false,
-    distance: "4.2 km",
-    categories: ["Ethiopian", "Eritrean", "Regional"],
-    menu: menuItems,
-    location: {
-      latitude: 9.0400,
-      longitude: 38.7700
-    },
-    phone: "+251 11 567 8901",
-    website: "https://bluenilerestaurant.com",
-    openingHours: {
-      "Monday": { open: "11:00 AM", close: "9:00 PM" },
-      "Tuesday": { open: "11:00 AM", close: "9:00 PM" },
-      "Wednesday": { open: "11:00 AM", close: "9:00 PM" },
-      "Thursday": { open: "11:00 AM", close: "9:00 PM" },
-      "Friday": { open: "11:00 AM", close: "10:00 PM" },
-      "Saturday": { open: "11:00 AM", close: "10:00 PM" },
-      "Sunday": { open: "Closed", close: "Closed" }
-    }
-  },
-  {
-    id: "rest6",
-    ownerId: "owner6",
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-    name: "Addis Ababa Bistro",
-    image: "https://images.unsplash.com/photo-1506748686214-e9df14d4d9d0?q=80&w=500",
-    imageUrl: "https://images.unsplash.com/photo-1506748686214-e9df14d4d9d0?q=80&w=500",
-    coverImage: "https://images.unsplash.com/photo-1506748686214-e9df14d4d9d0?q=80&w=500",
-    coverImageUrl: "https://images.unsplash.com/photo-1506748686214-e9df14d4d9d0?q=80&w=500",
-    cuisine: ["Ethiopian"],
-    rating: 4.5,
-    reviewCount: 75,
-    deliveryFee: 2.99,
-    estimatedDeliveryTime: "30-45 min",
-    address: "333 Main St, Addis Ababa",
-    description: "Charming bistro offering a fusion of Ethiopian and international dishes",
-    priceLevel: "$$",
-    isOpen: true,
-    distance: "2.5 km",
-    categories: ["Ethiopian", "Fusion", "Bistro"],
-    menu: menuItems,
-    location: {
-      latitude: 9.0500,
-      longitude: 38.7800
-    },
-    phone: "+251 11 678 9012",
-    website: "https://addisabababistro.com",
-    openingHours: {
-      "Monday": { open: "11:00 AM", close: "9:00 PM" },
-      "Tuesday": { open: "11:00 AM", close: "9:00 PM" },
-      "Wednesday": { open: "11:00 AM", close: "9:00 PM" },
-      "Thursday": { open: "11:00 AM", close: "9:00 PM" },
-      "Friday": { open: "11:00 AM", close: "10:00 PM" },
-      "Saturday": { open: "11:00 AM", close: "10:00 PM" },
-      "Sunday": { open: "Closed", close: "Closed" }
     }
   }
 ];

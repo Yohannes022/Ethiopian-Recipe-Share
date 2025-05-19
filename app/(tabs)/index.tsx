@@ -205,8 +205,9 @@ export default function HomeScreen() {
           renderItem={({ item }) => (
             <RecipeCard recipe={item} variant="horizontal" />
           )}
-          ItemSeparatorComponent={() => <View style={{ height: 16 }} />}
+          ItemSeparatorComponent={() => <View style={{ height: 10 }} />}
           scrollEnabled={false}
+          style={{ paddingHorizontal: 20 }}
         />
       </View>
     </ScrollView>
@@ -319,6 +320,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   popularContainer: {
+    // marginHorizontal: 10,
     marginBottom: 24,
   },
   sectionHeader: {

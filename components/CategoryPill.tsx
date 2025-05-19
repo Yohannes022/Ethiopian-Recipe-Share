@@ -6,6 +6,7 @@ import typography from "@/constants/typography";
 interface CategoryPillProps {
   title: string;
   selected?: boolean;
+  isSelected?: boolean;
   onPress: () => void;
 }
 
