@@ -73,7 +73,7 @@ export default function RestaurantDetailScreen() {
   const router = useRouter();
   const { user } = useAuthStore();
   const { items } = useCartStore();
-  const { restaurants, addReview } = useRestaurantStore();
+  const { fetchRestaurant, addReview } = useRestaurantStore();
   
   const [selectedCategory, setSelectedCategory] = useState<string>("All");
   const [locationPermission, setLocationPermission] = useState<boolean | null>(null);
@@ -84,19 +84,28 @@ export default function RestaurantDetailScreen() {
   const [reviewRating, setReviewRating] = useState(5);
   const [reviewComment, setReviewComment] = useState("");
   const [isSubmittingReview, setIsSubmittingReview] = useState(false);
+  const [restaurant, setRestaurant] = useState<Restaurant | null>(null);
   
   const scrollY = useRef(new Animated.Value(0)).current;
-  const restaurant = restaurants?.find((r) => r.id === id);
   
   // Calculate cart items count directly
   const cartItemCount = items.reduce((count, item) => count + item.quantity, 0);
+
+  useEffect(() => {
+    let isMounted = true;
+    setIsLoading(true);
+    fetchRestaurant(id || "").then((data: any) => {
+      if (isMounted) {
+        setRestaurant(data);
+        setIsLoading(false);
+      }
+    });
+    return () => {
+      isMounted = false;
+    };
+  }, [id]);
   
   useEffect(() => {
-    // Simulate loading restaurant data
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 1000);
-    
     // Request location permission on native platforms
     if (Platform.OS !== "web" && Location) {
       (async () => {
@@ -116,8 +125,6 @@ export default function RestaurantDetailScreen() {
         }
       })();
     }
-    
-    return () => clearTimeout(timer);
   }, []);
   
   if (isLoading) {
@@ -128,6 +135,10 @@ export default function RestaurantDetailScreen() {
       </View>
     );
   }
+  
+  const filteredMenu = restaurant && restaurant.menu && (selectedCategory === "All"
+    ? restaurant.menu
+    : restaurant.menu.filter(item => item.category === selectedCategory));
   
   if (!restaurant) {
     return (
@@ -142,10 +153,6 @@ export default function RestaurantDetailScreen() {
       </View>
     );
   }
-
-  const filteredMenu = restaurant.menu && (selectedCategory === "All"
-    ? restaurant.menu
-    : restaurant.menu.filter(item => item.category === selectedCategory));
 
   const renderPriceLevel = () => {
     const level = restaurant.priceLevel ? restaurant.priceLevel.length : 0;
@@ -452,11 +459,7 @@ export default function RestaurantDetailScreen() {
               {restaurant.openingHours && Object.entries(restaurant.openingHours).map(([day, hours]) => (
                 <View key={day} style={styles.hourRow}>
                   <Text style={styles.dayText}>{day}</Text>
-                  <Text style={styles.hoursText}>
-                    {typeof hours === "object" && hours.open && hours.close
-                      ? `${hours.open} - ${hours.close}`
-                      : String(hours)}
-                  </Text>
+                  <Text style={styles.hoursText}>{hours}</Text>
                 </View>
               ))}
             </View>
