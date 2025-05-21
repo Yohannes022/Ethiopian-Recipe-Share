@@ -1,22 +1,22 @@
-import React, { useState, useEffect, useRef } from "react";
-import {
-  StyleSheet,
-  View,
-  Text,
-  TouchableOpacity,
-  Platform,
-  Dimensions,
-  Linking,
-  Alert,
-} from "react-native";
-import { useLocalSearchParams, useRouter } from "expo-router";
-import { Image } from "expo-image";
-import { ChevronLeft, Phone, MessageCircle, MapPin, Navigation } from "lucide-react-native";
+import OrderStatusTracker from "@/components/OrderStatusTracker";
 import colors from "@/constants/colors";
 import typography from "@/constants/typography";
-import OrderStatusTracker from "@/components/OrderStatusTracker";
-import { useCartStore } from "@/store/cartStore";
 import { restaurants } from "@/mocks/restaurants";
+import { useCartStore } from "@/store/cartStore";
+import { Image } from "expo-image";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import { ChevronLeft, MapPin, MessageCircle, Navigation, Phone } from "lucide-react-native";
+import React, { useEffect, useRef, useState } from "react";
+import {
+  Alert,
+  Dimensions,
+  Linking,
+  Platform,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
 // Conditionally import MapView to avoid web issues
 let MapView: any = null;
@@ -59,7 +59,7 @@ export default function DeliveryTrackingScreen() {
   );
   
   const [estimatedTime, setEstimatedTime] = useState<number>(
-    order?.estimatedDeliveryTime ? parseInt(order.estimatedDeliveryTime.split("-")[1]) : 30
+    order?.estimatedDeliveryTime || 30
   );
 
   const [userLocation, setUserLocation] = useState<{latitude: number, longitude: number} | null>(null);
@@ -89,7 +89,8 @@ export default function DeliveryTrackingScreen() {
   useEffect(() => {
     // Simulate driver movement
     const interval = setInterval(() => {
-      if (order?.status === "out-for-delivery" && driverLocation && order.deliveryAddress.location) {
+      if (order?.status === "in-delivery" && driverLocation && 
+          typeof order.deliveryAddress !== 'string' && order.deliveryAddress.location) {
         // Move driver closer to delivery location
         const deliveryLoc = order.deliveryAddress.location;
         const newLat = driverLocation.latitude + (deliveryLoc.latitude - driverLocation.latitude) * 0.1;
@@ -110,7 +111,9 @@ export default function DeliveryTrackingScreen() {
 
   useEffect(() => {
     // Fit map to show all markers
-    if (Platform.OS !== "web" && mapRef.current && restaurant?.location && order?.deliveryAddress.location && driverLocation) {
+    if (Platform.OS !== "web" && mapRef.current && restaurant?.location && 
+        order?.deliveryAddress && typeof order.deliveryAddress !== 'string' && 
+        order.deliveryAddress.location && driverLocation) {
       const points = [
         restaurant.location,
         order.deliveryAddress.location,
@@ -210,28 +213,36 @@ export default function DeliveryTrackingScreen() {
             ref={mapRef}
             style={styles.map}
             provider={PROVIDER_GOOGLE}
-            initialRegion={{
+            initialRegion={restaurant?.location ? {
               latitude: restaurant.location.latitude,
               longitude: restaurant.location.longitude,
               latitudeDelta: 0.05,
               longitudeDelta: 0.05,
-            }}
+            } : undefined}
           >
             {/* Restaurant marker */}
-            <Marker
-              coordinate={restaurant.location}
-              title={restaurant.name}
-              description="Restaurant location"
-            >
-              <View style={styles.restaurantMarker}>
-                <MapPin size={24} color={colors.white} />
-              </View>
-            </Marker>
+            {restaurant?.location && (
+              <Marker
+                coordinate={{
+                  latitude: restaurant.location.latitude,
+                  longitude: restaurant.location.longitude
+                }}
+                title={restaurant.name}
+                description="Restaurant location"
+              >
+                <View style={styles.restaurantMarker}>
+                  <MapPin size={24} color={colors.white} />
+                </View>
+              </Marker>
+            )}
             
             {/* Delivery address marker */}
-            {order.deliveryAddress.location && (
+            {typeof order.deliveryAddress !== 'string' && order.deliveryAddress.location && (
               <Marker
-                coordinate={order.deliveryAddress.location}
+                coordinate={{
+                  latitude: order.deliveryAddress.location.latitude,
+                  longitude: order.deliveryAddress.location.longitude
+                }}
                 title="Delivery Address"
                 description={order.deliveryAddress.addressLine1}
               >
@@ -290,7 +301,7 @@ export default function DeliveryTrackingScreen() {
           </Text>
         </View>
         
-        {order.status === "out-for-delivery" && order.driverInfo && (
+        {order.status === 'in-delivery' && order.driverInfo && (
           <View style={styles.driverContainer}>
             <View style={styles.driverHeader}>
               <Image
@@ -324,18 +335,31 @@ export default function DeliveryTrackingScreen() {
         
         <View style={styles.deliveryAddressContainer}>
           <Text style={styles.deliveryAddressTitle}>Delivery Address</Text>
-          <Text style={styles.deliveryAddress}>
-            {order.deliveryAddress.addressLine1}
-            {order.deliveryAddress.addressLine2 ? `, ${order.deliveryAddress.addressLine2}` : ""}
-            {", "}
-            {order.deliveryAddress.city}
-          </Text>
-          
-          {order.deliveryAddress.instructions && (
-            <Text style={styles.deliveryInstructions}>
-              Note: {order.deliveryAddress.instructions}
-            </Text>
-          )}
+          {(() => {
+            if (typeof order.deliveryAddress === 'string') {
+              return (
+                <Text style={styles.deliveryAddress}>
+                  {order.deliveryAddress}
+                </Text>
+              );
+            } else {
+              return (
+                <View>
+                  <Text style={styles.deliveryAddress}>
+                    {order.deliveryAddress.addressLine1}
+                    {order.deliveryAddress.addressLine2 && `, ${order.deliveryAddress.addressLine2}`}
+                    {'\n'}
+                    {order.deliveryAddress.city}
+                  </Text>
+                  {order.deliveryAddress.instructions && (
+                    <Text style={styles.deliveryInstructions}>
+                      Delivery instructions: {order.deliveryAddress.instructions}
+                    </Text>
+                  )}
+                </View>
+              );
+            }
+          })()}
         </View>
         
         <View style={styles.orderSummaryContainer}>
@@ -352,7 +376,9 @@ export default function DeliveryTrackingScreen() {
           
           <View style={styles.totalContainer}>
             <Text style={styles.totalLabel}>Total</Text>
-            <Text style={styles.totalValue}>{order.total.toFixed(2)} Birr</Text>
+            <Text style={styles.totalValue}>
+              ${(order.items?.reduce((sum, item) => sum + (item.price * item.quantity), 0) || 0).toFixed(2)} Birr
+            </Text>
           </View>
         </View>
       </View>
@@ -540,13 +566,16 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   deliveryAddress: {
-    ...typography.body,
-    marginBottom: 4,
+    fontSize: 16,
+    color: '#333',
+    marginTop: 8,
+    lineHeight: 24,
   },
   deliveryInstructions: {
-    ...typography.bodySmall,
-    color: colors.lightText,
-    fontStyle: "italic",
+    fontSize: 14,
+    color: '#666',
+    marginTop: 8,
+    fontStyle: 'italic',
   },
   orderSummaryContainer: {
     borderTopWidth: 1,

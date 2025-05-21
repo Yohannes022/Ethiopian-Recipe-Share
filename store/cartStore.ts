@@ -255,20 +255,6 @@ export const useCartStore = create<CartState>()(
         }, 0);
       },
       
-      getDeliveryFee: () => {
-        const { restaurantId, serviceType } = get();
-        
-        // No delivery fee for dine-in or pickup
-        if (serviceType === 'dine-in' || serviceType === 'pickup') {
-          return 0;
-        }
-        
-        if (!restaurantId) return 0;
-        
-        const restaurant = mockRestaurants.find(r => r.id === restaurantId);
-        return restaurant?.deliveryFee || 0;
-      },
-      
       getTax: () => {
         // Assuming 15% VAT in Ethiopia
         const subtotal = get().getCartSubtotal();
@@ -354,7 +340,7 @@ export const useCartStore = create<CartState>()(
         
         const newOrder: Order = {
           id: Date.now().toString(),
-          userId: currentUser?.id,
+          userId: currentUser?.id || 'anonymous',
           restaurantId: restaurant.id,
           items: cartItems.map(item => ({
             id: Date.now() + "-" + item.menuItem.id,
@@ -365,22 +351,33 @@ export const useCartStore = create<CartState>()(
             specialInstructions: item.specialInstructions,
           })),
           status: 'pending',
+          paymentStatus: 'pending',
           subtotal,
           deliveryFee,
           tax,
           tip,
-          total,
+          totalAmount: total,
           paymentMethod: {
             id: Date.now().toString(),
-            type: paymentMethod === 'mobile-money' ? 'mobileMoney' : paymentMethod,
+            type: paymentMethod === 'mobile-money' ? 'mobile-money' : paymentMethod,
             name: paymentMethod === 'card' ? 'Credit Card' : paymentMethod === 'cash' ? 'Cash' : 'Mobile Money',
+            ...(paymentMethod === 'card' ? { last4: '4242' } : {}),
           },
           serviceType,
-          deliveryAddress,
+          deliveryAddress: deliveryAddress as string | { 
+            addressLine1: string; 
+            city: string; 
+            location: { 
+              latitude: number; 
+              longitude: number; 
+            }; 
+          },
           tableNumber,
           pickupTime,
           createdAt: new Date().toISOString(),
-          estimatedDeliveryTime: serviceType === 'delivery' ? restaurant.estimatedDeliveryTime : 0,
+          updatedAt: new Date().toISOString(),
+          driverInfo: null,
+          estimatedDeliveryTime: serviceType === 'delivery' ? Number(restaurant.estimatedDeliveryTime) : 0,
         };
         
         // Add driver info only for delivery orders

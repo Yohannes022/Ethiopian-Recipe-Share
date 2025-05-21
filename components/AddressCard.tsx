@@ -16,6 +16,7 @@ interface AddressCardProps {
   onSelect?: () => void;
   onEdit?: () => void;
   onDelete?: () => void;
+  onSetDefault?: () => void;
   showActions?: boolean;
 }
 
@@ -25,6 +26,7 @@ export default function AddressCard({
   onSelect,
   onEdit,
   onDelete,
+  onSetDefault,
   showActions = true,
 }: AddressCardProps) {
   return (
@@ -71,22 +73,23 @@ export default function AddressCard({
       
       {showActions && (
         <View style={styles.actions}>
-          {onEdit && (
-            <TouchableOpacity
-              style={styles.actionButton}
-              onPress={onEdit}
+          {onSetDefault && !address.isDefault && (
+            <TouchableOpacity 
+              style={styles.actionButton} 
+              onPress={onSetDefault}
             >
-              <Edit size={16} color={colors.primary} />
+              <Check size={18} color={colors.primary} />
+            </TouchableOpacity>
+          )}
+          {onEdit && (
+            <TouchableOpacity style={styles.actionButton} onPress={onEdit}>
+              <Edit size={18} color={colors.primary} />
               <Text style={styles.actionText}>Edit</Text>
             </TouchableOpacity>
           )}
-          
           {onDelete && !address.isDefault && (
-            <TouchableOpacity
-              style={styles.actionButton}
-              onPress={onDelete}
-            >
-              <Trash size={16} color={colors.error} />
+            <TouchableOpacity style={styles.actionButton} onPress={onDelete}>
+              <Trash size={18} color={colors.error} />
               <Text style={[styles.actionText, styles.deleteText]}>Delete</Text>
             </TouchableOpacity>
           )}
@@ -107,28 +110,28 @@ const styles = StyleSheet.create({
   },
   selectedContainer: {
     borderColor: colors.primary,
-    backgroundColor: colors.primary + "10", // 10% opacity
+    backgroundColor: `${colors.primary}10`, // 10% opacity
   },
   header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     marginBottom: 8,
   },
   labelContainer: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   label: {
     ...typography.body,
-    fontWeight: "600",
+    fontWeight: '600',
     marginLeft: 8,
   },
   selectedText: {
     color: colors.primary,
   },
   defaultBadge: {
-    backgroundColor: colors.secondary + "30", // 30% opacity
+    backgroundColor: `${colors.secondary}30`, // 30% opacity
     paddingHorizontal: 8,
     paddingVertical: 2,
     borderRadius: 10,
@@ -137,15 +140,15 @@ const styles = StyleSheet.create({
   defaultText: {
     ...typography.caption,
     color: colors.secondary,
-    fontWeight: "600",
+    fontWeight: '600',
   },
   checkCircle: {
     width: 24,
     height: 24,
     borderRadius: 12,
     backgroundColor: colors.primary,
-    justifyContent: "center",
-    alignItems: "center",
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   address: {
     ...typography.body,
@@ -162,15 +165,15 @@ const styles = StyleSheet.create({
     fontStyle: "italic",
   },
   actions: {
-    flexDirection: "row",
+    flexDirection: 'row',
     marginTop: 12,
     borderTopWidth: 1,
     borderTopColor: colors.divider,
     paddingTop: 12,
   },
   actionButton: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
     marginRight: 16,
   },
   actionText: {

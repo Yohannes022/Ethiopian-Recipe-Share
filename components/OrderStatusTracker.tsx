@@ -26,7 +26,7 @@ export default function OrderStatusTracker({ status }: OrderStatusTrackerProps) 
       icon: <ChefHat size={20} color={colors.white} />,
     },
     {
-      key: "out-for-delivery",
+      key: "in-delivery",
       label: "On the way",
       icon: <Bike size={20} color={colors.white} />,
     },

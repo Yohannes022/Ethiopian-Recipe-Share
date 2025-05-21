@@ -1,154 +1,158 @@
-# Welcome to your Expo app 👋
+# Ethiopian Recipe Share
 
-# Restaurant Management System
+![App Banner](assets/images/app-banner.png)
 
-This project is a full-stack restaurant management system with a React Native frontend and a FastAPI Python backend.
+A modern mobile application for discovering, sharing, and cooking authentic Ethiopian recipes. Connect with a community of food enthusiasts and explore the rich culinary heritage of Ethiopia.
 
-## Features
+## ✨ Features
 
-- User authentication (customers, restaurant owners, managers)
-- Restaurant management
-- Menu management
-- Order processing
-- Recipe management
-- Analytics and reporting
-- Customer management
+- **Recipe Discovery**: Browse a vast collection of authentic Ethiopian recipes
+- **User Profiles**: Create and customize your profile, save favorite recipes
+- **Recipe Sharing**: Share your own recipes with the community
+- **Step-by-Step Cooking**: Detailed cooking instructions with timers
+- **Grocery Lists**: Generate shopping lists from recipe ingredients
+- **Offline Access**: Save recipes for offline use
+- **Search & Filter**: Find recipes by ingredients, cooking time, or dietary preferences
 
-## Tech Stack
+## 🚀 Tech Stack
 
 ### Frontend
-- React Native with Expo
-- Zustand for state management
-- React Navigation for routing
-- Axios for API requests
+- **Framework**: React Native with Expo
+- **State Management**: Zustand
+- **Navigation**: React Navigation
+- **UI Components**: NativeWind for styling
+- **Icons**: Lucide Icons
+- **Form Handling**: React Hook Form
+- **HTTP Client**: Axios
 
 ### Backend
-- FastAPI (Python)
-- JSON file-based data storage (for demo purposes)
-- Analytics capabilities
+- **Framework**: Node.js with Express
+- **Authentication**: JWT
+- **Database**: MongoDB
+- **API**: RESTful endpoints
+- **File Storage**: Cloudinary / Local Storage
 
-## Getting Started
+## 📱 App Structure
+
+```
+.
+├── app/                    # Frontend React Native app
+│   ├── (auth)/             # Authentication screens
+│   ├── (tabs)/             # Main app tabs
+│   │   ├── explore/        # Recipe discovery
+│   │   ├── saved/          # Saved recipes
+│   │   ├── create/         # Recipe creation
+│   │   └── profile/        # User profile
+│   ├── components/         # Reusable components
+│   ├── constants/          # App constants
+│   ├── hooks/              # Custom hooks
+│   ├── lib/                # Utility functions
+│   ├── services/           # API services
+│   ├── store/              # State management
+│   └── types/              # TypeScript types
+│
+└── server/                # Backend server
+    ├── config/            # Configuration files
+    ├── controllers/       # Route controllers
+    ├── middleware/        # Custom middleware
+    ├── models/            # Database models
+    ├── routes/            # API routes
+    ├── services/          # Business logic
+    ├── utils/             # Utility functions
+    ├── .env               # Environment variables
+    └── server.js          # Server entry point
+```
+
+## 🛠️ Getting Started
 
 ### Prerequisites
-- Node.js
-- Python 3.7+
+
+- Node.js 18+
+- npm or yarn
 - Expo CLI
+- Python 3.9+ (for backend)
+- Git
 
 ### Installation
 
-1. Clone the repository
-2. Install frontend dependencies:
-```
-npm install
-```
-
-3. Install backend dependencies:
-```
-cd backend
-pip install -r requirments.txt
-```
-
-### Running the Application
-
-1. Start the backend server:
-```
-cd backend
-uvicorn main:app --reload
-```
-
-2. Start the frontend:
-```
-npx expo start
-```
-
-## Backend API
-
-The backend provides the following API endpoints:
-
-- `/api/users/register` - Register a new user
-- `/api/auth/verify-otp` - Verify OTP for user registration
-- `/api/auth/resend-otp` - Resend OTP
-- `/api/auth/login` - User login
-- `/api/restaurants` - CRUD operations for restaurants
-- `/api/restaurants/{restaurant_id}/menu` - CRUD operations for menu items
-- `/api/orders` - CRUD operations for orders
-- `/api/recipes` - CRUD operations for recipes
-- `/api/analytics/restaurant/{restaurant_id}` - Get restaurant analytics
-
-## Data Storage
-
-The system uses JSON files for data storage:
-
-- `data/users.json` - User data
-- `data/restaurants.json` - Restaurant data
-- `data/recipes.json` - Recipe data
-- `data/orders.json` - Order data
-
-In a production environment, this would be replaced with a proper database.
-
-## Analytics
-
-The system includes analytics capabilities for restaurant owners:
-
-- Sales trends
-- Popular menu items
-- Customer demographics
-- Order patterns
-
-This can be extended with more advanced data science concepts like:
-
-- Predictive analytics for demand forecasting
-- Menu optimization based on popularity and profitability
-- Customer segmentation and personalized marketing
-- Inventory management optimization
-
-## License
-
-This project is licensed under the MIT License.
-
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
-
-## Get started
-
-1. Install dependencies
-
+1. **Clone the repository**
    ```bash
+   git clone https://github.com/your-username/ethiopian-recipe-share.git
+   cd ethiopian-recipe-share
+   ```
+
+2. **Install dependencies**
+   ```bash
+   # Install frontend dependencies
+   npm install
+   
+   # Install backend dependencies
+   cd server
    npm install
    ```
 
-2. Start the app
+3. **Environment Setup**
+   - Copy `.env.example` to `.env` in both root and server directories
+   - Update the environment variables as needed
+   - Make sure MongoDB is running locally or update the connection string in `.env`
 
+### Running the App
+
+1. **Start the backend server**
    ```bash
+   cd server
+   npm run dev
+   ```
+   The server will start on `http://localhost:5000` by default
+
+2. **Start the frontend**
+   ```bash
+   # From the project root
    npx expo start
    ```
 
-In the output, you'll find options to open the app in a
+3. **Run on device/emulator**
+   - Press `a` for Android emulator
+   - Press `i` for iOS simulator (macOS only)
+   - Scan QR code with Expo Go (iOS/Android)
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+## 📚 Documentation
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+### API Documentation
 
-## Get a fresh project
+Once the backend is running, access the interactive API documentation at:
+- API Documentation: `http://localhost:5000/api-docs`
+- API Base URL: `http://localhost:5000/api`
 
-When you're ready, run:
+### State Management
 
-```bash
-npm run reset-project
-```
+The app uses Zustand for state management. Key stores include:
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+- `useAuthStore`: Authentication state
+- `useRecipeStore`: Recipe data and operations
+- `useProfileStore`: User profile and preferences
 
-## Learn more
+### Contributing
 
-To learn more about developing your project with Expo, look at the following resources:
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+## 📄 License
 
-## Join the community
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🙏 Acknowledgments
+
+- Ethiopian culinary experts and home cooks
+- Open source community for amazing tools and libraries
+- All contributors who help improve this project
+
+---
+
+Made with ❤️ by [Your Name] | [Website](https://your-website.com)
 
 Join our community of developers creating universal apps.
 

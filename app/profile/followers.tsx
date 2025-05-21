@@ -55,7 +55,10 @@ export default function FollowersScreen() {
     return (
       <TouchableOpacity
         style={styles.followerItem}
-        onPress={() => router.push(`/profile/${item.id}`)}
+        onPress={() => router.push({
+          pathname: "/(tabs)/profile",
+          params: { userId: item.id }
+        })}
       >
         <Image
           source={{ uri: item.avatar }}

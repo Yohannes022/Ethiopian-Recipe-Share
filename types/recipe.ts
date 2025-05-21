@@ -19,6 +19,7 @@ export interface Recipe {
   isLiked: boolean;
   isSaved: boolean;
   isFavorite?: boolean; // Alias for isSaved
+  creditTo?: string; // Optional field to credit the original recipe source
   rating: number;
   ratingCount: number;
   comments: Comment[];

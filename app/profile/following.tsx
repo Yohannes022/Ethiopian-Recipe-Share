@@ -1,21 +1,21 @@
-import React, { useEffect, useState } from "react";
-import {
-  StyleSheet,
-  View,
-  Text,
-  FlatList,
-  TouchableOpacity,
-  ActivityIndicator,
-  SafeAreaView,
-} from "react-native";
-import { Image } from "expo-image";
-import { useRouter, useLocalSearchParams } from "expo-router";
-import { useProfileStore } from "@/store/profileStore";
-import { useAuthStore } from "@/store/authStore";
 import colors from "@/constants/colors";
 import typography from "@/constants/typography";
-import { ArrowLeft, UserCheck } from "lucide-react-native";
+import { useAuthStore } from "@/store/authStore";
+import { useProfileStore } from "@/store/profileStore";
 import { User } from "@/types/auth";
+import { Image } from "expo-image";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import { ArrowLeft, UserCheck } from "lucide-react-native";
+import React, { useEffect, useState } from "react";
+import {
+  ActivityIndicator,
+  FlatList,
+  SafeAreaView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
 export default function FollowingScreen() {
   const router = useRouter();
@@ -50,7 +50,10 @@ export default function FollowingScreen() {
     return (
       <TouchableOpacity
         style={styles.followingItem}
-        onPress={() => router.push(`/profile/${item.id}`)}
+        onPress={() => router.push({
+          pathname: "/(tabs)/profile",
+          params: { id: item.id }
+        })}
       >
         <Image
           source={{ uri: item.avatar }}

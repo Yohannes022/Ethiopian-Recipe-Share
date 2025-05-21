@@ -37,12 +37,12 @@ export default function EditRecipeScreen() {
   const [prepTime, setPrepTime] = useState("");
   const [cookTime, setCookTime] = useState("");
   const [servings, setServings] = useState("");
-  const [difficulty, setDifficulty] = useState<"easy" | "medium" | "hard">("medium");
+  const [difficulty, setDifficulty] = useState<"easy" | "medium" | "hard">("easy");
   const [region, setRegion] = useState("");
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [ingredients, setIngredients] = useState<Ingredient[]>([]);
   const [steps, setSteps] = useState<Step[]>([]);
-  const [creditTo, setCreditTo] = useState("");
+  const [creditTo, setCreditTo] = useState<string | undefined>("");
 
   const [errors, setErrors] = useState<{
     title?: string;
@@ -86,11 +86,12 @@ export default function EditRecipeScreen() {
     setPrepTime(recipe.prepTime.toString());
     setCookTime(recipe.cookTime.toString());
     setServings(recipe.servings.toString());
-    setDifficulty(recipe.difficulty);
+    setDifficulty(recipe.difficulty as "easy" | "medium" | "hard" || "easy");
     setRegion(recipe.region || "");
     setSelectedTags(recipe.tags);
     setIngredients(recipe.ingredients);
     setSteps(recipe.steps);
+    // @ts-ignore - creditTo is not in the Recipe type but might be used in the UI
     setCreditTo(recipe.creditTo || "");
   }, [recipe, user, router]);
 
@@ -218,7 +219,7 @@ export default function EditRecipeScreen() {
         steps,
         region: region || undefined,
         tags: selectedTags.length > 0 ? selectedTags : ["traditional"],
-        creditTo: creditTo.trim() || undefined,
+        creditTo: creditTo?.trim() || undefined,
       });
 
       Alert.alert(

@@ -125,7 +125,7 @@ export default function SearchScreen() {
           <TouchableOpacity
             style={[
               styles.filterButton,
-              (selectedTag || selectedRegion || selectedDifficulty || maxTime) && styles.activeFilterButton,
+              (selectedTag || selectedRegion || selectedDifficulty || maxTime) ? styles.activeFilterButton : null,
             ]}
             onPress={toggleFilters}
           >

@@ -16,6 +16,7 @@ import {
 } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { Image } from "expo-image";
+import { Restaurant, MenuItem } from "@/types/restaurant";
 import { LinearGradient } from "expo-linear-gradient";
 import {
   Star,
@@ -75,36 +76,35 @@ export default function RestaurantDetailScreen() {
   const { items } = useCartStore();
   const { fetchRestaurant, addReview } = useRestaurantStore();
   
+  const [restaurant, setRestaurant] = useState<Restaurant | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string>("All");
   const [locationPermission, setLocationPermission] = useState<boolean | null>(null);
   const [userLocation, setUserLocation] = useState<{latitude: number, longitude: number} | null>(null);
-  const [showMap, setShowMap] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
-  const [showReviewModal, setShowReviewModal] = useState(false);
-  const [reviewRating, setReviewRating] = useState(5);
-  const [reviewComment, setReviewComment] = useState("");
-  const [isSubmittingReview, setIsSubmittingReview] = useState(false);
-  const [restaurant, setRestaurant] = useState<Restaurant | null>(null);
-  
+  const [showMap, setShowMap] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [showReviewModal, setShowReviewModal] = useState<boolean>(false);
+  const [reviewRating, setReviewRating] = useState<number>(5);
+  const [reviewComment, setReviewComment] = useState<string>("");
+  const [isSubmittingReview, setIsSubmittingReview] = useState<boolean>(false);
   const scrollY = useRef(new Animated.Value(0)).current;
-  
+
   // Calculate cart items count directly
   const cartItemCount = items.reduce((count, item) => count + item.quantity, 0);
 
   useEffect(() => {
     let isMounted = true;
     setIsLoading(true);
-    fetchRestaurant(id || "").then((data: any) => {
-      if (isMounted) {
+    fetchRestaurant(id || "").then((data: Restaurant | null) => {
+      if (isMounted && data) {
         setRestaurant(data);
-        setIsLoading(false);
       }
+      setIsLoading(false);
     });
     return () => {
       isMounted = false;
     };
   }, [id]);
-  
+
   useEffect(() => {
     // Request location permission on native platforms
     if (Platform.OS !== "web" && Location) {
@@ -112,7 +112,7 @@ export default function RestaurantDetailScreen() {
         try {
           const { status } = await Location.requestForegroundPermissionsAsync();
           setLocationPermission(status === "granted");
-          
+
           if (status === "granted") {
             const location = await Location.getCurrentPositionAsync({});
             setUserLocation({
@@ -126,7 +126,7 @@ export default function RestaurantDetailScreen() {
       })();
     }
   }, []);
-  
+
   if (isLoading) {
     return (
       <View style={styles.loadingContainer}>
@@ -135,11 +135,11 @@ export default function RestaurantDetailScreen() {
       </View>
     );
   }
-  
-  const filteredMenu = restaurant && restaurant.menu && (selectedCategory === "All"
-    ? restaurant.menu
-    : restaurant.menu.filter(item => item.category === selectedCategory));
-  
+
+  const filteredMenu = restaurant?.menu?.filter(item => 
+    selectedCategory === "All" || item.category === selectedCategory
+  ) || [];
+
   if (!restaurant) {
     return (
       <View style={styles.notFound}>
@@ -174,13 +174,20 @@ export default function RestaurantDetailScreen() {
     extrapolate: "clamp",
   });
 
-  const handleAddToCart = (menuItemId: string) => {
-    // This function is implemented in the MenuItemCard component
+  const handleAddToCart = (menuItem: MenuItem) => {
+    // Add to cart logic with proper typing
+    console.log("Adding to cart:", menuItem);
   };
 
-  const handleMenuItemPress = (menuItemId: string) => {
-    router.push(`/menu-item/${restaurant.id}/${menuItemId}`);
-  };
+  const renderMenuItem = ({ item }: { item: MenuItem }) => (
+    <TouchableOpacity onPress={() => router.push(`/menu-item/${restaurant?.id}/${item.id}`)}>
+      <MenuItemCard 
+        item={item} 
+        onPress={() => router.push(`/menu-item/${restaurant?.id}/${item.id}`)}
+        variant="vertical"
+      />
+    </TouchableOpacity>
+  );
 
   const toggleMap = () => {
     setShowMap(!showMap);
@@ -456,12 +463,17 @@ export default function RestaurantDetailScreen() {
             
             <View style={styles.hoursContainer}>
               <Text style={styles.hoursTitle}>Opening Hours</Text>
-              {restaurant.openingHours && Object.entries(restaurant.openingHours).map(([day, hours]) => (
-                <View key={day} style={styles.hourRow}>
-                  <Text style={styles.dayText}>{day}</Text>
-                  <Text style={styles.hoursText}>{hours}</Text>
-                </View>
-              ))}
+              {restaurant.openingHours && Object.entries(restaurant.openingHours).map(([day, hours]) => {
+                const hoursText = typeof hours === 'object' 
+                  ? `${hours.open} - ${hours.close}` 
+                  : hours;
+                return (
+                  <View key={day} style={styles.hourRow}>
+                    <Text style={styles.dayText}>{day}</Text>
+                    <Text style={styles.hoursText}>{hoursText}</Text>
+                  </View>
+                );
+              })}
             </View>
           </View>
 
@@ -488,8 +500,9 @@ export default function RestaurantDetailScreen() {
                 <MenuItemCard
                   key={item.id}
                   item={item}
-                  onPress={() => handleMenuItemPress(item.id)}
-                  onAddToCart={() => handleAddToCart(item.id)}
+                  onPress={() => router.push(`/menu-item/${restaurant?.id}/${item.id}`)}
+                  onAddToCart={() => handleAddToCart(item)}
+                  variant="vertical"
                 />
               ))}
             </View>

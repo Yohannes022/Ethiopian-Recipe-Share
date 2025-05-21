@@ -4,7 +4,7 @@ import typography from "@/constants/typography";
 import { restaurants } from "@/mocks/restaurants";
 import { useCartStore } from "@/store/cartStore";
 import { useProfileStore } from "@/store/profileStore";
-import { Address, OrderServiceType, PaymentMethod } from "@/types/restaurant";
+import { Address, OrderServiceType } from "@/types/restaurant";
 import { Image } from "expo-image";
 import { useRouter } from "expo-router";
 import { Clock, CreditCard, MapPin, MapPinOff, Plus, UtensilsCrossed } from "lucide-react-native";
@@ -35,9 +35,26 @@ export default function CheckoutScreen() {
   } = useCartStore();
   const { addresses: storedAddresses, paymentMethods: storedPaymentMethods } = useProfileStore();
   
-  // Initialize with empty arrays if null
-  const addresses: Address[] = storedAddresses || [];
-  const paymentMethods: PaymentMethod[] = storedPaymentMethods || [];
+  // Get addresses and payment methods with proper type safety
+  const addresses: Address[] = Array.isArray(storedAddresses) ? storedAddresses : [];
+  
+  // Define the payment method type based on ProfileState
+  type ProfilePaymentMethod = {
+    id: string;
+    type: "card" | "mobile-money";
+    cardBrand?: string;
+    last4?: string;
+    expiryMonth?: number;
+    expiryYear?: number;
+    provider?: string;
+    phoneNumber?: string;
+    isDefault?: boolean;
+    createdAt: string;
+    updatedAt: string;
+  };
+  
+  // Convert stored payment method to array if it exists
+  const paymentMethods: ProfilePaymentMethod[] = storedPaymentMethods ? [storedPaymentMethods] : [];
   
   const [isLoading, setIsLoading] = useState(true);
   const [selectedAddress, setSelectedAddress] = useState<string | null>(null);
@@ -68,7 +85,7 @@ export default function CheckoutScreen() {
         
         // Set default payment method if available
         if (paymentMethods.length > 0) {
-          const defaultPayment = paymentMethods.find((pm: PaymentMethod) => pm.isDefault) || paymentMethods[0];
+          const defaultPayment = paymentMethods.find((pm: ProfilePaymentMethod) => pm.isDefault) || paymentMethods[0];
           if (defaultPayment) {
             setSelectedPayment(defaultPayment.id);
           }

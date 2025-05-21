@@ -1,51 +1,84 @@
-import React, { useState, useEffect } from "react";
-import {
-  StyleSheet,
-  View,
-  Text,
-  SafeAreaView,
-  ScrollView,
-  TouchableOpacity,
-  Platform,
-} from "react-native";
-import { useRouter } from "expo-router";
-import { CreditCard, Plus, Edit2, Trash2 } from "lucide-react-native";
-import colors from "@/constants/colors";
-import typography from "@/constants/typography";
 import Button from "@/components/Button";
 import PaymentMethodCard from "@/components/PaymentMethodCard";
-import { useProfileStore } from "@/store/profileStore";
+import colors from "@/constants/colors";
+import typography from "@/constants/typography";
+import { PaymentMethod, useProfileStore } from "@/store/profileStore";
+import { useRouter } from "expo-router";
+import { CreditCard, Plus } from "lucide-react-native";
+import React, { useEffect, useState } from "react";
+import {
+  Alert,
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View
+} from "react-native";
 
 export default function PaymentMethodsScreen() {
   const router = useRouter();
-  const { paymentMethods, removePaymentMethod, setDefaultPaymentMethod } = useProfileStore();
+  const { 
+    removePaymentMethod, 
+    setDefaultPaymentMethod,
+    getPaymentMethods,
+  } = useProfileStore();
+  
   const [isLoading, setIsLoading] = useState(true);
+  const [paymentMethodsList, setPaymentMethodsList] = useState<PaymentMethod[]>([]);
 
   useEffect(() => {
-    // Simulate loading data
-    const loadData = async () => {
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      setIsLoading(false);
+    const loadPaymentMethods = async () => {
+      try {
+        setIsLoading(true);
+        const methods = await getPaymentMethods();
+        setPaymentMethodsList(methods);
+      } catch (error) {
+        console.error('Error loading payment methods:', error);
+        Alert.alert('Error', 'Failed to load payment methods');
+      } finally {
+        setIsLoading(false);
+      }
     };
-    loadData();
-  }, []);
+    
+    loadPaymentMethods();
+  }, [getPaymentMethods]);
 
   const handleAddPaymentMethod = () => {
-    // In a real app, this would navigate to a payment method form
-    router.push("/profile/payment/add");
+    // Use relative path for navigation
+    router.push('../payment/add');
   };
 
   const handleEditPaymentMethod = (id: string) => {
-    // In a real app, this would navigate to a payment method form with the payment method data
-    router.push(`/profile/payment/edit/${id}`);
+    // Use relative path for navigation
+    router.push(`../payment/edit/${id}`);
   };
 
-  const handleRemovePaymentMethod = (id: string) => {
-    removePaymentMethod(id);
+  const handleRemovePaymentMethod = async (id: string) => {
+    try {
+      await removePaymentMethod(id);
+      // Refresh the payment methods list
+      const methods = await getPaymentMethods();
+      setPaymentMethodsList(methods);
+    } catch (error) {
+      console.error('Error removing payment method:', error);
+      Alert.alert('Error', 'Failed to remove payment method');
+    }
   };
 
-  const handleSetDefaultPaymentMethod = (id: string) => {
-    setDefaultPaymentMethod(id);
+  const handleSetDefaultPaymentMethod = async (id: string) => {
+    try {
+      await setDefaultPaymentMethod(id);
+      // Update the local state to reflect the change
+      setPaymentMethodsList(prev => 
+        prev.map(method => ({
+          ...method,
+          isDefault: method.id === id
+        }))
+      );
+    } catch (error) {
+      console.error('Error setting default payment method:', error);
+      Alert.alert('Error', 'Failed to set default payment method');
+    }
   };
 
   return (
@@ -66,7 +99,7 @@ export default function PaymentMethodsScreen() {
           <View style={styles.loadingContainer}>
             <Text style={styles.loadingText}>Loading payment methods...</Text>
           </View>
-        ) : paymentMethods.length === 0 ? (
+        ) : paymentMethodsList.length === 0 ? (
           <View style={styles.emptyContainer}>
             <CreditCard size={48} color={colors.lightText} />
             <Text style={styles.emptyTitle}>No payment methods yet</Text>
@@ -76,25 +109,34 @@ export default function PaymentMethodsScreen() {
           </View>
         ) : (
           <View style={styles.paymentMethodsList}>
-            {paymentMethods.map((paymentMethod) => (
+            {paymentMethodsList.map((method) => (
               <PaymentMethodCard
-                key={paymentMethod.id}
-                paymentMethod={paymentMethod}
-                onEdit={() => handleEditPaymentMethod(paymentMethod.id)}
-                onDelete={() => handleRemovePaymentMethod(paymentMethod.id)}
-                onSetDefault={() => handleSetDefaultPaymentMethod(paymentMethod.id)}
+                key={method.id}
+                id={method.id}
+                type={method.type}
+                last4={method.last4}
+                cardBrand={method.cardBrand}
+                expiryMonth={method.expiryMonth}
+                expiryYear={method.expiryYear}
+                provider={method.provider}
+                phoneNumber={method.phoneNumber}
+                isDefault={method.isDefault}
+                onEdit={() => handleEditPaymentMethod(method.id)}
+                onDelete={() => handleRemovePaymentMethod(method.id)}
+                onSetDefault={() => handleSetDefaultPaymentMethod(method.id)}
               />
             ))}
           </View>
         )}
 
-        <Button
-          title="Add Payment Method"
-          icon={<Plus size={20} color={colors.white} />}
-          onPress={handleAddPaymentMethod}
-          fullWidth
-          style={styles.addButton}
-        />
+        <View style={styles.addButton}>
+          <Button
+            title="Add Payment Method"
+            leftIcon={<Plus size={20} color={colors.white} />}
+            onPress={handleAddPaymentMethod}
+            fullWidth
+          />
+        </View>
       </ScrollView>
     </SafeAreaView>
   );
@@ -109,55 +151,59 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
+    flexGrow: 1,
     padding: 16,
   },
   header: {
     marginBottom: 24,
   },
   title: {
-    ...typography.heading2,
+    ...typography.heading4,
     color: colors.text,
     marginBottom: 8,
   },
   subtitle: {
     ...typography.body,
     color: colors.lightText,
+    marginBlockStart: 8,
   },
   loadingContainer: {
     flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    minHeight: 200,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 24,
   },
   loadingText: {
     ...typography.body,
     color: colors.lightText,
+    marginBlockStart: 16,
   },
   emptyContainer: {
     flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    minHeight: 200,
-    backgroundColor: colors.cardBackground,
-    borderRadius: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
     padding: 24,
-    marginBottom: 24,
   },
   emptyTitle: {
-    ...typography.heading3,
+    ...typography.subtitle,
     color: colors.text,
-    marginTop: 16,
-    marginBottom: 8,
+    marginBlockStart: 16,
+    marginBlockEnd: 8,
   },
   emptyText: {
     ...typography.body,
     color: colors.lightText,
-    textAlign: "center",
+    textAlign: 'center',
   },
   paymentMethodsList: {
-    marginBottom: 24,
+    gap: 16,
+    marginBottom: 16,
   },
   addButton: {
+    marginTop: 8,
     marginBottom: 24,
+    paddingTop: 16,
+    borderTopWidth: 1,
+    borderTopColor: colors.border,
   },
 });

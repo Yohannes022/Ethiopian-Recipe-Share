@@ -11,6 +11,7 @@ interface RecipeState {
   selectedTag: string | null;
   selectedRegion: string | null;
   searchQuery: string;
+  isLoading: boolean;
   
   // Actions
   setRecipes: (recipes: Recipe[]) => void;
@@ -49,6 +50,7 @@ export const useRecipeStore = create<RecipeState>()(
   persist(
     (set, get) => ({
       recipes: prepareRecipes(mockRecipes),
+      isLoading: false,
       filteredRecipes: prepareRecipes(mockRecipes),
       selectedTag: null,
       selectedRegion: null,

@@ -8,23 +8,42 @@ import {
 import { CreditCard, Smartphone, Check, Edit, Trash } from "lucide-react-native";
 import colors from "@/constants/colors";
 import typography from "@/constants/typography";
-import { PaymentMethod } from "@/types/restaurant";
+
+export type PaymentMethodType = 'card' | 'mobile-money';
 
 interface PaymentMethodCardProps {
-  method: PaymentMethod;
+  id: string;
+  type: PaymentMethodType;
+  cardBrand?: string;
+  last4?: string;
+  expiryMonth?: number;
+  expiryYear?: number;
+  provider?: string;
+  phoneNumber?: string;
+  isDefault?: boolean;
   selected?: boolean;
   onSelect?: () => void;
   onEdit?: () => void;
   onDelete?: () => void;
+  onSetDefault?: () => void;
   showActions?: boolean;
 }
 
 export default function PaymentMethodCard({
-  method,
+  id,
+  type,
+  cardBrand,
+  last4,
+  expiryMonth,
+  expiryYear,
+  provider,
+  phoneNumber,
+  isDefault = false,
   selected = false,
   onSelect,
   onEdit,
   onDelete,
+  onSetDefault,
   showActions = true,
 }: PaymentMethodCardProps) {
   const renderCardBrandIcon = () => {
@@ -34,6 +53,27 @@ export default function PaymentMethodCard({
 
   const renderMobileMoneyIcon = () => {
     return <Smartphone size={20} color={selected ? colors.primary : colors.lightText} />;
+  };
+  
+  const handleSetAsDefault = (e: any) => {
+    e?.stopPropagation();
+    if (onSetDefault) {
+      onSetDefault();
+    }
+  };
+  
+  const handleEdit = (e: any) => {
+    e?.stopPropagation();
+    if (onEdit) {
+      onEdit();
+    }
+  };
+  
+  const handleDelete = (e: any) => {
+    e?.stopPropagation();
+    if (onDelete) {
+      onDelete();
+    }
   };
 
   return (
@@ -47,35 +87,43 @@ export default function PaymentMethodCard({
     >
       <View style={styles.header}>
         <View style={styles.methodContainer}>
-          {method.type === "card" ? renderCardBrandIcon() : renderMobileMoneyIcon()}
+          {type === "card" ? renderCardBrandIcon() : renderMobileMoneyIcon()}
           
           <View style={styles.methodInfo}>
-            {method.type === "card" ? (
+            {type === "card" ? (
               <>
                 <Text style={[styles.methodName, selected && styles.selectedText]}>
-                  {method.cardBrand?.toUpperCase()} •••• {method.last4}
+                  {cardBrand ? cardBrand.toUpperCase() : 'CARD'} •••• {last4 || '****'}
                 </Text>
-                <Text style={styles.methodDetails}>
-                  Expires {method.expiryMonth}/{method.expiryYear}
-                </Text>
+                {expiryMonth && expiryYear && (
+                  <Text style={styles.methodDetails}>
+                    Expires {expiryMonth.toString().padStart(2, '0')}/{expiryYear.toString().slice(-2)}
+                  </Text>
+                )}
               </>
             ) : (
               <>
                 <Text style={[styles.methodName, selected && styles.selectedText]}>
-                  {(method.provider ? method.provider.charAt(0).toUpperCase() + method.provider.slice(1) : "")}
+                  {provider ? provider.charAt(0).toUpperCase() + provider.slice(1) : 'Mobile Money'}
                 </Text>
-                <Text style={styles.methodDetails}>
-                  {method.phoneNumber}
-                </Text>
+                {phoneNumber && (
+                  <Text style={styles.methodDetails}>
+                    {phoneNumber}
+                  </Text>
+                )}
               </>
             )}
           </View>
           
-          {method.isDefault && (
+          {isDefault ? (
             <View style={styles.defaultBadge}>
               <Text style={styles.defaultText}>Default</Text>
             </View>
-          )}
+          ) : onSetDefault ? (
+            <TouchableOpacity onPress={handleSetAsDefault} style={styles.setDefaultButton}>
+              <Text style={styles.setDefaultText}>Set as default</Text>
+            </TouchableOpacity>
+          ) : null}
         </View>
         
         {selected && (
@@ -90,17 +138,17 @@ export default function PaymentMethodCard({
           {onEdit && (
             <TouchableOpacity
               style={styles.actionButton}
-              onPress={onEdit}
+              onPress={handleEdit}
             >
               <Edit size={16} color={colors.primary} />
               <Text style={styles.actionText}>Edit</Text>
             </TouchableOpacity>
           )}
           
-          {onDelete && !method.isDefault && (
+          {onDelete && !isDefault && (
             <TouchableOpacity
               style={styles.actionButton}
-              onPress={onDelete}
+              onPress={handleDelete}
             >
               <Trash size={16} color={colors.error} />
               <Text style={[styles.actionText, styles.deleteText]}>Delete</Text>
@@ -120,6 +168,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     borderWidth: 1,
     borderColor: colors.divider,
+    overflow: 'hidden',
   },
   selectedContainer: {
     borderColor: colors.primary,
@@ -153,9 +202,23 @@ const styles = StyleSheet.create({
   defaultBadge: {
     backgroundColor: colors.secondary + "30", // 30% opacity
     paddingHorizontal: 8,
-    paddingVertical: 2,
+    paddingVertical: 4,
     borderRadius: 10,
     marginLeft: 8,
+  },
+  setDefaultButton: {
+    backgroundColor: 'transparent',
+    borderWidth: 1,
+    borderColor: colors.primary,
+    borderRadius: 10,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    marginLeft: 8,
+  },
+  setDefaultText: {
+    ...typography.caption,
+    color: colors.primary,
+    fontWeight: '500',
   },
   defaultText: {
     ...typography.caption,

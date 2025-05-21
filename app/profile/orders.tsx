@@ -97,7 +97,7 @@ export default function OrdersScreen() {
                   <View>
                     <Text style={styles.orderNumber}>Order #{order.id}</Text>
                     <Text style={styles.orderDate}>
-                      {formatDate(order.date)}
+                      {order.date ? formatDate(order.date) : 'No date available'}
                     </Text>
                   </View>
                   <View
@@ -122,17 +122,19 @@ export default function OrdersScreen() {
                 </View>
 
                 <View style={styles.restaurantInfo}>
-                  <Image
-                    source={{ uri: order.restaurant.image }}
-                    style={styles.restaurantImage}
-                    contentFit="cover"
-                  />
+                  {order.restaurant?.image && (
+                    <Image
+                      source={{ uri: order.restaurant.image }}
+                      style={styles.restaurantImage}
+                      contentFit="cover"
+                    />
+                  )}
                   <View style={styles.restaurantDetails}>
                     <Text style={styles.restaurantName}>
-                      {order.restaurant.name}
+                      {order.restaurant?.name || 'Restaurant'}
                     </Text>
                     <Text style={styles.itemCount}>
-                      {order.items.length} items • ${order.total.toFixed(2)}
+                      {order.items?.length || 0} items • ${order.totalAmount?.toFixed(2) || '0.00'}
                     </Text>
                   </View>
                 </View>
@@ -145,7 +147,7 @@ export default function OrdersScreen() {
                       style={styles.detailIcon}
                     />
                     <Text style={styles.detailText}>
-                      {order.deliveryTime}
+                      {order.estimatedDeliveryTime ? `${order.estimatedDeliveryTime} min` : '30-45 min'}
                     </Text>
                   </View>
                   <View style={styles.detailRow}>
@@ -154,13 +156,17 @@ export default function OrdersScreen() {
                       color={colors.lightText}
                       style={styles.detailIcon}
                     />
-                    <Text style={styles.detailText} numberOfLines={1}>
-                      {order.deliveryAddress}
+                    <Text style={styles.detailText}>
+                      {order.deliveryAddressDetails
+                        ? `${order.deliveryAddressDetails.addressLine1}, ${order.deliveryAddressDetails.city}`
+                        : typeof order.deliveryAddress === 'string' 
+                          ? order.deliveryAddress 
+                          : 'No address provided'}
                     </Text>
                   </View>
                 </View>
 
-                {order.status === "in-progress" && (
+                {order.status === "preparing" && (
                   <TouchableOpacity
                     style={styles.trackButton}
                     onPress={() => handleTrackDelivery(order.id)}

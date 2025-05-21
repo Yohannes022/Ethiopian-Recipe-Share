@@ -18,34 +18,64 @@ import { useProfileStore } from "@/store/profileStore";
 
 export default function AddressesScreen() {
   const router = useRouter();
-  const { addresses, removeAddress, setDefaultAddress } = useProfileStore();
-  const [isLoading, setIsLoading] = useState(true);
+  const { 
+    addresses = [], 
+    removeAddress, 
+    setDefaultAddress,
+    getAddresses,
+    isLoading 
+  } = useProfileStore();
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
+  const [localAddresses, setLocalAddresses] = useState<typeof addresses>([]);
 
   useEffect(() => {
-    // Simulate loading data
-    const loadData = async () => {
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      setIsLoading(false);
+    const loadAddresses = async () => {
+      try {
+        const loadedAddresses = await getAddresses();
+        setLocalAddresses(loadedAddresses);
+      } catch (error) {
+        console.error('Error loading addresses:', error);
+      } finally {
+        setIsInitialLoading(false);
+      }
     };
-    loadData();
-  }, []);
+    
+    loadAddresses();
+  }, [getAddresses]);
 
   const handleAddAddress = () => {
-    // In a real app, this would navigate to an address form
-    router.push("/profile/addresses/add");
+    // Navigate to the add address screen using a relative path
+    router.push('../addresses/add');
   };
 
   const handleEditAddress = (id: string) => {
-    // In a real app, this would navigate to an address form with the address data
-    router.push(`/profile/addresses/edit/${id}`);
+    // Navigate to the edit address screen with the address ID using a relative path
+    router.push(`../addresses/edit/${id}`);
   };
 
-  const handleRemoveAddress = (id: string) => {
-    removeAddress(id);
+  const handleRemoveAddress = async (id: string) => {
+    try {
+      await removeAddress(id);
+      // Update local state after removal
+      setLocalAddresses(prev => prev ? prev.filter(addr => addr.id !== id) : []);
+    } catch (error) {
+      console.error('Error removing address:', error);
+    }
   };
 
-  const handleSetDefaultAddress = (id: string) => {
-    setDefaultAddress(id);
+  const handleSetDefaultAddress = async (id: string) => {
+    try {
+      await setDefaultAddress(id);
+      // Update local state to reflect the default address change
+      setLocalAddresses(prev => 
+        prev ? prev.map(addr => ({
+          ...addr,
+          isDefault: addr.id === id,
+        })) : []
+      );
+    } catch (error) {
+      console.error('Error setting default address:', error);
+    }
   };
 
   return (
@@ -62,11 +92,11 @@ export default function AddressesScreen() {
           </Text>
         </View>
 
-        {isLoading ? (
+        {isLoading || isInitialLoading ? (
           <View style={styles.loadingContainer}>
             <Text style={styles.loadingText}>Loading addresses...</Text>
           </View>
-        ) : addresses.length === 0 ? (
+        ) : (!addresses || addresses.length === 0) ? (
           <View style={styles.emptyContainer}>
             <MapPin size={48} color={colors.lightText} />
             <Text style={styles.emptyTitle}>No addresses yet</Text>
@@ -88,13 +118,14 @@ export default function AddressesScreen() {
           </View>
         )}
 
-        <Button
-          title="Add New Address"
-          icon={<Plus size={20} color={colors.white} />}
-          onPress={handleAddAddress}
-          fullWidth
-          style={styles.addButton}
-        />
+        <View style={styles.addButton}>
+          <Button
+            title="Add New Address"
+            onPress={handleAddAddress}
+            fullWidth
+            leftIcon={<Plus size={20} color={colors.white} />}
+          />
+        </View>
       </ScrollView>
     </SafeAreaView>
   );
@@ -113,6 +144,9 @@ const styles = StyleSheet.create({
   },
   header: {
     marginBottom: 24,
+    paddingBottom: 24,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border,
   },
   title: {
     ...typography.heading2,
@@ -125,9 +159,9 @@ const styles = StyleSheet.create({
   },
   loadingContainer: {
     flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    minHeight: 200,
+    justifyContent: 'center',
+    alignItems: 'center',
+    height: 200,
   },
   loadingText: {
     ...typography.body,
@@ -135,9 +169,9 @@ const styles = StyleSheet.create({
   },
   emptyContainer: {
     flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    minHeight: 200,
+    justifyContent: 'center',
+    alignItems: 'center',
+    height: 200,
     backgroundColor: colors.cardBackground,
     borderRadius: 12,
     padding: 24,
@@ -152,12 +186,14 @@ const styles = StyleSheet.create({
   emptyText: {
     ...typography.body,
     color: colors.lightText,
-    textAlign: "center",
+    textAlign: 'center',
+    marginBottom: 16,
   },
   addressList: {
     marginBottom: 24,
   },
   addButton: {
     marginBottom: 24,
+    marginTop: 8,
   },
 });

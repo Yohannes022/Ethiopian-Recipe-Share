@@ -6,6 +6,7 @@ import {
   ActivityIndicator,
   ViewStyle,
   TextStyle,
+  View,
 } from "react-native";
 import colors from "@/constants/colors";
 import typography from "@/constants/typography";
@@ -20,6 +21,7 @@ interface ButtonProps {
   style?: ViewStyle;
   textStyle?: TextStyle;
   fullWidth?: boolean;
+  leftIcon?: React.ReactNode;
 }
 
 export default function Button({
@@ -32,6 +34,7 @@ export default function Button({
   style,
   textStyle,
   fullWidth = false,
+  leftIcon,
 }: ButtonProps) {
   const buttonStyles = [
     styles.button,
@@ -62,7 +65,10 @@ export default function Button({
           size="small"
         />
       ) : (
-        <Text style={textStyles}>{title}</Text>
+        <View style={styles.buttonContent}>
+          {leftIcon && <View style={styles.iconContainer}>{leftIcon}</View>}
+          <Text style={textStyles}>{title}</Text>
+        </View>
       )}
     </TouchableOpacity>
   );
@@ -120,6 +126,14 @@ const styles = StyleSheet.create({
     color: colors.primary,
   },
   textText: {
-    color: colors.primary,
+    color: colors.text,
+  },
+  buttonContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  iconContainer: {
+    marginRight: 8,
   },
 });
