@@ -1,0 +1,65 @@
+[
+  {
+    "name": "Addis Ababa Restaurant",
+    "description": "Authentic Ethiopian cuisine with a cozy atmosphere and traditional coffee ceremony.",
+    "address": "123 Main St, Addis Ababa",
+    "phone": "+251 11 123 4567",
+    "email": "info@addisrestaurant.com",
+    "website": "https://addisrestaurant.com",
+    "cuisineType": ["Ethiopian", "African"],
+    "averageRating": 4.5,
+    "deliveryAvailable": true,
+    "takeoutAvailable": true,
+    "dineInAvailable": true,
+    "openingHours": {
+      "monday": { "open": 10, "close": 22 },
+      "tuesday": { "open": 10, "close": 22 },
+      "wednesday": { "open": 10, "close": 22 },
+      "thursday": { "open": 10, "close": 23 },
+      "friday": { "open": 10, "close": 23 },
+      "saturday": { "open": 11, "close": 23 },
+      "sunday": { "open": 11, "close": 21 }
+    },
+    "location": {
+      "type": "Point",
+      "coordinates": [38.7896, 9.0322]
+    },
+    "images": [
+      {
+        "url": "https://example.com/restaurant1.jpg",
+        "alt": "Addis Ababa Restaurant exterior"
+      }
+    ]
+  },
+  {
+    "name": "Blue Nile Ethiopian Cuisine",
+    "description": "Traditional Ethiopian dishes served in a warm, inviting setting with cultural decor.",
+    "address": "456 Bole Road, Addis Ababa",
+    "phone": "+251 11 987 6543",
+    "email": "contact@bluenileethiopian.com",
+    "cuisineType": ["Ethiopian", "Vegetarian Friendly"],
+    "averageRating": 4.7,
+    "deliveryAvailable": true,
+    "takeoutAvailable": true,
+    "dineInAvailable": true,
+    "openingHours": {
+      "monday": { "open": 11, "close": 22 },
+      "tuesday": { "open": 11, "close": 22 },
+      "wednesday": { "open": 11, "close": 22 },
+      "thursday": { "open": 11, "close": 23 },
+      "friday": { "open": 11, "close": 23 },
+      "saturday": { "open": 12, "close": 23 },
+      "sunday": { "open": 12, "close": 21 }
+    },
+    "location": {
+      "type": "Point",
+      "coordinates": [38.7912, 9.0287]
+    },
+    "images": [
+      {
+        "url": "https://example.com/restaurant2.jpg",
+        "alt": "Blue Nile Ethiopian Cuisine interior"
+      }
+    ]
+  }
+]

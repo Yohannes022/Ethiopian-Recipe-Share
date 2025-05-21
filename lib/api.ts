@@ -6,16 +6,16 @@ import { Platform } from 'react-native';
 const getBaseUrl = () => {
   if (Platform.OS === 'web') {
     // For web, use relative URL
-    return '/api';
+    return ''; // Remove '/api' from here since we'll add it in the request
   } else if (__DEV__) {
     // For development on mobile, use localhost with the correct port
     // Note: On Android emulator, 10.0.2.2 points to the host machine's localhost
     return Platform.OS === 'android' 
-      ? 'http://10.0.2.2:8000/api'
-      : 'http://localhost:8000/api';
+      ? 'http://10.0.2.2:8000'
+      : 'http://localhost:8000';
   } else {
     // For production, use the configured base URL
-    return API_CONFIG.BASE_URL;
+    return API_CONFIG.BASE_URL.replace(/\/api$/, ''); // Remove trailing /api if present
   }
 };
 

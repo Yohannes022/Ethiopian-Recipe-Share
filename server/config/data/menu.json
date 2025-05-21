@@ -1,0 +1,150 @@
+[
+  {
+    "name": "Doro Wat",
+    "description": "Spicy chicken stew with hard-boiled eggs, served with injera",
+    "price": 15.99,
+    "category": "Main Course",
+    "spiceLevel": 4,
+    "isVegetarian": false,
+    "isVegan": false,
+    "isGlutenFree": false,
+    "ingredients": ["chicken", "berbere spice", "onions", "garlic", "ginger", "niter kibbeh", "hard-boiled eggs"],
+    "images": [
+      {
+        "url": "https://example.com/doro-wat.jpg",
+        "alt": "Doro Wat - Spicy Ethiopian Chicken Stew"
+      }
+    ]
+  },
+  {
+    "name": "Misir Wat",
+    "description": "Spicy red lentil stew, a staple in Ethiopian cuisine",
+    "price": 12.99,
+    "category": "Main Course",
+    "spiceLevel": 3,
+    "isVegetarian": true,
+    "isVegan": true,
+    "isGlutenFree": true,
+    "ingredients": ["red lentils", "berbere spice", "onions", "garlic", "ginger", "niter kibbeh"],
+    "images": [
+      {
+        "url": "https://example.com/misir-wat.jpg",
+        "alt": "Misir Wat - Spicy Red Lentil Stew"
+      }
+    ]
+  },
+  {
+    "name": "Injera",
+    "description": "Traditional Ethiopian sourdough flatbread with a slightly spongy texture",
+    "price": 3.99,
+    "category": "Bread",
+    "spiceLevel": 0,
+    "isVegetarian": true,
+    "isVegan": true,
+    "isGlutenFree": true,
+    "ingredients": ["teff flour", "water", "salt"],
+    "images": [
+      {
+        "url": "https://example.com/injera.jpg",
+        "alt": "Injera - Traditional Ethiopian Flatbread"
+      }
+    ]
+  },
+  {
+    "name": "Tibs",
+    "description": "Sautéed meat (beef, lamb, or goat) with vegetables and spices",
+    "price": 16.99,
+    "category": "Main Course",
+    "spiceLevel": 2,
+    "isVegetarian": false,
+    "isVegan": false,
+    "isGlutenFree": true,
+    "ingredients": ["beef/lamb/goat", "onions", "jalapeños", "garlic", "ginger", "niter kibbeh"],
+    "options": [
+      {
+        "name": "Meat Choice",
+        "choices": ["Beef", "Lamb", "Goat"],
+        "required": true
+      },
+      {
+        "name": "Spice Level",
+        "choices": ["Mild", "Medium", "Spicy", "Very Spicy"],
+        "required": true
+      }
+    ],
+    "images": [
+      {
+        "url": "https://example.com/tibs.jpg",
+        "alt": "Tibs - Sautéed Meat with Vegetables"
+      }
+    ]
+  },
+  {
+    "name": "Shiro",
+    "description": "Hearty stew made from ground chickpeas or broad beans, seasoned with berbere spice",
+    "price": 11.99,
+    "category": "Main Course",
+    "spiceLevel": 3,
+    "isVegetarian": true,
+    "isVegan": true,
+    "isGlutenFree": true,
+    "ingredients": ["chickpea flour", "berbere spice", "onions", "garlic", "ginger", "niter kibbeh"],
+    "images": [
+      {
+        "url": "https://example.com/shiro.jpg",
+        "alt": "Shiro - Chickpea Stew"
+      }
+    ]
+  },
+  {
+    "name": "Vegetarian Combo",
+    "description": "Sampler platter with a variety of vegetarian dishes, served with injera",
+    "price": 14.99,
+    "category": "Combination",
+    "spiceLevel": 2,
+    "isVegetarian": true,
+    "isVegan": true,
+    "isGlutenFree": true,
+    "ingredients": ["lentils", "chickpeas", "split peas", "cabbage", "potatoes", "carrots", "onions", "spices"],
+    "images": [
+      {
+        "url": "https://example.com/vegetarian-combo.jpg",
+        "alt": "Vegetarian Combination Platter"
+      }
+    ]
+  },
+  {
+    "name": "Tibs Firfir",
+    "description": "Shredded injera mixed with doro wat sauce and meat",
+    "price": 15.99,
+    "category": "Breakfast",
+    "spiceLevel": 3,
+    "isVegetarian": false,
+    "isVegan": false,
+    "isGlutenFree": false,
+    "ingredients": ["injera", "doro wat sauce", "chicken", "spices"],
+    "images": [
+      {
+        "url": "https://example.com/tibs-firfir.jpg",
+        "alt": "Tibs Firfir - Shredded Injera with Doro Wat"
+      }
+    ]
+  },
+  {
+    "name": "Ethiopian Coffee Ceremony",
+    "description": "Traditional Ethiopian coffee served with popcorn and incense",
+    "price": 8.99,
+    "category": "Beverage",
+    "spiceLevel": 0,
+    "isVegetarian": true,
+    "isVegan": true,
+    "isGlutenFree": true,
+    "ingredients": ["ethiopian coffee beans", "water", "sugar"],
+    "images": [
+      {
+        "url": "https://example.com/ethiopian-coffee.jpg",
+        "alt": "Traditional Ethiopian Coffee Ceremony"
+      }
+    ]
+  }
+]

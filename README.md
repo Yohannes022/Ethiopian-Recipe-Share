@@ -45,7 +45,7 @@ npm install
 3. Install backend dependencies:
 ```
 cd backend
-pip install -r requirements.txt
+pip install -r requirments.txt
 ```
 
 ### Running the Application
