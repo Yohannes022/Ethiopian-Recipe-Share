@@ -224,7 +224,14 @@ export default function RestaurantDashboard() {
     });
   };
 
-  const menuItems = [
+  const menuItems: Array<{
+    id: string;
+    title: string;
+    icon: React.ReactNode;
+    description: string;
+    route: '/menu' | '/orders' | '/customers' | '/analytics' | '/settings' | '/recipe';
+    permission: string[];
+  }> = [
     {
       id: "menu",
       title: "Menu Management",
@@ -238,7 +245,7 @@ export default function RestaurantDashboard() {
       title: "Recipe Management",
       icon: <Utensils size={24} color={colors.text} />,
       description: "Manage your restaurant recipes",
-      route: "/recipes",
+      route: "/recipe",
       permission: ["owner", "manager"],
     },
     {
@@ -420,7 +427,7 @@ export default function RestaurantDashboard() {
             <TouchableOpacity
               key={item.id}
               style={styles.menuItem}
-              onPress={() => router.push(`/(restaurant)${item.route}`)}
+              onPress={() => router.push(item.route)}
             >
               <View style={styles.menuItemContent}>
                 <View style={styles.menuItemIcon}>{item.icon}</View>

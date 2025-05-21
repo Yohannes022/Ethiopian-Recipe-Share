@@ -1,28 +1,26 @@
-import React, { useState, useEffect } from "react";
-import {
-  StyleSheet,
-  View,
-  Text,
-  ScrollView,
-  FlatList,
-  TouchableOpacity,
-  RefreshControl,
-  Dimensions,
-  ActivityIndicator,
-} from "react-native";
-import { useRouter } from "expo-router";
-import { Image } from "expo-image";
-import { ChevronRight, MapPin, Star } from "lucide-react-native";
+import CategoryPill from "@/components/CategoryPill";
+import RecipeCard from "@/components/RecipeCard";
 import colors from "@/constants/colors";
 import typography from "@/constants/typography";
-import RecipeCard from "@/components/RecipeCard";
-import RestaurantCard from "@/components/RestaurantCard";
-import CategoryPill from "@/components/CategoryPill";
+import { popularTags } from "@/mocks/recipes";
+import { useAuthStore } from "@/store/authStore";
 import { useRecipeStore } from "@/store/recipeStore";
 import { useRestaurantStore } from "@/store/restaurantStore";
-import { useAuthStore } from "@/store/authStore";
-import { popularTags } from "@/mocks/recipes";
-import { API_CONFIG } from "@/constants/api";
+import { Image } from "expo-image";
+import { useRouter } from "expo-router";
+import { ChevronRight, MapPin, Star } from "lucide-react-native";
+import React, { useState } from "react";
+import {
+  ActivityIndicator,
+  Dimensions,
+  FlatList,
+  RefreshControl,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
 export default function HomeScreen() {
   const router = useRouter();

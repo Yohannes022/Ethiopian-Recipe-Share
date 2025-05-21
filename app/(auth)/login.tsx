@@ -255,7 +255,7 @@ export default function LoginScreen() {
               if (userType === "owner" || userType === "manager") {
                 router.push("/(auth)/restaurant-owner-signup");
               } else {
-                router.push("/(auth)/register");
+                // router.push("/(auth)/register");
               }
             }}
           >

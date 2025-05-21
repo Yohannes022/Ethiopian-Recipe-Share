@@ -4,7 +4,7 @@ import colors from "@/constants/colors";
 import typography from "@/constants/typography";
 import { mockRestaurants } from "@/mocks/restaurants";
 import { useCartStore } from "@/store/cartStore";
-import { ServiceType } from "@/types/restaurant";
+import type { OrderServiceType } from "@/types/restaurant";
 import { Image } from "expo-image";
 import { useRouter } from "expo-router";
 import { MapPin, MapPinOff, ShoppingBag, UtensilsCrossed } from "lucide-react-native";
@@ -69,11 +69,11 @@ export default function CartScreen() {
     );
   };
 
-  const handleServiceTypeChange = (type: ServiceType) => {
+  const handleServiceTypeChange = (type: OrderServiceType) => {
     setServiceType(type);
   };
 
-  const getServiceTypeIcon = (type: ServiceType, size: number = 20) => {
+  const getServiceTypeIcon = (type: OrderServiceType, size: number = 20) => {
     switch (type) {
       case 'delivery':
         return <MapPin size={size} color={colors.primary} />;

@@ -1,24 +1,24 @@
-import React, { useState, useEffect } from "react";
-import {
-  StyleSheet,
-  View,
-  Text,
-  SafeAreaView,
-  ScrollView,
-  TouchableOpacity,
-  Alert,
-  Platform,
-} from "react-native";
-import { useRouter } from "expo-router";
-import { Image } from "expo-image";
-import { MapPin, CreditCard, Clock, ChevronRight, Plus, MapPinOff, UtensilsCrossed } from "lucide-react-native";
+import Button from "@/components/Button";
 import colors from "@/constants/colors";
 import typography from "@/constants/typography";
-import Button from "@/components/Button";
+import { restaurants } from "@/mocks/restaurants";
 import { useCartStore } from "@/store/cartStore";
 import { useProfileStore } from "@/store/profileStore";
-import { restaurants } from "@/mocks/restaurants";
-import { OrderServiceType } from "@/types/restaurant";
+import { Address, OrderServiceType, PaymentMethod } from "@/types/restaurant";
+import { Image } from "expo-image";
+import { useRouter } from "expo-router";
+import { Clock, CreditCard, MapPin, MapPinOff, Plus, UtensilsCrossed } from "lucide-react-native";
+import React, { useEffect, useState } from "react";
+import {
+  Alert,
+  Platform,
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
 export default function CheckoutScreen() {
   const router = useRouter();
@@ -33,7 +33,11 @@ export default function CheckoutScreen() {
     serviceType,
     setServiceType
   } = useCartStore();
-  const { addresses, paymentMethods } = useProfileStore();
+  const { addresses: storedAddresses, paymentMethods: storedPaymentMethods } = useProfileStore();
+  
+  // Initialize with empty arrays if null
+  const addresses: Address[] = storedAddresses || [];
+  const paymentMethods: PaymentMethod[] = storedPaymentMethods || [];
   
   const [isLoading, setIsLoading] = useState(true);
   const [selectedAddress, setSelectedAddress] = useState<string | null>(null);
@@ -52,31 +56,39 @@ export default function CheckoutScreen() {
   const restaurant = restaurants.find(r => r.id === restaurantId);
 
   useEffect(() => {
-    // Simulate loading data
     const loadData = async () => {
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      setIsLoading(false);
+      try {
+        // Set default address if available
+        if (addresses.length > 0) {
+          const defaultAddress = addresses.find(addr => addr.isDefault) || addresses[0];
+          if (defaultAddress) {
+            setSelectedAddress(defaultAddress.id);
+          }
+        }
+        
+        // Set default payment method if available
+        if (paymentMethods.length > 0) {
+          const defaultPayment = paymentMethods.find((pm: PaymentMethod) => pm.isDefault) || paymentMethods[0];
+          if (defaultPayment) {
+            setSelectedPayment(defaultPayment.id);
+          }
+        }
+      } catch (error) {
+        console.error('Error loading checkout data:', error);
+      } finally {
+        setIsLoading(false);
+      }
     };
+    
     loadData();
-
-    // Set default address and payment method if available
-    if (addresses.length > 0 && serviceType === 'delivery') {
-      const defaultAddress = addresses.find((addr) => addr.isDefault);
-      setSelectedAddress(defaultAddress ? defaultAddress.id : addresses[0].id);
-    }
-
-    if (paymentMethods.length > 0) {
-      const defaultPayment = paymentMethods.find((pm) => pm.isDefault);
-      setSelectedPayment(defaultPayment ? defaultPayment.id : paymentMethods[0].id);
-    }
-  }, [addresses, paymentMethods, serviceType]);
+  }, [addresses, paymentMethods]);
 
   const handleAddAddress = () => {
-    router.push("/profile/addresses/add");
+    router.push("/profile/addresses/add" as any);
   };
 
   const handleAddPayment = () => {
-    router.push("/profile/payment/add");
+    router.push("/profile/payment/add" as any);
   };
 
   const handlePlaceOrder = () => {
@@ -407,15 +419,18 @@ export default function CheckoutScreen() {
                       style={styles.paymentIcon}
                     />
                     <View style={styles.paymentDetails}>
-                      <Text style={styles.paymentType}>{payment.type}</Text>
+                      <Text style={styles.paymentType}>
+                        {payment.type === 'card' ? 'Credit/Debit Card' : 'Mobile Money'}
+                      </Text>
                       <Text style={styles.paymentText}>
                         {payment.type === 'card' 
-                          ? `**** **** **** ${payment.last4 || payment.lastFourDigits || "****"}`
-                          : payment.phoneNumber || payment.number || ""}
+                          ? `•••• ${payment.last4 || '••••'}`
+                          : payment.phoneNumber || ''}
                       </Text>
                     </View>
                   </View>
                   <View
+
                     style={[
                       styles.radioButton,
                       selectedPayment === payment.id && styles.radioButtonSelected,

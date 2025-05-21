@@ -1,15 +1,23 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { CartItem, MenuItem, Order, ServiceType } from "@/types/restaurant";
+import type { MenuItem, Order, OrderItem, OrderServiceType } from "@/types/restaurant";
 import { mockRestaurants } from "@/mocks/restaurants";
 import { currentUser } from "@/mocks/users";
 import { addresses } from "@/mocks/addresses";
 
+interface CartItem {
+  id: string;
+  menuItemId: string;
+  quantity: number;
+  specialInstructions?: string;
+  menuItem: MenuItem;
+}
+
 interface CartState {
   items: CartItem[];
   restaurantId: string | null;
-  serviceType: ServiceType;
+  serviceType: OrderServiceType;
   
   // Cart actions
   addToCart: (restaurantId: string, menuItemId: string, quantity: number, specialInstructions?: string) => void;
@@ -17,7 +25,7 @@ interface CartState {
   updateInstructions: (itemId: string, instructions: string) => void;
   removeFromCart: (itemId: string) => void;
   clearCart: () => void;
-  setServiceType: (type: ServiceType) => void;
+  setServiceType: (type: OrderServiceType) => void;
   
   // Cart calculations
   getCartTotal: () => number;
@@ -45,11 +53,11 @@ export const useCartStore = create<CartState>()(
     (set, get) => ({
       items: [],
       restaurantId: null,
-      serviceType: 'delivery',
+      serviceType: 'delivery' as OrderServiceType,
       orders: [],
       
       addToCart: (restaurantId, menuItemId, quantity, specialInstructions) => {
-        const { items, restaurantId: currentRestaurantId } = get();
+        const { items, restaurantId: currentRestaurantId, getCartItems } = get();
         
         // If adding from a different restaurant, clear the cart first
         if (currentRestaurantId && currentRestaurantId !== restaurantId) {
@@ -59,31 +67,47 @@ export const useCartStore = create<CartState>()(
           }
         }
         
-        const existingItemIndex = items.findIndex(item => item.id === menuItemId || item.menuItemId === menuItemId);
+        // Find the menu item to get its details
+        const restaurant = mockRestaurants.find(r => r.id === restaurantId);
+        const menuItem = restaurant?.menu?.find(mi => mi.id === menuItemId);
+        
+        const existingItemIndex = items.findIndex(item => item.menuItemId === menuItemId);
         
         if (existingItemIndex >= 0) {
           // Update existing item
           const updatedItems = [...items];
-          updatedItems[existingItemIndex].quantity += quantity;
-          if (specialInstructions) {
-            updatedItems[existingItemIndex].specialInstructions = specialInstructions;
-          }
+          updatedItems[existingItemIndex] = {
+            ...updatedItems[existingItemIndex],
+            quantity: updatedItems[existingItemIndex].quantity + quantity,
+            specialInstructions: specialInstructions || updatedItems[existingItemIndex].specialInstructions
+          };
           set({ items: updatedItems, restaurantId });
         } else {
+          // Create a minimal menu item if not found
+          const now = new Date().toISOString();
+          const minimalMenuItem: MenuItem = menuItem || {
+            id: menuItemId,
+            name: "Unknown Item",
+            description: "",
+            price: 0,
+            image: "",
+            category: "",
+            restaurantId: restaurantId,
+            createdAt: now,
+            updatedAt: now,
+          };
+          
           // Add new item
+          const newItem: CartItem = {
+            id: menuItemId,
+            menuItemId: menuItemId,
+            quantity,
+            specialInstructions,
+            menuItem: minimalMenuItem
+          };
+          
           set({
-            items: [
-              ...items,
-              {
-                id: menuItemId,
-                menuItemId: menuItemId,
-                restaurantId,
-                quantity,
-                specialInstructions,
-                name: "", // Will be populated in getCartItems
-                price: 0, // Will be populated in getCartItems
-              },
-            ],
+            items: [...items, newItem],
             restaurantId,
           });
         }
@@ -147,49 +171,88 @@ export const useCartStore = create<CartState>()(
         set({ serviceType: type });
       },
       
+      getDeliveryFee: () => {
+        const { restaurantId, getCartSubtotal } = get();
+        
+        if (!restaurantId) return 0;
+        
+        const restaurant = mockRestaurants.find(r => r.id === restaurantId);
+        
+        if (!restaurant) return 0;
+        
+        // Free delivery for orders over $30
+        if (getCartSubtotal() > 30) {
+          return 0;
+        }
+        
+        // Default delivery fee or use restaurant's delivery fee if available
+        return restaurant.deliveryFee || 3.99;
+      },
+      
       getCartItems: () => {
         const { items, restaurantId } = get();
         
         if (!restaurantId) return [];
         
         const restaurant = mockRestaurants.find(r => r.id === restaurantId);
-        if (!restaurant || !restaurant.menu) return [];
+        
+        if (!restaurant) return [];
         
         return items.map(item => {
-          const menuItem = restaurant.menu?.find(mi => mi.id === (item.id || item.menuItemId));
+          // Find the full menu item details from the restaurant
+          const menuItem = restaurant.menu?.find(m => m.id === item.menuItemId);
+          
+          // If menu item is not found, return a minimal valid object
           if (!menuItem) {
-            // If menu item not found, return a placeholder
             return {
               ...item,
               menuItem: {
-                id: item.id || item.menuItemId || "",
-                name: item.name || "Unknown Item",
-                description: "",
-                price: item.price || 0,
-                image: "",
-                category: "",
+                id: item.menuItemId,
+                name: 'Unknown Item',
+                price: 0,
+                description: 'Item not found in menu',
+                category: 'Unknown',
+                restaurantId: restaurantId,
+                isAvailable: false,
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString(),
               }
             };
           }
+          
           return {
             ...item,
-            menuItem,
+            menuItem: {
+              ...menuItem,
+              // Ensure required fields have default values
+              id: menuItem.id || item.menuItemId,
+              name: menuItem.name || 'Unknown Item',
+              price: menuItem.price || 0,
+              category: menuItem.category || 'Uncategorized',
+              restaurantId: menuItem.restaurantId || restaurantId,
+              isAvailable: menuItem.isAvailable !== undefined ? menuItem.isAvailable : true,
+              createdAt: menuItem.createdAt || new Date().toISOString(),
+              updatedAt: menuItem.updatedAt || new Date().toISOString(),
+            }
           };
         });
       },
       
       getCartItemsCount: () => {
-        const { items } = get();
-        return items.reduce((total, item) => total + item.quantity, 0);
+        return get().items.reduce((total, item) => total + item.quantity, 0);
       },
       
       getCartSubtotal: () => {
         const cartItems = get().getCartItems();
         
-        return cartItems.reduce(
-          (total, item) => total + item.menuItem.price * item.quantity,
-          0
-        );
+        if (!cartItems.length) return 0;
+        
+        return cartItems.reduce((total, item) => {
+          const price = typeof item.menuItem.price === 'string' 
+            ? parseFloat(item.menuItem.price) 
+            : item.menuItem.price || 0;
+          return total + (price * item.quantity);
+        }, 0);
       },
       
       getDeliveryFee: () => {
@@ -203,12 +266,13 @@ export const useCartStore = create<CartState>()(
         if (!restaurantId) return 0;
         
         const restaurant = mockRestaurants.find(r => r.id === restaurantId);
-        return restaurant ? restaurant.deliveryFee : 0;
+        return restaurant?.deliveryFee || 0;
       },
       
       getTax: () => {
         // Assuming 15% VAT in Ethiopia
-        return get().getCartSubtotal() * 0.15;
+        const subtotal = get().getCartSubtotal();
+        return subtotal * 0.15;
       },
       
       getCartTotal: () => {
@@ -225,42 +289,61 @@ export const useCartStore = create<CartState>()(
           getCartSubtotal, 
           getDeliveryFee, 
           getTax, 
-          getCartTotal, 
+          getCartTotal,
           clearCart,
-          serviceType 
+          serviceType,
+          restaurantId
         } = get();
         
+        if (!restaurantId) {
+          throw new Error("No restaurant selected");
+        }
+        
         const cartItems = getCartItems();
+        
+        if (cartItems.length === 0) {
+          throw new Error("Cannot create an empty order");
+        }
+        
         const subtotal = getCartSubtotal();
         const deliveryFee = getDeliveryFee();
         const tax = getTax();
         const total = getCartTotal() + tip;
         
-        let deliveryAddress: any = "Pickup";
+        // Define the delivery address based on service type
+        let deliveryAddress: string | {
+          addressLine1: string;
+          addressLine2?: string;
+          city: string;
+          instructions?: string;
+          location: {
+            latitude: number;
+            longitude: number;
+          };
+        } = serviceType === 'dine-in' ? 'Dine-in' : 'Pickup';
         
         if (serviceType === 'delivery') {
           if (!addressId) {
             throw new Error("Delivery address is required for delivery orders");
           }
           
-          const address = addresses.find(a => a.id === addressId);
+          const selectedAddress = addresses.find(a => a.id === addressId);
           
-          if (!address) {
+          if (!selectedAddress) {
             throw new Error("Delivery address not found");
           }
           
+          // Use the address fields that exist on the Address type
           deliveryAddress = {
-            addressLine1: address.street,
-            addressLine2: address.apt,
-            city: address.city,
-            instructions: address.instructions,
+            addressLine1: selectedAddress.addressLine1 || '',
+            addressLine2: selectedAddress.addressLine2 || '',
+            city: selectedAddress.city || 'Addis Ababa', // Default city if not provided
+            instructions: selectedAddress.instructions || '',
             location: {
-              latitude: 9.0222, // Default location
-              longitude: 38.7468, // Default location
-            },
+              latitude: selectedAddress.location?.latitude || 9.0054, // Default to Addis Ababa coordinates
+              longitude: selectedAddress.location?.longitude || 38.7636
+            }
           };
-        } else if (serviceType === 'dine-in') {
-          deliveryAddress = "Dine-in";
         }
         
         const restaurant = mockRestaurants.find(r => r.id === get().restaurantId);

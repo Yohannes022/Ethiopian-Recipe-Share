@@ -1,6 +1,6 @@
-import React from "react";
 import { Stack } from "expo-router";
-import { Platform } from "react-native";
+import React from "react";
+// import { Platform } from "react-native";
 import colors from "@/constants/colors";
 
 export default function AuthLayout() {
