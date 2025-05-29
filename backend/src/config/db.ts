@@ -1,10 +1,10 @@
 import mongoose from 'mongoose';
-import { config } from '.';
+import config from './app';
 import logger from '../utils/logger';
 
 export const connectDB = async (): Promise<void> => {
   try {
-    const conn = await mongoose.connect(`${config.database.uri}/${config.database.name}`, {
+    const conn = await mongoose.connect(`${config.db.uri}/${config.db.name}`, {
       serverSelectionTimeoutMS: 5000,
     });
     
