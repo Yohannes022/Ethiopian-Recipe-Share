@@ -1,14 +1,27 @@
 import { Document, Model, Types } from 'mongoose';
 
-export interface IOrderItem {
+export interface IOrderItemBase {
   menuItem: Types.ObjectId;
   quantity: number;
   price: number;
   notes?: string;
 }
 
-export interface IOrder extends Document {
-  user: Types.ObjectId;
+export interface IOrderItem extends IOrderItemBase {
+  menuItem: Types.ObjectId;
+}
+
+export interface IOrderItemWithDetails extends IOrderItemBase {
+  menuItem: Types.ObjectId;
+  menuItemDetails?: {
+    name: string;
+    description: string;
+    price: number;
+    image: string;
+  };
+}
+
+export interface IOrderBase {
   restaurant: Types.ObjectId;
   items: IOrderItem[];
   total: number;
@@ -32,35 +45,34 @@ export interface IOrder extends Document {
   updatedAt: Date;
 }
 
+export interface IOrder extends Document, IOrderBase {
+  user: Types.ObjectId;
+}
+
+export type OrderStatus = 'pending' | 'confirmed' | 'preparing' | 'ready' | 'delivered' | 'cancelled';
+
 export interface IOrderMethods {
   calculateTotal(): void;
-  updateStatus(newStatus: string): void;
+  updateStatus(newStatus: OrderStatus): void;
   addDeliveryFee(fee: number): void;
   addTax(tax: number): void;
 }
 
 export type OrderModel = Model<IOrder, {}, IOrderMethods>;
 
-export interface IOrderWithDetails extends IOrder {
-  user?: {
+export interface IOrderWithDetails extends IOrderBase {
+  user: Types.ObjectId;
+  userDetails?: {
     name: string;
     phone: string;
     email: string;
   };
-  restaurant?: {
+  restaurant: Types.ObjectId;
+  restaurantDetails?: {
     name: string;
     phone: string;
     email: string;
   };
-  items?: {
-    menuItem: {
-      name: string;
-      description: string;
-      price: number;
-      image: string;
-    };
-    quantity: number;
-    price: number;
-    notes?: string;
-  }[];
+  items: IOrderItem[];
+  itemsWithDetails?: IOrderItemWithDetails[];
 }

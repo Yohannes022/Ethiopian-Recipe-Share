@@ -1,5 +1,5 @@
 import mongoose, { Schema, Document, Model } from 'mongoose';
-import { IOrder, IOrderMethods, OrderModel } from '@/types/order.types';
+import { IOrder, IOrderMethods, OrderModel, OrderStatus } from '@/types/order.types';
 
 const orderSchema = new mongoose.Schema<IOrder, OrderModel, IOrderMethods>(
   {
@@ -149,7 +149,7 @@ orderSchema.methods.calculateTotal = function () {
   this.total = this.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
 };
 
-orderSchema.methods.updateStatus = function (newStatus: string) {
+orderSchema.methods.updateStatus = function (newStatus: OrderStatus) {
   this.status = newStatus;
 };
 

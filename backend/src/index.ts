@@ -1,16 +1,14 @@
-import 'module-alias/register';
+// Load environment variables first
 import 'dotenv/config';
-import http from 'http';
+
+// Import module alias configuration
+import './config/module-alias';
+
 import mongoose from 'mongoose';
-import app from '@/app';
+import { server } from '@/app';
 import logger from '@/utils/logger';
-import { initializeSocket } from '@/config/socket';
 
 const PORT = process.env.PORT || 5000;
-const server = http.createServer(app);
-
-// Initialize Socket.IO
-initializeSocket(server);
 
 // Connect to MongoDB
 const connectDB = async () => {

@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import { seedDatabase } from './seed';
+import { env } from '@/config/config';
 
 interface IMigration {
   version: number;
@@ -12,14 +12,14 @@ const migrations: IMigration[] = [
     version: 1,
     up: async () => {
       // Add migration steps for version 1
-      await mongoose.connection.db.collection('migrations').insertOne({
+      await mongoose.connection.db?.collection('migrations').insertOne({
         version: 1,
         appliedAt: new Date(),
       });
     },
     down: async () => {
       // Add rollback steps for version 1
-      await mongoose.connection.db.collection('migrations').deleteOne({
+      await mongoose.connection.db?.collection('migrations').deleteOne({
         version: 1,
       });
     },
@@ -28,11 +28,9 @@ const migrations: IMigration[] = [
 
 const migrate = async (direction: 'up' | 'down') => {
   try {
-    await mongoose.connect(process.env.MONGODB_URI!);
+    await mongoose.connect(env.MONGODB_URI!);
 
-    const currentVersion = await mongoose.connection.db
-      .collection('migrations')
-      .findOne({}, { sort: { version: -1 } });
+    const currentVersion = await mongoose.connection.db?.collection('migrations').findOne({}, { sort: { version: -1 } });
 
     const targetVersion = direction === 'up' ? migrations.length : 0;
 

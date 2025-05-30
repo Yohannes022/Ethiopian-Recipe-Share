@@ -1,53 +1,48 @@
 import winston from 'winston';
-import path from 'path';
-import 'winston-daily-rotate-file';
+import * as path from 'path';
+import * as fs from 'fs';
+import { Console, File } from 'winston/lib/winston/transports';
+import DailyRotateFile from 'winston-daily-rotate-file';
+import { format } from 'winston';
 
-const { combine, timestamp, printf, colorize, align, json } = winston.format;
+// Create logs directory if it doesn't exist
+const logDir = path.join(process.cwd(), 'logs');
+if (!fs.existsSync(logDir)) {
+  fs.mkdirSync(logDir, { recursive: true });
+}
 
-// Log directory
-const logDir = 'logs';
-
-// Define log format
-const logFormat = printf(({ level, message, timestamp, stack }) => {
-  return `${timestamp} ${level}: ${stack || message}`;
-});
-
-// Define different colors for each level
-const colors = {
+// Define log levels and their colors
+const logColors = {
   error: 'red',
   warn: 'yellow',
   info: 'green',
-  http: 'magenta',
   debug: 'blue',
 };
-
-// Tell winston that you want to link the colors
-winston.addColors(colors);
 
 // Create the logger instance
 const logger = winston.createLogger({
   level: process.env.NODE_ENV === 'production' ? 'info' : 'debug',
-  format: combine(
-    timestamp({
+  format: winston.format.combine(
+    winston.format.timestamp({
       format: 'YYYY-MM-DD HH:mm:ss',
     }),
     winston.format.errors({ stack: true }),
-    process.env.NODE_ENV === 'production' ? json() : winston.format.simple(),
-    align()
+    process.env.NODE_ENV === 'production' ? winston.format.json() : winston.format.simple(),
+    winston.format.align()
   ),
   transports: [
     // Console transport
-    new winston.transports.Console({
-      format: combine(
-        colorize({ all: true }),
-        timestamp({
+    new Console({
+      format: winston.format.combine(
+        winston.format.colorize({ all: true }),
+        winston.format.timestamp({
           format: 'YYYY-MM-DD HH:mm:ss',
         }),
-        logFormat
+        winston.format.simple()
       ),
     }),
     // Daily rotate file transport for all logs
-    new winston.transports.DailyRotateFile({
+    new DailyRotateFile({
       filename: path.join(logDir, 'application-%DATE%.log'),
       datePattern: 'YYYY-MM-DD',
       zippedArchive: true,
@@ -55,26 +50,27 @@ const logger = winston.createLogger({
       maxFiles: '14d',
     }),
     // Error logs
-    new winston.transports.File({
+    new File({
       filename: path.join(logDir, 'error.log'),
       level: 'error',
-    }),
+    })
   ],
-  // Handle uncaught exceptions
   exceptionHandlers: [
-    new winston.transports.File({
+    new File({
       filename: path.join(logDir, 'exceptions.log'),
     }),
   ],
-  // Handle unhandled promise rejections
   rejectionHandlers: [
-    new winston.transports.File({
+    new File({
       filename: path.join(logDir, 'rejections.log'),
     }),
   ],
-  // Exit on error, set to false to allow the application to continue
-  exitOnError: false,
 });
+
+// Add colors for different log levels
+logger.addColors(logColors);
+
+export default logger;
 
 // Create a stream for morgan to pipe logs to winston
 if (process.env.NODE_ENV !== 'test') {
@@ -84,5 +80,3 @@ if (process.env.NODE_ENV !== 'test') {
     },
   } as any;
 }
-
-export default logger;

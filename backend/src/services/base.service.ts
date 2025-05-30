@@ -1,9 +1,9 @@
-import { Model } from 'mongoose';
+import { Model, Document, FilterQuery, QueryOptions, UpdateQuery } from 'mongoose';
 
-export class BaseService<T> {
+export class BaseService<T extends Document> {
   constructor(protected model: Model<T>) {}
 
-  async create(data: any): Promise<T> {
+  async create(data: Partial<T>): Promise<T> {
     return this.model.create(data);
   }
 
@@ -11,11 +11,14 @@ export class BaseService<T> {
     return this.model.findById(id);
   }
 
-  async findAll(query: any = {}, options: any = {}): Promise<T[]> {
-    return this.model.find(query, null, options);
+  async findAll(
+    query: FilterQuery<T> = {},
+    options: QueryOptions = {}
+  ): Promise<T[]> {
+    return this.model.find(query, null, options).lean().exec() as unknown as T[];
   }
 
-  async update(id: string, data: any): Promise<T | null> {
+  async update(id: string, data: UpdateQuery<T>): Promise<T | null> {
     return this.model.findByIdAndUpdate(id, data, { new: true });
   }
 
@@ -23,7 +26,7 @@ export class BaseService<T> {
     return this.model.findByIdAndDelete(id);
   }
 
-  async count(query: any = {}): Promise<number> {
+  async count(query: FilterQuery<T> = {}): Promise<number> {
     return this.model.countDocuments(query);
   }
 

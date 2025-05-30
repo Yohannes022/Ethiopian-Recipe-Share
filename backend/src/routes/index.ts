@@ -1,6 +1,7 @@
 import express from 'express';
 import { protect, restrictTo } from '../middleware/auth';
 import { signup, login, logout, protect as protectRoute, restrictTo as restrictToRole, resetPassword, forgotPassword, updatePassword, verifyEmail, resendVerificationEmail } from '../controllers/auth.controller';
+import testRoutes from './test.routes';
 import { getAllUsers, getUser, updateUser, deleteUser, getMe, updateMe, deleteMe } from '../controllers/user.controller';
 import { getAllRecipes, createRecipe, getRecipe, updateRecipe, deleteRecipe, getRecipesByUser, likeRecipe, commentOnRecipe } from '../controllers/recipe.controller';
 import { getAllRestaurants, createRestaurant, getRestaurant, updateRestaurant, deleteRestaurant, getRestaurantsByOwner, getRestaurantMenu } from '../controllers/restaurant.controller';
@@ -100,6 +101,11 @@ router.delete('/categories/:id', protectRoute, restrictToRole('admin'), deleteCa
 
 // Search route
 router.get('/search', search);
+
+// Test routes (only in development)
+if (process.env.NODE_ENV === 'development') {
+  router.use('/test', testRoutes);
+}
 
 // Upload routes
 router.post('/upload/image', protectRoute, uploadImage);

@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { ParsedQs } from 'qs';
 import Restaurant from '@/models/Restaurant';
-import { BadRequestError, NotFoundError } from '@/utils/apiError';
+import { BadRequestError, ForbiddenError, NotFoundError } from '@/utils/apiError';
 
 // Type for query parameters
 interface RestaurantQueryParams extends ParsedQs {
@@ -85,13 +85,14 @@ export const getAllRestaurants = async (req: Request, res: Response, next: NextF
 export const createRestaurant = async (req: Request, res: Response, next: NextFunction) => {
   try {
     // Check if user is restaurant owner
-    if (req.user.role !== 'restaurant_owner') {
-      throw new BadRequestError('You must be a restaurant owner to create a restaurant');
+    const user = (req as any).user;
+    if (user.role !== 'restaurant_owner') {
+      return next(new BadRequestError('You must be a restaurant owner to create a restaurant'));
     }
 
     const restaurant = await Restaurant.create({
       ...req.body,
-      owner: req.user._id,
+      owner: user._id,
     });
 
     res.status(201).json({
@@ -131,15 +132,21 @@ export const updateRestaurant = async (req: Request, res: Response, next: NextFu
     const restaurant = await Restaurant.findById(req.params.id);
 
     if (!restaurant) {
-      throw new NotFoundError('Restaurant not found');
+      return next(new NotFoundError('Restaurant not found'));
     }
 
-    // Check if user is owner or admin
-    if (!restaurant.owner.equals(req.user._id) && req.user.role !== 'admin') {
-      throw new BadRequestError('You do not have permission to update this restaurant');
+    const user = (req as any).user;
+    
+    // Check if user is the owner or admin
+    if (restaurant.owner.toString() !== user._id.toString() && user.role !== 'admin') {
+      return next(new ForbiddenError('You are not authorized to update this restaurant'));
     }
 
-    // Update restaurant
+    // Prevent updating the owner
+    if (req.body.owner) {
+      delete req.body.owner;
+    }
+
     const updatedRestaurant = await Restaurant.findByIdAndUpdate(
       req.params.id,
       req.body,
@@ -147,7 +154,9 @@ export const updateRestaurant = async (req: Request, res: Response, next: NextFu
         new: true,
         runValidators: true,
       }
-    ).populate('owner', 'name photo').populate('category', 'name');
+    )
+      .populate('owner', 'name photo')
+      .populate('category', 'name');
 
     res.status(200).json({
       status: 'success',
@@ -164,15 +173,17 @@ export const deleteRestaurant = async (req: Request, res: Response, next: NextFu
     const restaurant = await Restaurant.findById(req.params.id);
 
     if (!restaurant) {
-      throw new NotFoundError('Restaurant not found');
+      return next(new NotFoundError('Restaurant not found'));
     }
 
-    // Check if user is owner or admin
-    if (!restaurant.owner.equals(req.user._id) && req.user.role !== 'admin') {
-      throw new BadRequestError('You do not have permission to delete this restaurant');
+    const user = (req as any).user;
+    
+    // Check if user is the owner or admin
+    if (restaurant.owner.toString() !== user._id.toString() && user.role !== 'admin') {
+      return next(new ForbiddenError('You are not authorized to delete this restaurant'));
     }
 
-    await restaurant.deleteOne();
+    await Restaurant.findByIdAndDelete(req.params.id);
 
     res.status(204).json({
       status: 'success',
@@ -186,10 +197,11 @@ export const deleteRestaurant = async (req: Request, res: Response, next: NextFu
 // Get restaurants by owner
 export const getRestaurantsByOwner = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const restaurants = await Restaurant.find({ owner: req.params.ownerId })
-      .sort({ createdAt: -1 })
-      .populate('owner', 'name photo')
-      .populate('category', 'name');
+    const userId = (req as any).user._id;
+    const restaurants = await Restaurant.find({ owner: userId })
+      .select('-__v')
+      .populate('category', 'name')
+      .sort({ createdAt: -1 });
 
     res.status(200).json({
       status: 'success',

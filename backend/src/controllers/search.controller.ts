@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
-import Recipe from '@/models/Recipe';
+import mongoose, { Types } from 'mongoose';
+import { Recipe } from '@/models/Recipe';
 import Restaurant from '@/models/Restaurant';
 import User from '@/models/User';
 import { BadRequestError } from '@/utils/apiError';
@@ -13,6 +14,33 @@ interface ISearchResult {
   image?: string;
   rating?: number;
   category?: string;
+}
+
+// Helper type to convert Mongoose document to plain object
+interface IRecipeDoc extends mongoose.Document {
+  _id: Types.ObjectId;
+  name: string;
+  description: string;
+  image: string;
+  rating: number;
+  category?: {
+    name: string;
+  };
+}
+
+interface IRestaurantDoc extends mongoose.Document {
+  _id: Types.ObjectId;
+  name: string;
+  description: string;
+  image: string;
+  rating: number;
+}
+
+interface IUserDoc extends mongoose.Document {
+  _id: Types.ObjectId;
+  name: string;
+  bio: string;
+  photo: string;
 }
 
 // Global search across recipes, restaurants, and users
@@ -40,11 +68,12 @@ export const search = async (req: Request, res: Response, next: NextFunction) =>
         .skip(skip)
         .limit(Number(limit))
         .select('name description image rating category')
-        .populate('category', 'name');
+        .populate('category', 'name')
+        .lean() as unknown as IRecipeDoc[];
 
-      results = [...results, ...recipes.map(recipe => ({
+      results = [...results, ...recipes.map((recipe: IRecipeDoc): ISearchResult => ({
         type: 'recipe',
-        _id: recipe._id,
+        _id: recipe._id?.toString() || '',
         name: recipe.name,
         description: recipe.description,
         image: recipe.image,
@@ -58,11 +87,12 @@ export const search = async (req: Request, res: Response, next: NextFunction) =>
         .sort({ score: { $meta: 'textScore' } })
         .skip(skip)
         .limit(Number(limit))
-        .select('name description image rating');
+        .select('name description image rating')
+        .lean() as unknown as IRestaurantDoc[];
 
-      results = [...results, ...restaurants.map(restaurant => ({
+      results = [...results, ...restaurants.map((restaurant: IRestaurantDoc): ISearchResult => ({
         type: 'restaurant',
-        _id: restaurant._id,
+        _id: restaurant._id?.toString() || '',
         name: restaurant.name,
         description: restaurant.description,
         image: restaurant.image,
@@ -75,11 +105,12 @@ export const search = async (req: Request, res: Response, next: NextFunction) =>
         .sort({ score: { $meta: 'textScore' } })
         .skip(skip)
         .limit(Number(limit))
-        .select('name bio photo');
+        .select('name bio photo')
+        .lean() as unknown as IUserDoc[];
 
-      results = [...results, ...users.map(user => ({
+      results = [...results, ...users.map((user: IUserDoc): ISearchResult => ({
         type: 'user',
-        _id: user._id,
+        _id: user._id?.toString() || '',
         name: user.name,
         description: user.bio,
         image: user.photo,
@@ -91,7 +122,7 @@ export const search = async (req: Request, res: Response, next: NextFunction) =>
       !type || type === 'recipe' ? Recipe.countDocuments(searchQuery) : 0,
       !type || type === 'restaurant' ? Restaurant.countDocuments(searchQuery) : 0,
       !type || type === 'user' ? User.countDocuments(searchQuery) : 0,
-    ]).then(counts => counts.reduce((sum, count) => sum + count, 0));
+    ]).then((counts: number[]) => counts.reduce((sum: number, count: number) => sum + count, 0));
 
     res.status(200).json({
       status: 'success',

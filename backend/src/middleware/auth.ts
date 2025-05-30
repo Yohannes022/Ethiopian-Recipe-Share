@@ -1,9 +1,18 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
-import { User } from '@/models/User';
+import User from '@/models/User';
 import { UnauthorizedError, ForbiddenError } from '@/utils/apiError';
 import logger from '@/utils/logger';
 import { promisify } from 'util';
+import { env } from '@/config/config';
+import { IUser } from '@/types/user.types';
+import { VerifyErrors, VerifyOptions } from 'jsonwebtoken';
+
+// Type for decoded JWT token
+interface DecodedToken {
+  id: string;
+  iat: number;
+}
 
 // Extend Express Request type to include user
 declare global {
@@ -36,10 +45,8 @@ export const protect = async (req: Request, res: Response, next: NextFunction) =
     }
 
     // 2) Verify token
-    const decoded = await promisify(jwt.verify)(
-      token,
-      process.env.JWT_SECRET as string
-    ) as { id: string };
+    const verifyAsync = promisify<string, string, jwt.VerifyOptions, any>(jwt.verify);
+    const decoded = await verifyAsync(token, env.JWT_SECRET, {}) as jwt.JwtPayload;
 
     // 3) Check if user still exists
     const currentUser = await User.findById(decoded.id);
@@ -88,10 +95,8 @@ export const isLoggedIn = async (req: Request, res: Response, next: NextFunction
   if (req.cookies.jwt) {
     try {
       // 1) Verify token
-      const decoded = await promisify(jwt.verify)(
-        req.cookies.jwt,
-        process.env.JWT_SECRET as string
-      ) as { id: string };
+      const verifyAsync = promisify<string, string, jwt.VerifyOptions, any>(jwt.verify);
+      const decoded = await verifyAsync(req.cookies.jwt, env.JWT_SECRET, {}) as jwt.JwtPayload;
 
       // 2) Check if user still exists
       const currentUser = await User.findById(decoded.id);
@@ -122,18 +127,22 @@ export const socketAuth = async (socket: any, next: any) => {
     const token = socket.handshake.auth?.token || socket.handshake.query?.token;
     
     if (!token) {
-      return next(new Error('Authentication error: No token provided'));
+      return next({
+        message: 'Authentication error: No token provided',
+        code: 401
+      });
     }
 
-    const decoded = await promisify(jwt.verify)(
-      token,
-      process.env.JWT_SECRET as string
-    ) as { id: string };
+    const verifyAsync = promisify<string, string, jwt.VerifyOptions, any>(jwt.verify);
+    const decoded = await verifyAsync(token, env.JWT_SECRET, {}) as jwt.JwtPayload;
 
     const currentUser = await User.findById(decoded.id);
     
     if (!currentUser) {
-      return next(new Error('Authentication error: User not found'));
+      return next({
+        message: 'Authentication error: User not found',
+        code: 401
+      });
     }
 
     // Attach user to socket for later use
@@ -141,6 +150,9 @@ export const socketAuth = async (socket: any, next: any) => {
     next();
   } catch (error) {
     logger.error(`Socket authentication error: ${error}`);
-    next(new Error('Authentication error: Invalid token'));
+    next({
+      message: 'Authentication error',
+      code: 401
+    });
   }
 };

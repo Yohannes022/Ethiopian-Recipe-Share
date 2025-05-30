@@ -1,7 +1,7 @@
 import mongoose, { Schema, Document, Model } from 'mongoose';
-import { IFavorite, IFavoriteMethods, FavoriteModel } from '@/types/favorite.types';
+import { IFavorite, IFavoriteMethods, FavoriteModel, FavoriteType } from '@/types/favorite.types';
 
-const favoriteSchema = new mongoose.Schema<IFavorite, FavoriteModel, IFavoriteMethods>(
+const favoriteSchema = new mongoose.Schema(
   {
     user: {
       type: mongoose.Schema.Types.ObjectId,
@@ -23,13 +23,13 @@ const favoriteSchema = new mongoose.Schema<IFavorite, FavoriteModel, IFavoriteMe
     toJSON: { virtuals: true },
     toObject: { virtuals: true },
   }
-);
+) as Schema<IFavorite, FavoriteModel, IFavoriteMethods>;
 
 // Indexes
 favoriteSchema.index({ user: 1, type: 1, itemId: 1 }, { unique: true });
 
 // Virtual populate
-favoriteSchema.virtual('user', {
+favoriteSchema.virtual('userDetails', {
   ref: 'User',
   localField: 'user',
   foreignField: '_id',
@@ -38,7 +38,10 @@ favoriteSchema.virtual('user', {
 });
 
 favoriteSchema.virtual('item', {
-  refPath: 'type',
+  ref: (doc: IFavorite) => {
+    if (!doc.type) return null;
+    return doc.type === 'recipe' ? 'Recipe' : doc.type === 'restaurant' ? 'Restaurant' : 'Menu';
+  },
   localField: 'itemId',
   foreignField: '_id',
   justOne: true,
@@ -46,7 +49,7 @@ favoriteSchema.virtual('item', {
 });
 
 // Instance methods
-favoriteSchema.methods.updateType = function (newType: string) {
+favoriteSchema.methods.updateType = function (newType: FavoriteType) {
   this.type = newType;
 };
 

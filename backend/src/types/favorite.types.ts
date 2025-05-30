@@ -1,20 +1,32 @@
 import { Document, Model, Types } from 'mongoose';
 
+// Type for the type field
+export type FavoriteType = 'recipe' | 'restaurant' | 'menu';
+
+// Mongoose document interface
 export interface IFavorite extends Document {
   user: Types.ObjectId;
-  type: 'recipe' | 'restaurant' | 'menu';
+  type: FavoriteType;
   itemId: Types.ObjectId;
   createdAt: Date;
 }
 
+// Methods interface
 export interface IFavoriteMethods {
-  updateType(newType: string): void;
+  updateType(newType: FavoriteType): void;
 }
 
+// Model type
 export type FavoriteModel = Model<IFavorite, {}, IFavoriteMethods>;
 
-export interface IFavoriteWithDetails extends IFavorite {
-  user?: {
+// Response interface with enriched data
+export interface IFavoriteResponse {
+  _id: Types.ObjectId;
+  user: Types.ObjectId;
+  type: FavoriteType;
+  itemId: Types.ObjectId;
+  createdAt: Date;
+  userDetails?: {
     name: string;
     photo: string;
   };

@@ -2,8 +2,19 @@ import { IValidationError } from '@/interfaces/error';
 import { Request, Response, NextFunction } from 'express';
 import { ApiError } from './apiError';
 
+// Helper functions
+const isValidEmail = (email: string): boolean => {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(email);
+};
+
+const isValidPassword = (password: string): boolean => {
+  return password.length >= 8;
+};
+
+// Request validation middleware
 export const validateRequest = (req: Request, res: Response, next: NextFunction) => {
-  const errors: IValidationError[] = [];
+  const errors: { field: string; message: string }[] = [];
 
   // Validate required fields
   const requiredFields = ['name', 'email', 'password'];
@@ -33,31 +44,25 @@ export const validateRequest = (req: Request, res: Response, next: NextFunction)
   }
 
   if (errors.length > 0) {
-    throw new ApiError(400, 'Validation failed', errors);
+    throw new ApiError('Validation failed', 400);
   }
 
   next();
 };
 
-const isValidEmail = (email: string): boolean => {
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  return emailRegex.test(email);
-};
-
-const isValidPassword = (password: string): boolean => {
-  return password.length >= 8;
-};
-
+// Pagination validation middleware
 export const validatePagination = (req: Request, res: Response, next: NextFunction) => {
   const { page, limit } = req.query;
 
   if (page && isNaN(Number(page))) {
-    throw new ApiError(400, 'Invalid page number');
+    throw new ApiError('Invalid page number', 400);
   }
 
   if (limit && isNaN(Number(limit))) {
-    throw new ApiError(400, 'Invalid limit number');
+    throw new ApiError('Invalid limit number', 400);
   }
 
   next();
 };
+
+

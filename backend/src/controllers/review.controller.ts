@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import mongoose from 'mongoose';
 import Review from '@/models/Review';
 import Restaurant from '@/models/Restaurant';
-import { BadRequestError, NotFoundError } from '@/utils/apiError';
+import { BadRequestError, ForbiddenError, NotFoundError } from '@/utils/apiError';
 import { IReview } from '@/types/review.types';
 import { protect } from '../middleware/auth';
 
@@ -83,24 +83,32 @@ export const getReviewsByUser = async (req: Request, res: Response, next: NextFu
 // Create new review
 export const createReview = async (req: Request, res: Response, next: NextFunction) => {
   try {
+    const { restaurant, rating, comment } = req.body;
+    const userId = (req as any).user._id;
+
     // Check if user has already reviewed this restaurant
     const existingReview = await Review.findOne({
-      user: req.user._id,
-      restaurant: req.body.restaurant,
+      user: userId,
+      restaurant,
     });
 
     if (existingReview) {
-      throw new BadRequestError('You have already reviewed this restaurant');
+      return next(new BadRequestError('You have already reviewed this restaurant'));
     }
 
-    // Create review
     const review = await Review.create({
-      ...req.body,
-      user: req.user._id,
+      user: userId,
+      restaurant,
+      rating,
+      comment,
     });
 
+    // Populate user and restaurant details
+    await review.populate('user', 'name photo');
+    await review.populate('restaurant', 'name image');
+
     // Update restaurant's rating
-    await updateRestaurantRating(review.restaurant);
+    await updateRestaurantRating(new mongoose.Types.ObjectId(restaurant));
 
     res.status(201).json({
       status: 'success',
@@ -134,35 +142,37 @@ export const getReview = async (req: Request, res: Response, next: NextFunction)
 // Update review
 export const updateReview = async (req: Request, res: Response, next: NextFunction) => {
   try {
+    const { rating, comment } = req.body;
+    const userId = (req as any).user._id;
+    const userRole = (req as any).user.role;
+
     const review = await Review.findById(req.params.id);
 
     if (!review) {
-      throw new NotFoundError('Review not found');
+      return next(new NotFoundError('Review not found'));
     }
 
-    // Check if user owns the review
-    if (!review.user.equals(req.user._id)) {
-      throw new BadRequestError('You do not have permission to update this review');
+    // Check if user is the author or admin
+    if (review.user.toString() !== userId.toString() && userRole !== 'admin') {
+      return next(new ForbiddenError('You are not authorized to update this review'));
     }
 
     // Update review
-    const updatedReview = await Review.findByIdAndUpdate(
-      req.params.id,
-      req.body,
-      {
-        new: true,
-        runValidators: true,
-      }
-    ).populate('user', 'name photo').populate('restaurant', 'name image');
+    if (rating !== undefined) review.rating = rating;
+    if (comment !== undefined) review.comment = comment;
+    
+    await review.save();
 
-    // Update restaurant's rating if rating changed
-    if (req.body.rating !== undefined) {
-      await updateRestaurantRating(review.restaurant);
-    }
+    // Update restaurant's rating
+    await updateRestaurantRating(new mongoose.Types.ObjectId(review.restaurant.toString()));
+
+    // Populate user and restaurant details
+    await review.populate('user', 'name photo');
+    await review.populate('restaurant', 'name image');
 
     res.status(200).json({
       status: 'success',
-      data: updatedReview,
+      data: review,
     });
   } catch (error) {
     next(error);
@@ -173,21 +183,23 @@ export const updateReview = async (req: Request, res: Response, next: NextFuncti
 export const deleteReview = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const review = await Review.findById(req.params.id);
+    const userId = (req as any).user._id;
+    const userRole = (req as any).user.role;
 
     if (!review) {
-      throw new NotFoundError('Review not found');
+      return next(new NotFoundError('Review not found'));
     }
 
-    // Check if user owns the review
-    if (!review.user.equals(req.user._id)) {
-      throw new BadRequestError('You do not have permission to delete this review');
+    // Check if user is the author or admin
+    if (review.user.toString() !== userId.toString() && userRole !== 'admin') {
+      return next(new ForbiddenError('You are not authorized to delete this review'));
     }
 
-    // Delete review
-    await Review.findByIdAndDelete(req.params.id);
+    const restaurantId = new mongoose.Types.ObjectId(review.restaurant.toString());
+    await review.deleteOne();
 
     // Update restaurant's rating
-    await updateRestaurantRating(review.restaurant);
+    await updateRestaurantRating(restaurantId);
 
     res.status(204).json({
       status: 'success',
@@ -234,23 +246,29 @@ const updateRestaurantRating = async (restaurantId: mongoose.Types.ObjectId) => 
 export const likeReview = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const review = await Review.findById(req.params.id);
+    const userId = new mongoose.Types.ObjectId((req as any).user._id);
 
     if (!review) {
-      throw new NotFoundError('Review not found');
+      return next(new NotFoundError('Review not found'));
     }
 
     // Check if user has already liked the review
-    if (review.likes.includes(req.user._id)) {
-      throw new BadRequestError('You have already liked this review');
+    const hasLiked = review.likes.some(id => id.toString() === userId.toString());
+
+    if (hasLiked) {
+      return next(new BadRequestError('You have already liked this review'));
     }
 
     // Add like
-    review.addLike(req.user._id);
+    review.likes.push(userId);
     await review.save();
 
     res.status(200).json({
       status: 'success',
-      data: review,
+      data: {
+        likes: review.likes,
+        likesCount: review.likes.length,
+      },
     });
   } catch (error) {
     next(error);
@@ -261,18 +279,29 @@ export const likeReview = async (req: Request, res: Response, next: NextFunction
 export const unlikeReview = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const review = await Review.findById(req.params.id);
+    const userId = new mongoose.Types.ObjectId((req as any).user._id);
 
     if (!review) {
-      throw new NotFoundError('Review not found');
+      return next(new NotFoundError('Review not found'));
+    }
+
+    // Check if user has liked the review
+    const hasLiked = review.likes.some(id => id.toString() === userId.toString());
+
+    if (!hasLiked) {
+      return next(new BadRequestError('You have not liked this review'));
     }
 
     // Remove like
-    review.removeLike(req.user._id);
+    review.likes = review.likes.filter(id => id.toString() !== userId.toString());
     await review.save();
 
     res.status(200).json({
       status: 'success',
-      data: review,
+      data: {
+        likes: review.likes,
+        likesCount: review.likes.length,
+      },
     });
   } catch (error) {
     next(error);

@@ -1,7 +1,9 @@
 import { Request, Response, NextFunction } from 'express';
 import User from '@/models/User';
+import Review from '@/models/Review';
 import { BadRequestError, NotFoundError } from '@/utils/apiError';
 import { protect, restrictTo } from '../middleware/auth';
+import logger from '@/utils/logger';
 
 // Get all users (admin only)
 export const getAllUsers = async (req: Request, res: Response, next: NextFunction) => {
@@ -100,12 +102,17 @@ export const getMe = async (req: Request, res: Response, next: NextFunction) => 
 // Update current user's profile
 export const updateMe = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const filteredBody = Object.keys(req.body).reduce((acc, key) => {
-      if (key !== 'password' && key !== 'role') {
-        acc[key] = req.body[key];
+    // Create a type for allowed update fields
+    const allowedFields = ['name', 'email', 'photo', 'bio', 'phoneNumber'] as const;
+    type AllowedField = typeof allowedFields[number];
+    
+    const filteredBody: Partial<Record<AllowedField, any>> = {};
+    
+    Object.entries(req.body).forEach(([key, value]) => {
+      if (allowedFields.includes(key as AllowedField)) {
+        filteredBody[key as AllowedField] = value;
       }
-      return acc;
-    }, {});
+    });
 
     const user = await User.findByIdAndUpdate(
       req.user.id,

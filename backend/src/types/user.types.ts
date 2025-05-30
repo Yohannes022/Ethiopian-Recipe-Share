@@ -31,7 +31,7 @@ export interface IUserPreferences {
   favoriteCuisines: string[];
 }
 
-export interface IUser extends Document {
+export interface IUser extends Document<Types.ObjectId> {
   name: string;
   email: string;
   photo?: string;

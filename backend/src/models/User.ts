@@ -176,7 +176,7 @@ userSchema.methods.createPasswordResetToken = function (): string {
     .update(resetToken)
     .digest('hex');
 
-  this.passwordResetExpires = Date.now() + 10 * 60 * 1000; // 10 minutes
+  this.passwordResetExpires = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
 
   return resetToken;
 };
@@ -190,7 +190,7 @@ userSchema.methods.createEmailVerificationToken = function (): string {
     .update(verificationToken)
     .digest('hex');
 
-  this.emailVerificationExpires = Date.now() + 24 * 60 * 60 * 1000; // 24 hours
+  this.emailVerificationExpires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
 
   return verificationToken;
 };

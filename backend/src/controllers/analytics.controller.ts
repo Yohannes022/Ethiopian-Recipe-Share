@@ -5,8 +5,9 @@ import Order from '@/models/Order';
 import Review from '@/models/Review';
 import { BadRequestError } from '@/utils/apiError';
 import { protect, restrictTo } from '../middleware/auth';
+import mongoose from 'mongoose';
 
-// Get user analytics
+  // Get user analytics
 export const getUserAnalytics = async (
   req: Request,
   res: Response,

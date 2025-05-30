@@ -5,14 +5,17 @@ import { promisify } from 'util';
 import User from '@/models/User';
 import Email from '@/utils/email';
 import { createAndSendToken } from '@/utils/token';
+import { env } from '@/config/config';
 import {
   BadRequestError,
   UnauthorizedError,
   NotFoundError,
   ValidationError,
+  ForbiddenError,
 } from '@/utils/apiError';
 import { IUser } from '@/types/user.types';
 import logger from '@/utils/logger';
+import mongoose from 'mongoose';
 
 // Sign up a new user
 export const signup = async (req: Request, res: Response, next: NextFunction) => {
@@ -51,12 +54,17 @@ export const signup = async (req: Request, res: Response, next: NextFunction) =>
     // 5) Generate token and send response
     createAndSendToken(newUser, 201, res);
   } catch (error) {
-    if (error.name === 'ValidationError') {
+    if (error instanceof mongoose.Error.ValidationError) {
       const errors = Object.values(error.errors).map((err: any) => ({
         field: err.path,
         message: err.message,
       }));
-      return next(new ValidationError(errors));
+      // Convert validation errors to a format compatible with ValidationError
+      const formattedErrors = errors.reduce((acc: Record<string, string>, error: any) => {
+        acc[error.field] = error.message;
+        return acc;
+      }, {});
+      return next(new ValidationError(formattedErrors));
     }
     next(error);
   }
@@ -125,7 +133,7 @@ export const protect = async (req: Request, res: Response, next: NextFunction) =
     }
 
     // 2) Verification token
-    const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET as string);
+    const decoded = jwt.verify(token, env.JWT_SECRET) as jwt.JwtPayload;
 
     // 3) Check if user still exists
     const currentUser = await User.findById((decoded as any).id);
@@ -152,7 +160,7 @@ export const restrictTo = (...roles: string[]) => {
   return (req: Request, res: Response, next: NextFunction) => {
     // roles is an array of allowed roles ['admin', 'lead-guide']
     if (!roles.includes(req.user.role)) {
-      throw new ForbiddenError('You do not have permission to perform this action');
+      return next(new ForbiddenError('You do not have permission to perform this action'));
     }
     next();
   };

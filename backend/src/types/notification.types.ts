@@ -1,7 +1,6 @@
 import { Document, Model, Types } from 'mongoose';
 
-export interface INotification extends Document {
-  user: Types.ObjectId;
+export interface INotificationBase {
   type: 'like' | 'comment' | 'follow' | 'review' | 'order' | 'message';
   message: string;
   read: boolean;
@@ -10,15 +9,13 @@ export interface INotification extends Document {
   createdAt: Date;
 }
 
-export interface INotificationMethods {
-  markAsRead(): void;
-  markAsUnread(): void;
+export interface INotification extends Document, INotificationBase {
+  user: Types.ObjectId;
 }
 
-export type NotificationModel = Model<INotification, {}, INotificationMethods>;
-
-export interface INotificationWithDetails extends INotification {
-  user?: {
+export interface INotificationWithDetails extends INotificationBase {
+  user: Types.ObjectId;
+  userDetails?: {
     name: string;
     photo: string;
   };
@@ -28,3 +25,10 @@ export interface INotificationWithDetails extends INotification {
     image?: string;
   };
 }
+
+export interface INotificationMethods {
+  markAsRead(): void;
+  markAsUnread(): void;
+}
+
+export type NotificationModel = Model<INotification, {}, INotificationMethods>;

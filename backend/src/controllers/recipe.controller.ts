@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
-import mongoose from 'mongoose';
-import Recipe from '@/models/Recipe';
+import mongoose, { Types } from 'mongoose';
+import { Recipe } from '@/models/Recipe';
 import { BadRequestError, NotFoundError } from '@/utils/apiError';
 import { IRecipe, IRecipeVirtuals } from '@/types/recipe.types';
 import { protect, restrictTo } from '../middleware/auth';
@@ -132,7 +132,8 @@ export const updateRecipe = async (req: Request, res: Response, next: NextFuncti
     }
 
     // Check if user is owner or admin
-    if (!recipe.user.equals(req.user._id) && req.user.role !== 'admin') {
+    const recipeObj = recipe.toObject();
+    if ((!recipeObj.author || recipeObj.author.toString() !== req.user._id) && req.user.role !== 'admin') {
       throw new BadRequestError('You do not have permission to update this recipe');
     }
 
@@ -147,7 +148,6 @@ export const updateRecipe = async (req: Request, res: Response, next: NextFuncti
     ).populate('user', 'name photo')
      .populate('category', 'name');
 
-    // Since we've populated the virtuals, we can safely cast to IRecipeVirtuals
     res.status(200).json({
       status: 'success',
       data: updatedRecipe
@@ -167,7 +167,8 @@ export const deleteRecipe = async (req: Request, res: Response, next: NextFuncti
     }
 
     // Check if user is owner or admin
-    if (!recipe.user.equals(req.user._id) && req.user.role !== 'admin') {
+    const recipeObj = recipe.toObject();
+    if ((!recipeObj.author || recipeObj.author.toString() !== req.user._id) && req.user.role !== 'admin') {
       throw new BadRequestError('You do not have permission to delete this recipe');
     }
 
@@ -247,31 +248,33 @@ export const getRecipesByUser = async (req: Request, res: Response, next: NextFu
 export const likeRecipe = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const recipe = await Recipe.findById(req.params.id);
-
     if (!recipe) {
-      throw new NotFoundError('Recipe not found');
+      return next(new NotFoundError('No recipe found with that ID'));
     }
 
-    // Check if user has already liked
-    if (recipe.likes.includes(req.user._id)) {
-      // Remove like
-      recipe.removeLike(req.user._id);
-      await recipe.save();
-      res.status(200).json({
-        status: 'success',
-        message: 'Recipe unliked',
-        data: recipe,
-      });
+    // Get user ID from authenticated request
+    const userId = new mongoose.Types.ObjectId((req as any).user.id);
+    const hasLiked = recipe.likes.some(id => id.toString() === userId.toString());
+
+    if (hasLiked) {
+      await recipe.removeLike(userId);
     } else {
-      // Add like
-      recipe.addLike(req.user._id);
-      await recipe.save();
-      res.status(200).json({
-        status: 'success',
-        message: 'Recipe liked',
-        data: recipe,
-      });
+      await recipe.addLike(userId);
     }
+
+    // Populate likes with user details
+    await recipe.populate({
+      path: 'likes',
+      select: 'name photo',
+    });
+
+    res.status(200).json({
+      status: 'success',
+      data: {
+        likes: recipe.likes,
+        likesCount: recipe.likes.length,
+      },
+    });
   } catch (error) {
     next(error);
   }
@@ -280,19 +283,25 @@ export const likeRecipe = async (req: Request, res: Response, next: NextFunction
 // Comment on recipe
 export const commentOnRecipe = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const recipe = await Recipe.findById(req.params.id);
-
-    if (!recipe) {
-      throw new NotFoundError('Recipe not found');
+    const { content } = req.body;
+    if (!content) {
+      return next(new BadRequestError('Please provide comment content'));
     }
 
-    // Add comment
-    recipe.addComment(req.user._id, req.body.content);
-    await recipe.save();
+    const recipe = await Recipe.findById(req.params.id);
+    if (!recipe) {
+      return next(new NotFoundError('No recipe found with that ID'));
+    }
+
+    // Get user ID from authenticated request
+    const userId = new mongoose.Types.ObjectId((req as any).user.id);
+    await recipe.addComment({ user: userId, text: content });
 
     res.status(201).json({
       status: 'success',
-      data: recipe,
+      data: {
+        comments: recipe.comments,
+      },
     });
   } catch (error) {
     next(error);

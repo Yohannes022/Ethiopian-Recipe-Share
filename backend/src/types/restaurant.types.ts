@@ -1,5 +1,6 @@
 import { Document, Model, Types } from 'mongoose';
 import { IMenuItem } from './menuItem.types';
+import { IReview } from './review.types';
 
 export interface IOpeningHours {
   opens: string;
@@ -33,14 +34,24 @@ export interface IRestaurant extends Document {
     instagram?: string;
   };
   menu: Types.ObjectId[];
-  images: string[];
-  video?: string;
-  rating: number;
   reviews: Types.ObjectId[];
-  featured: boolean;
-  private: boolean;
+  rating: number;
+  images: string[];
+  videos: string[];
   createdAt: Date;
   updatedAt: Date;
+}
+
+// Virtual properties
+export interface IRestaurantVirtuals {
+  owner?: {
+    name: string;
+    photo: string;
+  };
+  category?: {
+    name: string;
+  };
+  reviews?: IReview[];
 }
 
 // Virtual properties

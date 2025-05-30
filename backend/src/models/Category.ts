@@ -63,9 +63,11 @@ categorySchema.methods.updateImage = function (newImage: string) {
 // Pre-save middleware to ensure parent category exists
 categorySchema.pre('save', async function (next) {
   if (this.parent) {
-    const parent = await this.constructor.findById(this.parent);
+    const CategoryModel = this.constructor as Model<ICategory>;
+    const parent = await CategoryModel.findById(this.parent);
     if (!parent) {
-      throw new Error('Parent category does not exist');
+      const error = new Error('Parent category does not exist');
+      return next(error);
     }
   }
   next();

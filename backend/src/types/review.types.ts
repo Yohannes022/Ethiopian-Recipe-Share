@@ -1,7 +1,6 @@
 import { Document, Model, Types } from 'mongoose';
 
-export interface IReview extends Document {
-  user: Types.ObjectId;
+export interface IReviewBase {
   restaurant: Types.ObjectId;
   rating: number;
   comment: string;
@@ -11,6 +10,21 @@ export interface IReview extends Document {
   updatedAt: Date;
 }
 
+export interface IReview extends Document, IReviewBase {
+  user: Types.ObjectId;
+}
+
+export interface IReviewWithDetails extends IReview {
+  userDetails?: {
+    name: string;
+    photo: string;
+  };
+  restaurantDetails?: {
+    name: string;
+    image: string;
+  };
+}
+
 export interface IReviewMethods {
   updateRating(newRating: number): void;
   addLike(userId: Types.ObjectId): void;
@@ -18,14 +32,3 @@ export interface IReviewMethods {
 }
 
 export type ReviewModel = Model<IReview, {}, IReviewMethods>;
-
-export interface IReviewWithDetails extends IReview {
-  user?: {
-    name: string;
-    photo: string;
-  };
-  restaurant?: {
-    name: string;
-    image: string;
-  };
-}

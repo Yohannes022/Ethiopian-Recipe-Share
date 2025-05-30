@@ -1,7 +1,12 @@
-import { IApiResponse, IErrorResponse } from '@/interfaces';
+import { IResponse } from '@/interfaces/common';
+import { IPagination } from '@/interfaces/common';
+
+interface IErrorResponse extends IResponse<null> {
+  details?: any;
+}
 
 export class ApiResponse {
-  static success<T>(data: T, message?: string): IApiResponse<T> {
+  static success<T>(data: T, message?: string): IResponse<T> {
     return {
       status: 'success',
       message: message || 'Request successful',
@@ -14,6 +19,7 @@ export class ApiResponse {
       status: 'error',
       message: error,
       details,
+      data: null
     };
   }
 
@@ -22,7 +28,7 @@ export class ApiResponse {
     page: number,
     limit: number,
     total: number
-  ): IApiResponse<T[]> {
+  ): IResponse<T[]> & { pagination: IPagination } {
     return {
       status: 'success',
       message: 'Request successful',
@@ -31,7 +37,8 @@ export class ApiResponse {
         page,
         limit,
         total,
-        totalPages: Math.ceil(total / limit),
+        pages: Math.ceil(total / limit),
+        results: data.length
       },
     };
   }

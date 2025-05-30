@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { protect } from '../middleware/auth';
-import { uploadSingle, uploadMultiple, validateUpload } from '../middleware/upload';
+import { uploadSingle, uploadMultiple, validateUpload } from '../middleware/upload.controller';
+import { deleteFile } from '../controllers/upload.controller';
 import { BadRequestError } from '../utils/apiError';
 
 const router = Router();

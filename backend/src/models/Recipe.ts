@@ -1,281 +1,201 @@
-import mongoose, { Schema, Document, Model } from 'mongoose';
-import { IRecipe, IRecipeMethods, RecipeModel } from '@/types/recipe.types';
+import { Schema, model, Document, Model, Types } from 'mongoose';
+import { IUser, IUserMethods, UserModel } from '@/types/user.types';
 
-const recipeSchema = new mongoose.Schema<IRecipe, RecipeModel, IRecipeMethods>(
+export interface IRecipeMethods {
+  updateViews(): Promise<void>;
+  addLike(userId: Types.ObjectId): Promise<IRecipe>;
+  removeLike(userId: Types.ObjectId): Promise<IRecipe>;
+  addComment(comment: { user: Types.ObjectId | IUser; text: string }): Promise<IRecipe>;
+}
+
+export interface IRecipe extends Document, IRecipeMethods {
+  title: string;
+  description: string;
+  ingredients: string[];
+  instructions: string[];
+  prepTime: number;
+  cookTime: number;
+  servings: number;
+  difficulty: 'easy' | 'medium' | 'hard';
+  cuisine: string;
+  categories: string[];
+  image?: string;
+  video?: string;
+  author: Types.ObjectId | IUser;
+  likes: Types.ObjectId[];
+  comments: Array<{
+    user: Types.ObjectId | IUser;
+    text: string;
+    createdAt: Date;
+  }>;
+  views: number;
+  isPublished: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+type RecipeModel = Model<IRecipe, {}, IRecipeMethods>;
+
+const RecipeSchema = new Schema<IRecipe, RecipeModel, IRecipeMethods>(
   {
     title: {
       type: String,
-      required: [true, 'Recipe must have a title'],
+      required: [true, 'Please provide a recipe title'],
       trim: true,
-      maxlength: [100, 'Recipe title must be less than 100 characters'],
+      maxlength: [100, 'Title cannot be more than 100 characters'],
     },
     description: {
       type: String,
-      required: [true, 'Recipe must have a description'],
+      required: [true, 'Please provide a recipe description'],
       trim: true,
     },
-    preparationTime: {
-      type: Number,
-      required: [true, 'Recipe must have preparation time'],
-      min: [1, 'Preparation time must be at least 1 minute'],
+    ingredients: {
+      type: [String],
+      required: [true, 'Please provide recipe ingredients'],
+      validate: {
+        validator: function (v: string[]) {
+          return v.length > 0;
+        },
+        message: 'Please provide at least one ingredient',
+      },
     },
-    cookingTime: {
+    instructions: {
+      type: [String],
+      required: [true, 'Please provide recipe instructions'],
+      validate: {
+        validator: function (v: string[]) {
+          return v.length > 0;
+        },
+        message: 'Please provide at least one instruction',
+      },
+    },
+    prepTime: {
       type: Number,
-      required: [true, 'Recipe must have cooking time'],
-      min: [1, 'Cooking time must be at least 1 minute'],
+      required: [true, 'Please provide preparation time'],
+      min: [0, 'Preparation time cannot be negative'],
+    },
+    cookTime: {
+      type: Number,
+      required: [true, 'Please provide cooking time'],
+      min: [0, 'Cooking time cannot be negative'],
     },
     servings: {
       type: Number,
-      required: [true, 'Recipe must have number of servings'],
-      min: [1, 'Number of servings must be at least 1'],
+      required: [true, 'Please provide number of servings'],
+      min: [1, 'Servings must be at least 1'],
     },
     difficulty: {
       type: String,
-      enum: ['easy', 'medium', 'hard'],
-      required: [true, 'Recipe must have a difficulty level'],
+      required: [true, 'Please provide difficulty level'],
+      enum: {
+        values: ['easy', 'medium', 'hard'],
+        message: 'Difficulty must be easy, medium, or hard',
+      },
     },
     cuisine: {
       type: String,
-      required: [true, 'Recipe must have a cuisine type'],
+      required: [true, 'Please provide cuisine type'],
       trim: true,
     },
-    category: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Category',
-      required: [true, 'Recipe must belong to a category'],
-    },
-    ingredients: [{
-      name: {
-        type: String,
-        required: [true, 'Ingredient must have a name'],
-        trim: true,
-      },
-      quantity: {
-        type: String,
-        required: [true, 'Ingredient must have a quantity'],
-        trim: true,
-      },
-      unit: {
-        type: String,
-        required: [true, 'Ingredient must have a unit'],
-        trim: true,
-      },
-      notes: {
-        type: String,
-        trim: true,
-      },
-    }],
-    instructions: [{
-      step: {
-        type: Number,
-        required: [true, 'Instruction must have a step number'],
-      },
-      description: {
-        type: String,
-        required: [true, 'Instruction must have a description'],
-        trim: true,
-      },
-      time: {
-        type: String,
-        trim: true,
-      },
-      image: {
-        type: String,
-        trim: true,
-      },
-    }],
-    nutrition: {
-      calories: {
-        type: Number,
-        required: [true, 'Recipe must have calorie information'],
-        min: [0, 'Calories cannot be negative'],
-      },
-      protein: {
-        type: Number,
-        required: [true, 'Recipe must have protein information'],
-        min: [0, 'Protein cannot be negative'],
-      },
-      fat: {
-        type: Number,
-        required: [true, 'Recipe must have fat information'],
-        min: [0, 'Fat cannot be negative'],
-      },
-      carbohydrates: {
-        type: Number,
-        required: [true, 'Recipe must have carbohydrate information'],
-        min: [0, 'Carbohydrates cannot be negative'],
-      },
-      fiber: {
-        type: Number,
-        required: [true, 'Recipe must have fiber information'],
-        min: [0, 'Fiber cannot be negative'],
-      },
-      sugar: {
-        type: Number,
-        required: [true, 'Recipe must have sugar information'],
-        min: [0, 'Sugar cannot be negative'],
+    categories: {
+      type: [String],
+      required: [true, 'Please provide at least one category'],
+      validate: {
+        validator: function (v: string[]) {
+          return v.length > 0;
+        },
+        message: 'Please provide at least one category',
       },
     },
     image: {
       type: String,
-      required: [true, 'Recipe must have an image'],
-      trim: true,
+      default: 'default.jpg',
     },
-    video: {
-      type: String,
-      trim: true,
-    },
-    tags: [{
-      name: {
-        type: String,
-        required: [true, 'Tag must have a name'],
-        trim: true,
-      },
-      type: {
-        type: String,
-        enum: ['cuisine', 'diet', 'occasion', 'difficulty'],
-        required: [true, 'Tag must have a type'],
-      },
-    }],
-    user: {
-      type: mongoose.Schema.Types.ObjectId,
+    video: String,
+    author: {
+      type: Schema.Types.ObjectId,
       ref: 'User',
-      required: [true, 'Recipe must belong to a user'],
+      required: [true, 'Please provide an author'],
     },
-    likes: [{
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
-    }],
-    comments: [{
-      user: {
-        type: mongoose.Schema.Types.ObjectId,
+    likes: [
+      {
+        type: Schema.Types.ObjectId,
         ref: 'User',
-        required: true,
       },
-      content: {
-        type: String,
-        required: [true, 'Comment must have content'],
-        trim: true,
+    ],
+    comments: [
+      {
+        user: {
+          type: Schema.Types.ObjectId,
+          ref: 'User',
+          required: true,
+        },
+        text: {
+          type: String,
+          required: [true, 'Please provide comment text'],
+          trim: true,
+        },
+        createdAt: {
+          type: Date,
+          default: Date.now,
+        },
       },
-      likes: [{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'User',
-      }],
-      createdAt: {
-        type: Date,
-        default: Date.now,
-      },
-      updatedAt: {
-        type: Date,
-        default: Date.now,
-      },
-    }],
+    ],
     views: {
       type: Number,
       default: 0,
     },
-    rating: {
-      type: Number,
-      default: 0,
-      min: [0, 'Rating cannot be negative'],
-      max: [5, 'Rating cannot be more than 5'],
-    },
-    reviews: [{
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Review',
-    }],
-    featured: {
-      type: Boolean,
-      default: false,
-    },
-    private: {
+    isPublished: {
       type: Boolean,
       default: false,
     },
   },
   {
     timestamps: true,
-    toJSON: { virtuals: true },
-    toObject: { virtuals: true },
   }
 );
 
-// Indexes
-recipeSchema.index({ title: 'text', description: 'text', cuisine: 'text' });
-recipeSchema.index({ category: 1 });
-recipeSchema.index({ user: 1 });
-recipeSchema.index({ rating: -1 });
-recipeSchema.index({ createdAt: -1 });
-recipeSchema.index({ featured: 1 });
+// Create text index for search
+RecipeSchema.index({ title: 'text', description: 'text', ingredients: 'text' });
 
-// Virtual populate
-recipeSchema.virtual('user', {
-  ref: 'User',
-  localField: 'user',
-  foreignField: '_id',
-  justOne: true,
-  select: 'name photo',
-});
-
-recipeSchema.virtual('category', {
-  ref: 'Category',
-  localField: 'category',
-  foreignField: '_id',
-  justOne: true,
-  select: 'name',
-});
-
-// Instance methods
-recipeSchema.methods.calculateRating = function () {
-  if (this.reviews.length === 0) {
-    this.rating = 0;
-    return;
-  }
-
-  const totalRating = this.reviews.reduce((sum, reviewId) => {
-    return sum + (reviewId.rating || 0);
-  }, 0);
-
-  this.rating = totalRating / this.reviews.length;
-};
-
-recipeSchema.methods.updateViews = function () {
+// Add methods to the schema
+RecipeSchema.methods.updateViews = async function (): Promise<void> {
   this.views += 1;
+  await this.save();
 };
 
-recipeSchema.methods.addLike = function (userId: mongoose.Types.ObjectId) {
-  if (!this.likes.includes(userId)) {
+RecipeSchema.methods.addLike = async function (userId: Types.ObjectId): Promise<IRecipe> {
+  const userIdStr = userId.toString();
+  const hasLiked = this.likes.some((id: Types.ObjectId) => id.toString() === userIdStr);
+  
+  if (!hasLiked) {
     this.likes.push(userId);
+    await this.save();
   }
+  return this;
 };
 
-recipeSchema.methods.removeLike = function (userId: mongoose.Types.ObjectId) {
-  this.likes = this.likes.filter((like) => !like.equals(userId));
+RecipeSchema.methods.removeLike = async function (userId: Types.ObjectId): Promise<IRecipe> {
+  const userIdStr = userId.toString();
+  this.likes = this.likes.filter((id: Types.ObjectId) => id.toString() !== userIdStr);
+  await this.save();
+  return this;
 };
 
-recipeSchema.methods.addComment = function (
-  userId: mongoose.Types.ObjectId,
-  content: string
-) {
-  const comment = {
-    user: userId,
-    content,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  };
-  this.comments.push(comment);
+RecipeSchema.methods.addComment = async function (comment: { 
+  user: Types.ObjectId | IUser; 
+  text: string 
+}): Promise<IRecipe> {
+  this.comments.push({
+    user: comment.user,
+    text: comment.text,
+    createdAt: new Date()
+  });
+  await this.save();
+  return this;
 };
-
-recipeSchema.methods.removeComment = function (commentId: mongoose.Types.ObjectId) {
-  this.comments = this.comments.filter((comment) => !comment._id.equals(commentId));
-};
-
-// Pre-save middleware to calculate rating before saving
-recipeSchema.pre('save', function (next) {
-  this.calculateRating();
-  next();
-});
 
 // Create and export the model
-const Recipe = mongoose.model<IRecipe, RecipeModel>('Recipe', recipeSchema);
-export default Recipe;
+const Recipe = model<IRecipe, RecipeModel>('Recipe', RecipeSchema);
+
+export { Recipe };

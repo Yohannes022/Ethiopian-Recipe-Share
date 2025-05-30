@@ -3,13 +3,13 @@ import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
 import rateLimit from 'express-rate-limit';
+import { errorHandler } from '@/middleware/errorHandler';
 import mongoSanitize from 'express-mongo-sanitize';
 import hpp from 'hpp';
 import cookieParser from 'cookie-parser';
 import compression from 'compression';
 import { createServer } from 'http';
 import { Server } from 'socket.io';
-import { errorHandler } from '@/middleware/errorHandler';
 import { NotFoundError } from '@/utils/apiError';
 import routes from '@/routes';
 import logger from '@/utils/logger';
@@ -101,8 +101,10 @@ app.all('*', (req: Request, res: Response, next: NextFunction) => {
   next(new NotFoundError(`Can't find ${req.originalUrl} on this server!`));
 });
 
-// Error handling middleware
-app.use(errorHandler);
+// Error handling middleware must be defined after all other middleware and routes
+app.use((err: any, req: Request, res: Response, next: NextFunction) => {
+  errorHandler(err, req, res, next);
+});
 
 // Set io instance to be used in routes
 app.set('io', io);

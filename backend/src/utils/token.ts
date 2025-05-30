@@ -1,19 +1,46 @@
 import { Response } from 'express';
 import jwt from 'jsonwebtoken';
 import { IUser } from '@/types/user.types';
+import { env } from '@/config/config';
+import { SignOptions } from 'jsonwebtoken';
+
+// Type assertion for JWT environment variables
+const jwtConfig = {
+  JWT_SECRET: env.JWT_SECRET,
+  JWT_EXPIRES_IN: env.JWT_EXPIRES_IN as string,
+  JWT_REFRESH_SECRET: env.JWT_REFRESH_SECRET,
+  JWT_REFRESH_EXPIRES_IN: env.JWT_REFRESH_EXPIRES_IN as string,
+  JWT_COOKIE_EXPIRES_IN: env.JWT_COOKIE_EXPIRES_IN,
+};
+
+// Type for JWT expiration time
+type JWTExpiration = string | number | undefined;
+
+// Validate configuration
+if (!jwtConfig.JWT_SECRET || !jwtConfig.JWT_EXPIRES_IN || !jwtConfig.JWT_REFRESH_SECRET || !jwtConfig.JWT_REFRESH_EXPIRES_IN || !jwtConfig.JWT_COOKIE_EXPIRES_IN) {
+  throw new Error('JWT configuration is missing required environment variables');
+}
 
 // Sign JWT token
 const signToken = (id: string): string => {
-  return jwt.sign({ id }, process.env.JWT_SECRET as string, {
-    expiresIn: process.env.JWT_EXPIRES_IN,
-  });
+  if (!jwtConfig.JWT_SECRET || !jwtConfig.JWT_EXPIRES_IN) {
+    throw new Error('JWT configuration is missing required environment variables');
+  }
+  const options = {
+    expiresIn: jwtConfig.JWT_EXPIRES_IN,
+  } as SignOptions;
+  return jwt.sign({ id }, jwtConfig.JWT_SECRET, options);
 };
 
 // Sign refresh token
 const signRefreshToken = (id: string): string => {
-  return jwt.sign({ id }, process.env.JWT_REFRESH_SECRET as string, {
-    expiresIn: process.env.JWT_REFRESH_EXPIRES_IN,
-  });
+  if (!jwtConfig.JWT_REFRESH_SECRET || !jwtConfig.JWT_REFRESH_EXPIRES_IN) {
+    throw new Error('JWT refresh token configuration is missing required environment variables');
+  }
+  const options = {
+    expiresIn: jwtConfig.JWT_REFRESH_EXPIRES_IN,
+  } as SignOptions;
+  return jwt.sign({ id }, jwtConfig.JWT_REFRESH_SECRET, options);
 };
 
 // Create and send token, create cookie and send response
@@ -22,8 +49,10 @@ export const createAndSendToken = (
   statusCode: number,
   res: Response
 ): void => {
-  const token = signToken(user._id);
-  const refreshToken = signRefreshToken(user._id);
+  // Ensure user._id is converted to string if it's an ObjectId
+  const userId = user._id.toString();
+  const token = signToken(userId);
+  const refreshToken = signRefreshToken(userId);
 
   // Remove password from output
   user.password = undefined as any;
@@ -31,10 +60,10 @@ export const createAndSendToken = (
   // Cookie options
   const cookieOptions = {
     expires: new Date(
-      Date.now() + Number(process.env.JWT_COOKIE_EXPIRES_IN) * 24 * 60 * 60 * 1000
+      Date.now() + Number(env.JWT_COOKIE_EXPIRES_IN) * 24 * 60 * 60 * 1000
     ),
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production', // Only send over HTTPS in production
+    secure: env.NODE_ENV === 'production', // Only send over HTTPS in production
     sameSite: 'lax' as const, // Protection against CSRF attacks
   };
 
@@ -60,7 +89,7 @@ export const createAndSendToken = (
 // Verify JWT token
 export const verifyToken = (token: string): Promise<any> => {
   return new Promise((resolve, reject) => {
-    jwt.verify(token, process.env.JWT_SECRET as string, (err, decoded) => {
+    jwt.verify(token, jwtConfig.JWT_SECRET, (err, decoded) => {
       if (err) return reject(err);
       resolve(decoded);
     });
@@ -70,7 +99,7 @@ export const verifyToken = (token: string): Promise<any> => {
 // Verify refresh token
 export const verifyRefreshToken = (token: string): Promise<any> => {
   return new Promise((resolve, reject) => {
-    jwt.verify(token, process.env.JWT_REFRESH_SECRET as string, (err, decoded) => {
+    jwt.verify(token, jwtConfig.JWT_REFRESH_SECRET, (err, decoded) => {
       if (err) return reject(err);
       resolve(decoded);
     });
