@@ -4,7 +4,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.commentOnRecipe = exports.likeRecipe = exports.getRecipesByUser = exports.deleteRecipe = exports.updateRecipe = exports.getRecipe = exports.createRecipe = exports.getAllRecipes = void 0;
-const Recipe_1 = __importDefault(require("@/models/Recipe"));
+const mongoose_1 = __importDefault(require("mongoose"));
+const Recipe_1 = require("@/models/Recipe");
 const apiError_1 = require("@/utils/apiError");
 // Get all recipes with filters
 const getAllRecipes = async (req, res, next) => {
@@ -52,9 +53,9 @@ const getAllRecipes = async (req, res, next) => {
         // Pagination
         const skip = (Number(page) - 1) * Number(limit);
         // Get total count
-        const total = await Recipe_1.default.countDocuments(query);
+        const total = await Recipe_1.Recipe.countDocuments(query);
         // Get recipes
-        const recipes = await Recipe_1.default.find(query)
+        const recipes = await Recipe_1.Recipe.find(query)
             .sort(sortOptions)
             .skip(skip)
             .limit(Number(limit))
@@ -77,7 +78,7 @@ exports.getAllRecipes = getAllRecipes;
 // Create new recipe
 const createRecipe = async (req, res, next) => {
     try {
-        const recipe = await Recipe_1.default.create({
+        const recipe = await Recipe_1.Recipe.create({
             ...req.body,
             user: req.user._id,
         });
@@ -94,7 +95,7 @@ exports.createRecipe = createRecipe;
 // Get recipe by ID
 const getRecipe = async (req, res, next) => {
     try {
-        const recipe = await Recipe_1.default.findById(req.params.id)
+        const recipe = await Recipe_1.Recipe.findById(req.params.id)
             .populate('user', 'name photo')
             .populate('category', 'name')
             .populate('reviews', 'rating comment user')
@@ -119,21 +120,21 @@ exports.getRecipe = getRecipe;
 const updateRecipe = async (req, res, next) => {
     try {
         // First get the recipe to check ownership
-        const recipe = await Recipe_1.default.findById(req.params.id);
+        const recipe = await Recipe_1.Recipe.findById(req.params.id);
         if (!recipe) {
             throw new apiError_1.NotFoundError('Recipe not found');
         }
         // Check if user is owner or admin
-        if (!recipe.user.equals(req.user._id) && req.user.role !== 'admin') {
+        const recipeObj = recipe.toObject();
+        if ((!recipeObj.author || recipeObj.author.toString() !== req.user._id) && req.user.role !== 'admin') {
             throw new apiError_1.BadRequestError('You do not have permission to update this recipe');
         }
         // Update recipe and populate virtuals in one query
-        const updatedRecipe = await Recipe_1.default.findByIdAndUpdate(req.params.id, req.body, {
+        const updatedRecipe = await Recipe_1.Recipe.findByIdAndUpdate(req.params.id, req.body, {
             new: true,
             runValidators: true
         }).populate('user', 'name photo')
             .populate('category', 'name');
-        // Since we've populated the virtuals, we can safely cast to IRecipeVirtuals
         res.status(200).json({
             status: 'success',
             data: updatedRecipe
@@ -147,12 +148,13 @@ exports.updateRecipe = updateRecipe;
 // Delete recipe
 const deleteRecipe = async (req, res, next) => {
     try {
-        const recipe = await Recipe_1.default.findById(req.params.id);
+        const recipe = await Recipe_1.Recipe.findById(req.params.id);
         if (!recipe) {
             throw new apiError_1.NotFoundError('Recipe not found');
         }
         // Check if user is owner or admin
-        if (!recipe.user.equals(req.user._id) && req.user.role !== 'admin') {
+        const recipeObj = recipe.toObject();
+        if ((!recipeObj.author || recipeObj.author.toString() !== req.user._id) && req.user.role !== 'admin') {
             throw new apiError_1.BadRequestError('You do not have permission to delete this recipe');
         }
         // Delete recipe
@@ -206,7 +208,7 @@ exports.deleteRecipe = deleteRecipe;
 // Get recipes by user
 const getRecipesByUser = async (req, res, next) => {
     try {
-        const recipes = await Recipe_1.default.find({ user: req.params.userId })
+        const recipes = await Recipe_1.Recipe.find({ user: req.params.userId })
             .sort({ createdAt: -1 })
             .populate('user', 'name photo')
             .populate('category', 'name');
@@ -224,31 +226,31 @@ exports.getRecipesByUser = getRecipesByUser;
 // Like recipe
 const likeRecipe = async (req, res, next) => {
     try {
-        const recipe = await Recipe_1.default.findById(req.params.id);
+        const recipe = await Recipe_1.Recipe.findById(req.params.id);
         if (!recipe) {
-            throw new apiError_1.NotFoundError('Recipe not found');
+            return next(new apiError_1.NotFoundError('No recipe found with that ID'));
         }
-        // Check if user has already liked
-        if (recipe.likes.includes(req.user._id)) {
-            // Remove like
-            recipe.removeLike(req.user._id);
-            await recipe.save();
-            res.status(200).json({
-                status: 'success',
-                message: 'Recipe unliked',
-                data: recipe,
-            });
+        // Get user ID from authenticated request
+        const userId = new mongoose_1.default.Types.ObjectId(req.user.id);
+        const hasLiked = recipe.likes.some(id => id.toString() === userId.toString());
+        if (hasLiked) {
+            await recipe.removeLike(userId);
         }
         else {
-            // Add like
-            recipe.addLike(req.user._id);
-            await recipe.save();
-            res.status(200).json({
-                status: 'success',
-                message: 'Recipe liked',
-                data: recipe,
-            });
+            await recipe.addLike(userId);
         }
+        // Populate likes with user details
+        await recipe.populate({
+            path: 'likes',
+            select: 'name photo',
+        });
+        res.status(200).json({
+            status: 'success',
+            data: {
+                likes: recipe.likes,
+                likesCount: recipe.likes.length,
+            },
+        });
     }
     catch (error) {
         next(error);
@@ -258,16 +260,22 @@ exports.likeRecipe = likeRecipe;
 // Comment on recipe
 const commentOnRecipe = async (req, res, next) => {
     try {
-        const recipe = await Recipe_1.default.findById(req.params.id);
-        if (!recipe) {
-            throw new apiError_1.NotFoundError('Recipe not found');
+        const { content } = req.body;
+        if (!content) {
+            return next(new apiError_1.BadRequestError('Please provide comment content'));
         }
-        // Add comment
-        recipe.addComment(req.user._id, req.body.content);
-        await recipe.save();
+        const recipe = await Recipe_1.Recipe.findById(req.params.id);
+        if (!recipe) {
+            return next(new apiError_1.NotFoundError('No recipe found with that ID'));
+        }
+        // Get user ID from authenticated request
+        const userId = new mongoose_1.default.Types.ObjectId(req.user.id);
+        await recipe.addComment({ user: userId, text: content });
         res.status(201).json({
             status: 'success',
-            data: recipe,
+            data: {
+                comments: recipe.comments,
+            },
         });
     }
     catch (error) {

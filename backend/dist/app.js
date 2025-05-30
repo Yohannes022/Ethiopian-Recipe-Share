@@ -18,6 +18,7 @@ const http_1 = require("http");
 const socket_io_1 = require("socket.io");
 const apiError_1 = require("@/utils/apiError");
 const routes_1 = __importDefault(require("@/routes"));
+const logger_1 = require("@/utils/logger");
 const passport_1 = require("@/config/passport");
 const cors_2 = require("@/config/cors");
 const app = (0, express_1.default)();
@@ -40,9 +41,12 @@ app.set('trust proxy', 1);
 app.use((0, cors_1.default)(cors_2.corsOptions));
 // Set security HTTP headers
 app.use((0, helmet_1.default)());
-// Development logging
+// HTTP request logging
 if (process.env.NODE_ENV === 'development') {
-    app.use((0, morgan_1.default)('dev'));
+    app.use((0, morgan_1.default)('dev', { stream: logger_1.stream }));
+}
+else {
+    app.use((0, morgan_1.default)('combined', { stream: logger_1.stream }));
 }
 // Body parser, reading data from body into req.body
 app.use(express_1.default.json({ limit: '10kb' }));
@@ -85,8 +89,10 @@ app.get('/health', (req, res) => {
 app.all('*', (req, res, next) => {
     next(new apiError_1.NotFoundError(`Can't find ${req.originalUrl} on this server!`));
 });
-// Error handling middleware
-app.use(errorHandler_1.errorHandler);
+// Error handling middleware must be defined after all other middleware and routes
+app.use((err, req, res, next) => {
+    (0, errorHandler_1.errorHandler)(err, req, res, next);
+});
 // Set io instance to be used in routes
 app.set('io', io);
 exports.default = app;

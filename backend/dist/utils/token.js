@@ -40,8 +40,10 @@ const signRefreshToken = (id) => {
 };
 // Create and send token, create cookie and send response
 const createAndSendToken = (user, statusCode, res) => {
-    const token = signToken(user._id);
-    const refreshToken = signRefreshToken(user._id);
+    // Ensure user._id is converted to string if it's an ObjectId
+    const userId = user._id.toString();
+    const token = signToken(userId);
+    const refreshToken = signRefreshToken(userId);
     // Remove password from output
     user.password = undefined;
     // Cookie options

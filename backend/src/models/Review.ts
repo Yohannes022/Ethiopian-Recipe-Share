@@ -1,7 +1,8 @@
 import mongoose, { Schema, Document, Model } from 'mongoose';
-import { IReview, IReviewMethods, ReviewModel } from '@/types/review.types';
+import { IReview, IReviewMethods, IReviewWithDetails, ReviewModel } from '@/types/review.types';
 
-const reviewSchema = new mongoose.Schema<IReview, ReviewModel, IReviewMethods>(
+// Define the schema with proper type parameters
+const reviewSchema = new mongoose.Schema<IReview, ReviewModel, IReviewMethods, {}, IReviewWithDetails>(
   {
     user: {
       type: mongoose.Schema.Types.ObjectId,
@@ -46,8 +47,8 @@ reviewSchema.index({ user: 1, restaurant: 1 });
 reviewSchema.index({ rating: -1 });
 reviewSchema.index({ createdAt: -1 });
 
-// Virtual populate
-reviewSchema.virtual('user', {
+// Virtual populate for user details
+reviewSchema.virtual('userDetails', {
   ref: 'User',
   localField: 'user',
   foreignField: '_id',
@@ -55,7 +56,8 @@ reviewSchema.virtual('user', {
   select: 'name photo',
 });
 
-reviewSchema.virtual('restaurant', {
+// Virtual populate for restaurant details - using restaurantDetails to match the interface
+reviewSchema.virtual('restaurantDetails', {
   ref: 'Restaurant',
   localField: 'restaurant',
   foreignField: '_id',

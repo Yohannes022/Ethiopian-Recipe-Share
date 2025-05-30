@@ -117,8 +117,8 @@ orderSchema.index({ user: 1 });
 orderSchema.index({ restaurant: 1 });
 orderSchema.index({ status: 1 });
 orderSchema.index({ createdAt: -1 });
-// Virtual populate
-orderSchema.virtual('user', {
+// Virtual populate - using userDetails to avoid conflict with the user field
+orderSchema.virtual('userDetails', {
     ref: 'User',
     localField: 'user',
     foreignField: '_id',

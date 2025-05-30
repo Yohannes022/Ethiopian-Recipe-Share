@@ -12,7 +12,7 @@ import { createServer } from 'http';
 import { Server } from 'socket.io';
 import { NotFoundError } from '@/utils/apiError';
 import routes from '@/routes';
-import logger from '@/utils/logger';
+import logger, { stream } from '@/utils/logger';
 import { initializePassport } from '@/config/passport';
 import { corsOptions } from '@/config/cors';
 
@@ -43,9 +43,11 @@ app.use(cors(corsOptions));
 // Set security HTTP headers
 app.use(helmet());
 
-// Development logging
+// HTTP request logging
 if (process.env.NODE_ENV === 'development') {
-  app.use(morgan('dev'));
+  app.use(morgan('dev', { stream }));
+} else {
+  app.use(morgan('combined', { stream }));
 }
 
 // Body parser, reading data from body into req.body

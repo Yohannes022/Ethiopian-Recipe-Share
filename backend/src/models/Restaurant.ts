@@ -1,6 +1,6 @@
 import mongoose, { Schema, Document, Types } from 'mongoose';
 import { IReviewBase } from '../types/review.types';
-import { IRestaurant } from '../types/restaurant.types';
+import { IRestaurant, IRestaurantVirtuals, RestaurantModel } from '../types/restaurant.types';
 
 // Define interfaces for methods
 interface IRestaurantMethods {
@@ -48,8 +48,9 @@ interface IRestaurantDocument extends mongoose.Document {
   updatedAt: Date;
 }
 
-// Define the schema
-const restaurantSchema = new Schema({
+// Define the schema with proper type parameters
+const restaurantSchema = new Schema<IRestaurant, RestaurantModel, IRestaurantMethods, {}, IRestaurantVirtuals>({
+  // Schema definition
   name: {
     type: String,
     required: [true, 'Restaurant must have a name'],
@@ -207,6 +208,8 @@ const restaurantSchema = new Schema({
   },
 }, {
   timestamps: true,
+  toJSON: { virtuals: true },
+  toObject: { virtuals: true },
 });
 
 // Add methods to the schema
@@ -247,7 +250,45 @@ restaurantSchema.methods.removeOpeningHours = async function (this: mongoose.Doc
   await this.save();
 };
 
+// Virtual populate - using ownerInfo to avoid conflict with the owner field
+restaurantSchema.virtual('ownerInfo', {
+  ref: 'User',
+  localField: 'owner',
+  foreignField: '_id',
+  justOne: true,
+  select: 'name photo',
+});
+
+// Virtual populate - using categoryInfo to avoid conflict with the category field
+restaurantSchema.virtual('categoryInfo', {
+  ref: 'Category',
+  localField: 'category',
+  foreignField: '_id',
+  justOne: true,
+  select: 'name',
+});
+
+// Virtual populate for reviews
+restaurantSchema.virtual('reviewsInfo', {
+  ref: 'Review',
+  localField: 'reviews',
+  foreignField: '_id',
+  justOne: false,
+});
+
+// Virtual populate for menu items
+restaurantSchema.virtual('menuItems', {
+  ref: 'MenuItem',
+  localField: 'menu',
+  foreignField: '_id',
+  justOne: false,
+});
+
 // Create and export the model
-const Restaurant = mongoose.model<IRestaurant>('Restaurant', restaurantSchema) as mongoose.Model<IRestaurantDocument> & mongoose.Model<IRestaurant>;
+type RestaurantModelType = mongoose.Model<IRestaurant, {}, IRestaurantMethods> & {
+  new (doc?: any): IRestaurant & IRestaurantMethods;
+};
+
+const Restaurant = mongoose.model<IRestaurant, RestaurantModelType>('Restaurant', restaurantSchema);
 
 export default Restaurant;

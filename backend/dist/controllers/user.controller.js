@@ -103,12 +103,14 @@ exports.getMe = getMe;
 // Update current user's profile
 const updateMe = async (req, res, next) => {
     try {
-        const filteredBody = Object.keys(req.body).reduce((acc, key) => {
-            if (key !== 'password' && key !== 'role') {
-                acc[key] = req.body[key];
+        // Create a type for allowed update fields
+        const allowedFields = ['name', 'email', 'photo', 'bio', 'phoneNumber'];
+        const filteredBody = {};
+        Object.entries(req.body).forEach(([key, value]) => {
+            if (allowedFields.includes(key)) {
+                filteredBody[key] = value;
             }
-            return acc;
-        }, {});
+        });
         const user = await User_1.default.findByIdAndUpdate(req.user.id, filteredBody, {
             new: true,
             runValidators: true,

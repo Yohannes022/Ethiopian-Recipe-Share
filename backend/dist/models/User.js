@@ -17,13 +17,14 @@ const userSchema = new mongoose_1.default.Schema({
     email: {
         type: String,
         required: [true, 'Please provide your email'],
-        unique: true,
+        unique: true, // This creates an index by default
         lowercase: true,
         trim: true,
         match: [
             /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/,
             'Please provide a valid email address',
         ],
+        index: true, // Explicitly define index here instead of separate index() call
     },
     photo: {
         type: String,
@@ -104,8 +105,7 @@ const userSchema = new mongoose_1.default.Schema({
     toJSON: { virtuals: true },
     toObject: { virtuals: true },
 });
-// Indexes
-userSchema.index({ email: 1 }, { unique: true });
+// Index for geospatial queries
 userSchema.index({ 'address.location': '2dsphere' });
 // Virtual populate
 userSchema.virtual('recipes', {

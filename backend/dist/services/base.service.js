@@ -12,7 +12,7 @@ class BaseService {
         return this.model.findById(id);
     }
     async findAll(query = {}, options = {}) {
-        return this.model.find(query, null, options);
+        return this.model.find(query, null, options).lean().exec();
     }
     async update(id, data) {
         return this.model.findByIdAndUpdate(id, data, { new: true });

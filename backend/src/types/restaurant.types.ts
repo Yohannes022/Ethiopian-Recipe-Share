@@ -40,29 +40,29 @@ export interface IRestaurant extends Document {
   videos: string[];
   createdAt: Date;
   updatedAt: Date;
+  
+  // Virtuals
+  ownerInfo?: {
+    name: string;
+    photo: string;
+  };
+  categoryInfo?: {
+    name: string;
+  };
+  reviewsInfo?: IReview[];
 }
 
 // Virtual properties
 export interface IRestaurantVirtuals {
-  owner?: {
+  ownerInfo?: {
     name: string;
     photo: string;
   };
-  category?: {
+  categoryInfo?: {
     name: string;
   };
-  reviews?: IReview[];
-}
-
-// Virtual properties
-export interface IRestaurantVirtuals {
-  owner?: {
-    name: string;
-    photo: string;
-  };
-  category?: {
-    name: string;
-  };
+  reviewsInfo?: IReview[];
+  menuItems?: IMenuItem[];
 }
 
 export interface IRestaurantMethods {

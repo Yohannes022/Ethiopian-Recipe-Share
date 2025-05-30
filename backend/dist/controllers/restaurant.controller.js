@@ -69,12 +69,13 @@ exports.getAllRestaurants = getAllRestaurants;
 const createRestaurant = async (req, res, next) => {
     try {
         // Check if user is restaurant owner
-        if (req.user.role !== 'restaurant_owner') {
-            throw new apiError_1.BadRequestError('You must be a restaurant owner to create a restaurant');
+        const user = req.user;
+        if (user.role !== 'restaurant_owner') {
+            return next(new apiError_1.BadRequestError('You must be a restaurant owner to create a restaurant'));
         }
         const restaurant = await Restaurant_1.default.create({
             ...req.body,
-            owner: req.user._id,
+            owner: user._id,
         });
         res.status(201).json({
             status: 'success',
@@ -112,17 +113,23 @@ const updateRestaurant = async (req, res, next) => {
     try {
         const restaurant = await Restaurant_1.default.findById(req.params.id);
         if (!restaurant) {
-            throw new apiError_1.NotFoundError('Restaurant not found');
+            return next(new apiError_1.NotFoundError('Restaurant not found'));
         }
-        // Check if user is owner or admin
-        if (!restaurant.owner.equals(req.user._id) && req.user.role !== 'admin') {
-            throw new apiError_1.BadRequestError('You do not have permission to update this restaurant');
+        const user = req.user;
+        // Check if user is the owner or admin
+        if (restaurant.owner.toString() !== user._id.toString() && user.role !== 'admin') {
+            return next(new apiError_1.ForbiddenError('You are not authorized to update this restaurant'));
         }
-        // Update restaurant
+        // Prevent updating the owner
+        if (req.body.owner) {
+            delete req.body.owner;
+        }
         const updatedRestaurant = await Restaurant_1.default.findByIdAndUpdate(req.params.id, req.body, {
             new: true,
             runValidators: true,
-        }).populate('owner', 'name photo').populate('category', 'name');
+        })
+            .populate('owner', 'name photo')
+            .populate('category', 'name');
         res.status(200).json({
             status: 'success',
             data: updatedRestaurant,
@@ -138,13 +145,14 @@ const deleteRestaurant = async (req, res, next) => {
     try {
         const restaurant = await Restaurant_1.default.findById(req.params.id);
         if (!restaurant) {
-            throw new apiError_1.NotFoundError('Restaurant not found');
+            return next(new apiError_1.NotFoundError('Restaurant not found'));
         }
-        // Check if user is owner or admin
-        if (!restaurant.owner.equals(req.user._id) && req.user.role !== 'admin') {
-            throw new apiError_1.BadRequestError('You do not have permission to delete this restaurant');
+        const user = req.user;
+        // Check if user is the owner or admin
+        if (restaurant.owner.toString() !== user._id.toString() && user.role !== 'admin') {
+            return next(new apiError_1.ForbiddenError('You are not authorized to delete this restaurant'));
         }
-        await restaurant.deleteOne();
+        await Restaurant_1.default.findByIdAndDelete(req.params.id);
         res.status(204).json({
             status: 'success',
             data: null,
@@ -158,10 +166,11 @@ exports.deleteRestaurant = deleteRestaurant;
 // Get restaurants by owner
 const getRestaurantsByOwner = async (req, res, next) => {
     try {
-        const restaurants = await Restaurant_1.default.find({ owner: req.params.ownerId })
-            .sort({ createdAt: -1 })
-            .populate('owner', 'name photo')
-            .populate('category', 'name');
+        const userId = req.user._id;
+        const restaurants = await Restaurant_1.default.find({ owner: userId })
+            .select('-__v')
+            .populate('category', 'name')
+            .sort({ createdAt: -1 });
         res.status(200).json({
             status: 'success',
             results: restaurants.length,

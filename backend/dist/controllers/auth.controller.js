@@ -6,7 +6,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.resendVerificationEmail = exports.verifyEmail = exports.updatePassword = exports.resetPassword = exports.forgotPassword = exports.restrictTo = exports.protect = exports.logout = exports.login = exports.signup = void 0;
 const crypto_1 = __importDefault(require("crypto"));
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
-const util_1 = require("util");
 const User_1 = __importDefault(require("@/models/User"));
 const email_1 = __importDefault(require("@/utils/email"));
 const token_1 = require("@/utils/token");
@@ -52,7 +51,12 @@ const signup = async (req, res, next) => {
                 field: err.path,
                 message: err.message,
             }));
-            return next(new apiError_1.ValidationError(errors));
+            // Convert validation errors to a format compatible with ValidationError
+            const formattedErrors = errors.reduce((acc, error) => {
+                acc[error.field] = error.message;
+                return acc;
+            }, {});
+            return next(new apiError_1.ValidationError(formattedErrors));
         }
         next(error);
     }
@@ -112,7 +116,7 @@ const protect = async (req, res, next) => {
             throw new apiError_1.UnauthorizedError('You are not logged in! Please log in to get access.');
         }
         // 2) Verification token
-        const decoded = await (0, util_1.promisify)(jsonwebtoken_1.default.verify)(token, config_1.env.JWT_SECRET);
+        const decoded = jsonwebtoken_1.default.verify(token, config_1.env.JWT_SECRET);
         // 3) Check if user still exists
         const currentUser = await User_1.default.findById(decoded.id);
         if (!currentUser) {
@@ -137,7 +141,7 @@ const restrictTo = (...roles) => {
     return (req, res, next) => {
         // roles is an array of allowed roles ['admin', 'lead-guide']
         if (!roles.includes(req.user.role)) {
-            throw new ForbiddenError('You do not have permission to perform this action');
+            return next(new apiError_1.ForbiddenError('You do not have permission to perform this action'));
         }
         next();
     };

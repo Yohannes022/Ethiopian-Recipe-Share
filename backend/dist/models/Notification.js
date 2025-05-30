@@ -41,8 +41,8 @@ const notificationSchema = new mongoose_1.default.Schema({
 // Indexes
 notificationSchema.index({ user: 1, read: 1, createdAt: -1 });
 notificationSchema.index({ relatedId: 1, relatedType: 1 });
-// Virtual populate
-notificationSchema.virtual('user', {
+// Virtual populate - using userInfo to avoid conflict with the user field
+notificationSchema.virtual('userInfo', {
     ref: 'User',
     localField: 'user',
     foreignField: '_id',

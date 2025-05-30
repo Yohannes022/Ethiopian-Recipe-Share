@@ -28,7 +28,8 @@ const protect = async (req, res, next) => {
             return next(new apiError_1.UnauthorizedError('You are not logged in! Please log in to get access.'));
         }
         // 2) Verify token
-        const decoded = await (0, util_1.promisify)(jsonwebtoken_1.default.verify)(token, config_1.env.JWT_SECRET);
+        const verifyAsync = (0, util_1.promisify)(jsonwebtoken_1.default.verify);
+        const decoded = await verifyAsync(token, config_1.env.JWT_SECRET, {});
         // 3) Check if user still exists
         const currentUser = await User_1.default.findById(decoded.id);
         if (!currentUser) {
@@ -69,7 +70,8 @@ const isLoggedIn = async (req, res, next) => {
     if (req.cookies.jwt) {
         try {
             // 1) Verify token
-            const decoded = await (0, util_1.promisify)(jsonwebtoken_1.default.verify)(req.cookies.jwt, config_1.env.JWT_SECRET);
+            const verifyAsync = (0, util_1.promisify)(jsonwebtoken_1.default.verify);
+            const decoded = await verifyAsync(req.cookies.jwt, config_1.env.JWT_SECRET, {});
             // 2) Check if user still exists
             const currentUser = await User_1.default.findById(decoded.id);
             if (!currentUser) {
@@ -102,7 +104,8 @@ const socketAuth = async (socket, next) => {
                 code: 401
             });
         }
-        const decoded = await (0, util_1.promisify)(jsonwebtoken_1.default.verify)(token, config_1.env.JWT_SECRET);
+        const verifyAsync = (0, util_1.promisify)(jsonwebtoken_1.default.verify);
+        const decoded = await verifyAsync(token, config_1.env.JWT_SECRET, {});
         const currentUser = await User_1.default.findById(decoded.id);
         if (!currentUser) {
             return next({

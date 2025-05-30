@@ -1,7 +1,8 @@
 import mongoose, { Schema, Document, Model } from 'mongoose';
 import { IOrder, IOrderMethods, OrderModel, OrderStatus } from '@/types/order.types';
 
-const orderSchema = new mongoose.Schema<IOrder, OrderModel, IOrderMethods>(
+// Define the schema with proper type parameters
+const orderSchema = new mongoose.Schema<IOrder, OrderModel, IOrderMethods, {}, { userDetails?: any; restaurantInfo?: any; items?: any }>(
   {
     user: {
       type: mongoose.Schema.Types.ObjectId,
@@ -119,8 +120,8 @@ orderSchema.index({ restaurant: 1 });
 orderSchema.index({ status: 1 });
 orderSchema.index({ createdAt: -1 });
 
-// Virtual populate
-orderSchema.virtual('user', {
+// Virtual populate - using userDetails to avoid conflict with the user field
+orderSchema.virtual('userDetails', {
   ref: 'User',
   localField: 'user',
   foreignField: '_id',
@@ -128,7 +129,8 @@ orderSchema.virtual('user', {
   select: 'name phone email',
 });
 
-orderSchema.virtual('restaurant', {
+// Rename to match the interface
+orderSchema.virtual('restaurantDetails', {
   ref: 'Restaurant',
   localField: 'restaurant',
   foreignField: '_id',
@@ -136,11 +138,12 @@ orderSchema.virtual('restaurant', {
   select: 'name phone email',
 });
 
-orderSchema.virtual('items', {
+// Rename to match the interface
+orderSchema.virtual('itemsWithDetails', {
   ref: 'MenuItem',
   localField: 'items.menuItem',
   foreignField: '_id',
-  justOne: true,
+  justOne: false,
   select: 'name description price image',
 });
 

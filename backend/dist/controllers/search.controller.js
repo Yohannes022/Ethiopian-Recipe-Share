@@ -4,7 +4,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.advancedSearch = exports.search = void 0;
-const Recipe_1 = __importDefault(require("@/models/Recipe"));
+const Recipe_1 = require("@/models/Recipe");
 const Restaurant_1 = __importDefault(require("@/models/Restaurant"));
 const User_1 = __importDefault(require("@/models/User"));
 const apiError_1 = require("@/utils/apiError");
@@ -23,15 +23,16 @@ const search = async (req, res, next) => {
         // Search across all types if no type specified
         let results = [];
         if (!type || type === 'recipe') {
-            const recipes = (await Recipe_1.default.find(searchQuery)
+            const recipes = await Recipe_1.Recipe.find(searchQuery)
                 .sort({ score: { $meta: 'textScore' } })
                 .skip(skip)
                 .limit(Number(limit))
                 .select('name description image rating category')
-                .populate('category', 'name'));
+                .populate('category', 'name')
+                .lean();
             results = [...results, ...recipes.map((recipe) => ({
                     type: 'recipe',
-                    _id: recipe._id.toString(),
+                    _id: recipe._id?.toString() || '',
                     name: recipe.name,
                     description: recipe.description,
                     image: recipe.image,
@@ -40,14 +41,15 @@ const search = async (req, res, next) => {
                 }))];
         }
         if (!type || type === 'restaurant') {
-            const restaurants = (await Restaurant_1.default.find(searchQuery)
+            const restaurants = await Restaurant_1.default.find(searchQuery)
                 .sort({ score: { $meta: 'textScore' } })
                 .skip(skip)
                 .limit(Number(limit))
-                .select('name description image rating'));
+                .select('name description image rating')
+                .lean();
             results = [...results, ...restaurants.map((restaurant) => ({
                     type: 'restaurant',
-                    _id: restaurant._id.toString(),
+                    _id: restaurant._id?.toString() || '',
                     name: restaurant.name,
                     description: restaurant.description,
                     image: restaurant.image,
@@ -55,14 +57,15 @@ const search = async (req, res, next) => {
                 }))];
         }
         if (!type || type === 'user') {
-            const users = (await User_1.default.find(searchQuery)
+            const users = await User_1.default.find(searchQuery)
                 .sort({ score: { $meta: 'textScore' } })
                 .skip(skip)
                 .limit(Number(limit))
-                .select('name bio photo'));
+                .select('name bio photo')
+                .lean();
             results = [...results, ...users.map((user) => ({
                     type: 'user',
-                    _id: user._id.toString(),
+                    _id: user._id?.toString() || '',
                     name: user.name,
                     description: user.bio,
                     image: user.photo,
@@ -70,10 +73,10 @@ const search = async (req, res, next) => {
         }
         // Get total count
         const total = await Promise.all([
-            !type || type === 'recipe' ? Recipe_1.default.countDocuments(searchQuery) : 0,
+            !type || type === 'recipe' ? Recipe_1.Recipe.countDocuments(searchQuery) : 0,
             !type || type === 'restaurant' ? Restaurant_1.default.countDocuments(searchQuery) : 0,
             !type || type === 'user' ? User_1.default.countDocuments(searchQuery) : 0,
-        ]).then(counts => counts.reduce((sum, count) => sum + count, 0));
+        ]).then((counts) => counts.reduce((sum, count) => sum + count, 0));
         res.status(200).json({
             status: 'success',
             results: results.length,
@@ -98,7 +101,7 @@ const advancedSearch = async (req, res, next) => {
         let model;
         switch (type) {
             case 'recipe':
-                model = Recipe_1.default;
+                model = Recipe_1.Recipe;
                 if (category)
                     query.category = category;
                 if (minRating)

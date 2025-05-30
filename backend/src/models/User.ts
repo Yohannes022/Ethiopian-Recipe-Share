@@ -15,13 +15,13 @@ const userSchema = new mongoose.Schema<IUser, UserModel, IUserMethods>(
     email: {
       type: String,
       required: [true, 'Please provide your email'],
-      unique: true,
+      unique: true,  // This creates an index by default
       lowercase: true,
       trim: true,
       match: [
         /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/,
         'Please provide a valid email address',
-      ],
+      ]
     },
     photo: {
       type: String,
@@ -105,8 +105,7 @@ const userSchema = new mongoose.Schema<IUser, UserModel, IUserMethods>(
   }
 );
 
-// Indexes
-userSchema.index({ email: 1 }, { unique: true });
+// Index for geospatial queries
 userSchema.index({ 'address.location': '2dsphere' });
 
 // Virtual populate
