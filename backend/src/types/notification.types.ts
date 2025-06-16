@@ -15,7 +15,7 @@ export interface INotification extends Document, INotificationBase {
 
 export interface INotificationWithDetails extends INotificationBase {
   user: Types.ObjectId;
-  userDetails?: {
+  userInfo?: {
     name: string;
     photo: string;
   };

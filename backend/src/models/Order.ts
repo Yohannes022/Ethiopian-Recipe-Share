@@ -1,8 +1,29 @@
 import mongoose, { Schema, Document, Model } from 'mongoose';
 import { IOrder, IOrderMethods, OrderModel, OrderStatus } from '@/types/order.types';
 
+// Define the virtual fields interface
+interface IOrderVirtuals {
+  userInfo?: {
+    name: string;
+    phone: string;
+    email: string;
+  };
+  restaurantInfo?: {
+    name: string;
+    phone: string;
+    email: string;
+  };
+  menuItems?: Array<{
+    _id: mongoose.Types.ObjectId;
+    name: string;
+    description: string;
+    price: number;
+    image: string;
+  }>;
+}
+
 // Define the schema with proper type parameters
-const orderSchema = new mongoose.Schema<IOrder, OrderModel, IOrderMethods, {}, { userDetails?: any; restaurantInfo?: any; items?: any }>(
+const orderSchema = new mongoose.Schema<IOrder, OrderModel, IOrderMethods, {}, IOrderVirtuals>(
   {
     user: {
       type: mongoose.Schema.Types.ObjectId,
@@ -120,8 +141,8 @@ orderSchema.index({ restaurant: 1 });
 orderSchema.index({ status: 1 });
 orderSchema.index({ createdAt: -1 });
 
-// Virtual populate - using userDetails to avoid conflict with the user field
-orderSchema.virtual('userDetails', {
+// Virtual populate for user details
+orderSchema.virtual('userInfo', {
   ref: 'User',
   localField: 'user',
   foreignField: '_id',
@@ -129,8 +150,8 @@ orderSchema.virtual('userDetails', {
   select: 'name phone email',
 });
 
-// Rename to match the interface
-orderSchema.virtual('restaurantDetails', {
+// Virtual populate for restaurant details
+orderSchema.virtual('restaurantInfo', {
   ref: 'Restaurant',
   localField: 'restaurant',
   foreignField: '_id',
@@ -138,8 +159,8 @@ orderSchema.virtual('restaurantDetails', {
   select: 'name phone email',
 });
 
-// Rename to match the interface
-orderSchema.virtual('itemsWithDetails', {
+// Virtual populate for order items with details
+orderSchema.virtual('menuItems', {
   ref: 'MenuItem',
   localField: 'items.menuItem',
   foreignField: '_id',

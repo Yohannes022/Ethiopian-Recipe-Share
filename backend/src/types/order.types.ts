@@ -62,17 +62,17 @@ export type OrderModel = Model<IOrder, {}, IOrderMethods>;
 
 export interface IOrderWithDetails extends IOrderBase {
   user: Types.ObjectId;
-  userDetails?: {
+  userInfo?: {
     name: string;
     phone: string;
     email: string;
   };
   restaurant: Types.ObjectId;
-  restaurantDetails?: {
+  restaurantInfo?: {
     name: string;
     phone: string;
     email: string;
   };
   items: IOrderItem[];
-  itemsWithDetails?: IOrderItemWithDetails[];
+  menuItems?: IOrderItemWithDetails[];
 }

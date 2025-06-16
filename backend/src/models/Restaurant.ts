@@ -285,8 +285,13 @@ restaurantSchema.virtual('menuItems', {
 });
 
 // Create and export the model
-type RestaurantModelType = mongoose.Model<IRestaurant, {}, IRestaurantMethods> & {
-  new (doc?: any): IRestaurant & IRestaurantMethods;
+type RestaurantModelType = mongoose.Model<IRestaurant, {}, IRestaurantMethods, {}, IRestaurantVirtuals> & {
+  new (doc?: any): IRestaurant & IRestaurantMethods & {
+    ownerInfo?: { name: string; photo: string };
+    categoryInfo?: { name: string };
+    reviewsInfo?: any[];
+    menuItems?: any[];
+  };
 };
 
 const Restaurant = mongoose.model<IRestaurant, RestaurantModelType>('Restaurant', restaurantSchema);

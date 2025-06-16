@@ -28,8 +28,8 @@ const favoriteSchema = new mongoose.Schema(
 // Indexes
 favoriteSchema.index({ user: 1, type: 1, itemId: 1 }, { unique: true });
 
-// Virtual populate
-favoriteSchema.virtual('userDetails', {
+// Virtual populate for user info
+favoriteSchema.virtual('userInfo', {
   ref: 'User',
   localField: 'user',
   foreignField: '_id',

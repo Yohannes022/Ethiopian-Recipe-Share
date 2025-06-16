@@ -48,7 +48,7 @@ reviewSchema.index({ rating: -1 });
 reviewSchema.index({ createdAt: -1 });
 
 // Virtual populate for user details
-reviewSchema.virtual('userDetails', {
+reviewSchema.virtual('userInfo', {
   ref: 'User',
   localField: 'user',
   foreignField: '_id',
@@ -56,8 +56,8 @@ reviewSchema.virtual('userDetails', {
   select: 'name photo',
 });
 
-// Virtual populate for restaurant details - using restaurantDetails to match the interface
-reviewSchema.virtual('restaurantDetails', {
+// Virtual populate for restaurant details
+reviewSchema.virtual('restaurantInfo', {
   ref: 'Restaurant',
   localField: 'restaurant',
   foreignField: '_id',

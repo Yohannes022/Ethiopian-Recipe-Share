@@ -26,7 +26,7 @@ export interface IFavoriteResponse {
   type: FavoriteType;
   itemId: Types.ObjectId;
   createdAt: Date;
-  userDetails?: {
+  userInfo?: {
     name: string;
     photo: string;
   };

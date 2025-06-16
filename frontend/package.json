@@ -1,7 +1,8 @@
 {
-  "name": "ethiopian_recipe_share",
+  "name": "ethiopian-recipe-share",
   "main": "expo-router/entry",
   "version": "1.0.0",
+  "type": "module",
   "scripts": {
     "start": "expo start",
     "reset-project": "node ./scripts/reset-project.js",
@@ -11,9 +12,6 @@
     "lint": "expo lint"
   },
   "dependencies": {
-    "name": "ethiopian-recipe-share",
-    "version": "1.0.0",
-    "type": "module",
     "@expo/vector-icons": "^14.1.0",
     "@react-native-async-storage/async-storage": "^2.1.2",
     "@react-navigation/bottom-tabs": "^7.3.10",
@@ -50,6 +48,7 @@
     "react-native-reanimated": "~3.17.4",
     "react-native-safe-area-context": "5.4.0",
     "react-native-screens": "~4.10.0",
+    "react-native-svg": "^15.12.0",
     "react-native-web": "~0.20.0",
     "react-native-webview": "13.13.5",
     "zustand": "^5.0.4"

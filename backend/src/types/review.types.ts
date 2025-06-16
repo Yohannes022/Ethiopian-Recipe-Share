@@ -15,11 +15,11 @@ export interface IReview extends Document, IReviewBase {
 }
 
 export interface IReviewWithDetails extends IReview {
-  userDetails?: {
+  userInfo?: {
     name: string;
     photo: string;
   };
-  restaurantDetails?: {
+  restaurantInfo?: {
     name: string;
     image: string;
   };
