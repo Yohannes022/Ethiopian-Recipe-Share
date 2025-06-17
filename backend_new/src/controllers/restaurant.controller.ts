@@ -3,7 +3,15 @@ import { validationResult } from 'express-validator';
 import mongoose from 'mongoose';
 import Restaurant, { IRestaurant } from '../models/restaurant.model';
 import AppError from '../utils/appError';
-import { catchAsync } from '../utils/catchAsync';
+import catchAsync from '../utils/catchAsync';
+
+// Import the IUser interface from the user model
+import { IUser } from '../models/user.model';
+
+// Extend the Express Request type to include the user property
+interface AuthenticatedRequest extends Request {
+  user?: IUser & { _id: mongoose.Types.ObjectId };
+}
 
 // Helper function to build filter object from query parameters
 const buildFilter = (query: any) => {
@@ -63,7 +71,7 @@ export const getAllRestaurants = catchAsync(async (req: Request, res: Response, 
  * @route   GET /api/restaurants/:id
  * @access  Public
  */
-export const getRestaurant = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+export const getRestaurant = catchAsync(async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
   const restaurant = await Restaurant.findById(req.params.id)
     .populate('owner', 'name email phone')
     .populate('reviews');
@@ -83,15 +91,19 @@ export const getRestaurant = catchAsync(async (req: Request, res: Response, next
  * @route   POST /api/restaurants
  * @access  Private/Owner & Admin
  */
-export const createRestaurant = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+export const createRestaurant = catchAsync(async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
   // Only allow owners and admins to create restaurants
-  if (req.user.role !== 'owner' && req.user.role !== 'admin') {
+  if (!req.user || (req.user.role !== 'restaurant_owner' && req.user.role !== 'admin')) {
     return next(new AppError('Not authorized to create a restaurant', 403));
+  }
+
+  if (!req.user) {
+    return next(new AppError('User not authenticated', 401));
   }
 
   const newRestaurant = await Restaurant.create({
     ...req.body,
-    owner: req.user.id
+    owner: req.user._id
   });
 
   res.status(201).json({
@@ -105,15 +117,19 @@ export const createRestaurant = catchAsync(async (req: Request, res: Response, n
  * @route   PUT /api/restaurants/:id
  * @access  Private/Owner & Admin
  */
-export const updateRestaurant = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+export const updateRestaurant = catchAsync(async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
   const restaurant = await Restaurant.findById(req.params.id);
   
   if (!restaurant) {
     return next(new AppError('No restaurant found with that ID', 404));
   }
 
-  // Check if user is owner or admin
-  if (restaurant.owner.toString() !== req.user.id && req.user.role !== 'admin') {
+  // Check if user is authenticated and has permission
+  if (!req.user) {
+    return next(new AppError('User not authenticated', 401));
+  }
+  
+  if (restaurant.owner.toString() !== req.user._id.toString() && req.user.role !== 'admin') {
     return next(new AppError('Not authorized to update this restaurant', 403));
   }
 
@@ -142,15 +158,19 @@ export const updateRestaurant = catchAsync(async (req: Request, res: Response, n
  * @route   DELETE /api/restaurants/:id
  * @access  Private/Owner & Admin
  */
-export const deleteRestaurant = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+export const deleteRestaurant = catchAsync(async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
   const restaurant = await Restaurant.findById(req.params.id);
   
   if (!restaurant) {
     return next(new AppError('No restaurant found with that ID', 404));
   }
 
-  // Check if user is owner or admin
-  if (restaurant.owner.toString() !== req.user.id && req.user.role !== 'admin') {
+  // Check if user is authenticated and has permission
+  if (!req.user) {
+    return next(new AppError('User not authenticated', 401));
+  }
+  
+  if (restaurant.owner.toString() !== req.user._id.toString() && req.user.role !== 'admin') {
     return next(new AppError('Not authorized to delete this restaurant', 403));
   }
 
@@ -169,7 +189,7 @@ export const deleteRestaurant = catchAsync(async (req: Request, res: Response, n
  * @route   GET /api/restaurants/owner/:ownerId
  * @access  Public
  */
-export const getRestaurantsByOwner = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+export const getRestaurantsByOwner = catchAsync(async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
   if (!mongoose.Types.ObjectId.isValid(req.params.ownerId)) {
     return next(new AppError('Invalid owner ID', 400));
   }
@@ -213,15 +233,19 @@ export const getRestaurantMenu = catchAsync(async (req: Request, res: Response, 
  * @route   PATCH /api/restaurants/:id/menu
  * @access  Private/Owner & Admin
  */
-export const updateRestaurantMenu = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+export const updateRestaurantMenu = catchAsync(async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
   const restaurant = await Restaurant.findById(req.params.id);
   
   if (!restaurant) {
     return next(new AppError('No restaurant found with that ID', 404));
   }
 
-  // Check if user is owner or admin
-  if (restaurant.owner.toString() !== req.user.id && req.user.role !== 'admin') {
+  // Check if user is authenticated and has permission
+  if (!req.user) {
+    return next(new AppError('User not authenticated', 401));
+  }
+  
+  if (restaurant.owner.toString() !== req.user._id.toString() && req.user.role !== 'admin') {
     return next(new AppError('Not authorized to update this menu', 403));
   }
 

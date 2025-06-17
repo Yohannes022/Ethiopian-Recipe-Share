@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
-import User from '@/models/user.model';
+import { Types } from 'mongoose';
+import User, { IUser } from '@/models/user.model';
 import AppError from '@/utils/appError';
 
 interface JwtPayload {
@@ -12,7 +13,7 @@ interface JwtPayload {
 declare global {
   namespace Express {
     interface Request {
-      user?: any;
+      user?: IUser & { _id: Types.ObjectId };
     }
   }
 }
@@ -44,21 +45,41 @@ export const protect = async (req: Request, res: Response, next: NextFunction) =
     const currentUser = await User.findById(decoded.id);
     if (!currentUser) {
       return next(
-        new AppError('The user belonging to this token no longer exists.', 401)
+        new AppError('The user belonging to this token no longer exists', 401)
       );
     }
 
     // 4) Check if user changed password after the token was issued
-    if (currentUser.changedPasswordAfter) {
-      if (currentUser.changedPasswordAfter(decoded.iat)) {
-        return next(
-          new AppError('User recently changed password! Please log in again.', 401)
-        );
-      }
+    if (currentUser.changedPasswordAfter(decoded.iat)) {
+      return next(
+        new AppError('User recently changed password! Please log in again', 401)
+      );
     }
 
     // GRANT ACCESS TO PROTECTED ROUTE
-    req.user = currentUser;
+    // Create a new user object with the correct type
+    const userObj = currentUser.toObject();
+    
+    // Create a new object with only the properties we need
+    const userForRequest = {
+      _id: userObj._id,
+      name: userObj.name,
+      email: userObj.email,
+      role: userObj.role,
+      isEmailVerified: userObj.isEmailVerified,
+      favorites: userObj.favorites || [],
+      followers: userObj.followers || [],
+      following: userObj.following || [],
+      createdAt: userObj.createdAt,
+      updatedAt: userObj.updatedAt,
+      ...(userObj.profilePicture && { profilePicture: userObj.profilePicture }),
+      ...(userObj.phoneNumber && { phoneNumber: userObj.phoneNumber }),
+      ...(userObj.address && { address: userObj.address }),
+      ...(userObj.passwordChangedAt && { passwordChangedAt: userObj.passwordChangedAt })
+    };
+    
+    // Assign the typed user object to req.user
+    req.user = userForRequest as IUser & { _id: Types.ObjectId };
     next();
   } catch (error) {
     next(error);

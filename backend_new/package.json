@@ -13,8 +13,10 @@
     "format": "prettier --write \"src/**/*.ts\"",
     "migrate": "ts-node --require tsconfig-paths/register src/scripts/migrate.ts",
     "seed": "ts-node --require tsconfig-paths/register src/scripts/seed.ts",
+    "seed:users": "ts-node --require tsconfig-paths/register scripts/seedUsers.ts",
     "seed:recipes": "ts-node --require tsconfig-paths/register scripts/seedRecipes.ts",
-    "seed:restaurants": "ts-node --require tsconfig-paths/register scripts/seedRestaurants.ts"
+    "seed:restaurants": "ts-node --require tsconfig-paths/register scripts/seedRestaurants.ts",
+    "seed:all": "npm run seed:users && npm run seed:restaurants && npm run seed:recipes"
   },
   "dependencies": {
     "@types/express-rate-limit": "^5.1.3",

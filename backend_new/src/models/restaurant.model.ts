@@ -80,7 +80,7 @@ const restaurantSchema = new Schema<IRestaurant>(
       state: { type: String, required: true },
       zipCode: { type: String, required: true },
       country: { type: String, required: true, default: 'Ethiopia' },
-      coordinates: { type: [Number], index: '2dsphere' }
+      coordinates: { type: [Number] }
     },
     phone: { type: String, required: true },
     email: { type: String, required: true, lowercase: true },

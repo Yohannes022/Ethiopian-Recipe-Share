@@ -120,10 +120,12 @@ export const uploadProfilePicture = async (req: Request, res: Response, next: Ne
       return next(new AppError('Profile not found', 404));
     }
 
-    // Remove the binary data from the response
+    // Create a new object without the binary data for the response
     const profileObj = profile.toObject();
-    if (profileObj.profilePicture) {
-      delete profileObj.profilePicture.data;
+    if (profileObj.profilePicture && 'data' in profileObj.profilePicture) {
+      // Create a new object without the data property
+      const { data, ...profilePictureWithoutData } = profileObj.profilePicture;
+      profileObj.profilePicture = profilePictureWithoutData as any;
     }
 
     console.log('Profile picture updated successfully for user:', req.user?._id);

@@ -2,9 +2,9 @@ import 'module-alias/register';
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import path from 'path';
-import Restaurant from '@/models/restaurant.model';
-import User from '@/models/user.model';
-import { connectDB } from '@/config/database';
+import Restaurant from '../src/models/restaurant.model';
+import User from '../src/models/user.model';
+import { connectDB } from '../src/config/database';
 
 dotenv.config({ path: path.join(__dirname, '../.env') });
 

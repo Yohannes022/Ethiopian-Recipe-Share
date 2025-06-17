@@ -32,8 +32,12 @@ export const connectDB = async (): Promise<Mongoose> => {
     const MONGODB_URI = process.env.MONGODB_URI;
     
     if (!MONGODB_URI) {
-      throw new Error('MongoDB connection URI is not defined in environment variables');
+      const errorMsg = 'MongoDB connection URI is not defined in environment variables';
+      logger.error(errorMsg);
+      throw new Error(errorMsg);
     }
+    
+    logger.info(`Attempting to connect to MongoDB with URI: ${MONGODB_URI.split('@')[1]?.split('?')[0] || 'invalid_uri'}`);
 
     // In development, use a cached connection if available
     if (process.env.NODE_ENV === 'development') {
@@ -43,22 +47,31 @@ export const connectDB = async (): Promise<Mongoose> => {
       }
 
       if (!cached.promise) {
+        logger.info('Creating new MongoDB connection...');
         const opts: mongoose.ConnectOptions = {
           bufferCommands: false,
-          serverSelectionTimeoutMS: 5000,
+          serverSelectionTimeoutMS: 10000, // Increased from 5000 to 10000
           socketTimeoutMS: 45000,
+          connectTimeoutMS: 10000, // Added explicit connect timeout
         };
 
-        cached.promise = mongoose.connect(MONGODB_URI, opts);
+        try {
+          cached.promise = mongoose.connect(MONGODB_URI, opts);
+          logger.info('MongoDB connection promise created');
+        } catch (connectError) {
+          logger.error('Error creating MongoDB connection promise:', connectError);
+          throw connectError;
+        }
       }
 
       try {
+        logger.info('Waiting for MongoDB connection to establish...');
         cached.conn = await cached.promise;
-        logger.info('MongoDB Connected');
+        logger.info('MongoDB connection established successfully');
         return cached.conn;
-      } catch (e) {
-        cached.promise = null;
-        throw e;
+      } catch (connectionError) {
+        logger.error('Error establishing MongoDB connection:', connectionError);
+        throw connectionError;
       }
     }
 

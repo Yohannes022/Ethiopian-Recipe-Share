@@ -78,8 +78,5 @@ profileSchema.virtual('profilePictureUrl').get(function() {
   return null;
 });
 
-// Ensure each user has only one profile
-profileSchema.index({ user: 1 }, { unique: true });
-
 const Profile = mongoose.model<IProfile>('Profile', profileSchema);
 export default Profile;
