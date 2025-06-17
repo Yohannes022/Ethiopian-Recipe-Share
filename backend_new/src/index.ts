@@ -57,6 +57,7 @@ import recipeRoutes from '@/routes/recipe.routes';
 import profileRoutes from '@/routes/profile.routes';
 import restaurantRoutes from '@/routes/restaurant.routes';
 import menuItemRoutes from '@/routes/menuItem.routes';
+import orderRoutes from '@/routes/order.routes';
 
 // Mount routes
 app.use('/api/v1', healthRoutes);
@@ -66,6 +67,7 @@ app.use('/api/v1/recipes', recipeRoutes);
 app.use('/api/v1/profiles', profileRoutes);
 app.use('/api/v1/restaurants', restaurantRoutes);
 app.use('/api/v1/menu-items', menuItemRoutes);
+app.use('/api/v1/orders', orderRoutes);
 
 // API Routes will be mounted here
 // app.use('/api/v1/users', userRoutes);

@@ -4,6 +4,7 @@ import './profile.model';
 import './recipe.model';
 import './restaurant.model';
 import './menuItem.model';
+import './order.model';
 
 // This file ensures all models are registered with Mongoose when imported
 // The models are registered when they are imported, so we just need to import them here
