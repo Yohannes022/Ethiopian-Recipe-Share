@@ -96,7 +96,7 @@ export const logout = (req: Request, res: Response) => {
  */
 export const getMe = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const user = await User.findById(req.user.id);
+    const user = await User.findById(req.user?.id);
     res.status(200).json({
       status: 'success',
       data: {

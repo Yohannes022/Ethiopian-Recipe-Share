@@ -1,0 +1,14 @@
+{"level":"info","message":"Mongoose connected to MongoDB","service":"ethiopian-recipe-share"}
+{"level":"info","message":"MongoDB Connected","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Server running in development mode on port 5000","service":"ethiopian-recipe-share"}
+{"level":"info","message":"MongoDB URI: cluster0.dcsevss.mongodb.net/","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Mongoose connected to MongoDB","service":"ethiopian-recipe-share"}
+{"level":"info","message":"MongoDB Connected","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Server running in development mode on port 5000","service":"ethiopian-recipe-share"}
+{"level":"info","message":"MongoDB URI: cluster0.dcsevss.mongodb.net/","service":"ethiopian-recipe-share"}
+{"level":"warn","message":"Mongoose disconnected from MongoDB","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Mongoose connected to MongoDB","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Mongoose connected to MongoDB","service":"ethiopian-recipe-share"}
+{"level":"info","message":"MongoDB Connected","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Server running in development mode on port 5000","service":"ethiopian-recipe-share"}
+{"level":"info","message":"MongoDB URI: cluster0.dcsevss.mongodb.net/","service":"ethiopian-recipe-share"}

@@ -52,6 +52,7 @@ import testRoutes from '@/routes/test.routes';
 import authRoutes from '@/routes/auth.routes';
 import recipeRoutes from '@/routes/recipe.routes';
 import profileRoutes from '@/routes/profile.routes';
+import restaurantRoutes from '@/routes/restaurant.routes';
 
 // Mount routes
 app.use('/api/v1', healthRoutes);
@@ -59,10 +60,10 @@ app.use('/api/test', testRoutes);
 app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/recipes', recipeRoutes);
 app.use('/api/v1/profiles', profileRoutes);
+app.use('/api/v1/restaurants', restaurantRoutes);
 
 // API Routes will be mounted here
 // app.use('/api/v1/users', userRoutes);
-// app.use('/api/v1/restaurants', restaurantRoutes);
 
 // Error handling middleware
 app.use((err: any, req: Request, res: Response, next: NextFunction) => {
