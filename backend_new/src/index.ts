@@ -60,6 +60,9 @@ import menuItemRoutes from '@/routes/menuItem.routes';
 import orderRoutes from '@/routes/order.routes';
 import reviewRoutes from '@/routes/review.routes';
 import categoryRoutes from '@/routes/category.routes';
+import searchRoutes from '@/routes/search.routes';
+import analyticsRoutes from '@/routes/analytics.routes';
+import uploadRoutes from '@/routes/upload.routes';
 
 // Mount routes
 app.use('/api/v1', healthRoutes);
@@ -72,6 +75,9 @@ app.use('/api/v1/menu-items', menuItemRoutes);
 app.use('/api/v1/orders', orderRoutes);
 app.use('/api/v1/reviews', reviewRoutes);
 app.use('/api/v1/categories', categoryRoutes);
+app.use('/api/v1/search', searchRoutes);
+app.use('/api/v1/analytics', analyticsRoutes);
+app.use('/api/v1/upload', uploadRoutes);
 
 // API Routes will be mounted here
 // app.use('/api/v1/users', userRoutes);
