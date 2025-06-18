@@ -434,3 +434,230 @@
 {"level":"info","message":"MongoDB URI: cluster0.dcsevss.mongodb.net/ethiopian_recipe_share","service":"ethiopian-recipe-share"}
 {"level":"info","message":"Server is ready to handle requests","service":"ethiopian-recipe-share"}
 {"level":"info","message":"Access the API at http://localhost:5000/api/v1","service":"ethiopian-recipe-share"}
+{"level":"warn","message":"Mongoose disconnected from MongoDB","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Mongoose connected to MongoDB","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Starting server initialization...","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Connecting to MongoDB...","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Attempting to connect to MongoDB with URI: cluster0.dcsevss.mongodb.net/ethiopian_recipe_share","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Creating new MongoDB connection...","service":"ethiopian-recipe-share"}
+{"level":"info","message":"MongoDB connection promise created","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Waiting for MongoDB connection to establish...","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Mongoose connected to MongoDB","service":"ethiopian-recipe-share"}
+{"level":"info","message":"MongoDB connection established successfully","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Successfully connected to MongoDB","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Attempting to start server on port 5000...","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Starting HTTP server on port 5000...","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Server running in development mode on :::5000","service":"ethiopian-recipe-share"}
+{"level":"info","message":"MongoDB URI: cluster0.dcsevss.mongodb.net/ethiopian_recipe_share","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Server is ready to handle requests","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Access the API at http://localhost:5000/api/v1","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Starting server initialization...","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Connecting to MongoDB...","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Attempting to connect to MongoDB with URI: cluster0.dcsevss.mongodb.net/ethiopian_recipe_share","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Creating new MongoDB connection...","service":"ethiopian-recipe-share"}
+{"level":"info","message":"MongoDB connection promise created","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Waiting for MongoDB connection to establish...","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Mongoose connected to MongoDB","service":"ethiopian-recipe-share"}
+{"level":"info","message":"MongoDB connection established successfully","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Successfully connected to MongoDB","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Attempting to start server on port 5000...","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Starting HTTP server on port 5000...","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Server running in development mode on :::5000","service":"ethiopian-recipe-share"}
+{"level":"info","message":"MongoDB URI: cluster0.dcsevss.mongodb.net/ethiopian_recipe_share","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Server is ready to handle requests","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Access the API at http://localhost:5000/api/v1","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Starting server initialization...","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Connecting to MongoDB...","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Attempting to connect to MongoDB with URI: cluster0.dcsevss.mongodb.net/ethiopian_recipe_share","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Creating new MongoDB connection...","service":"ethiopian-recipe-share"}
+{"level":"info","message":"MongoDB connection promise created","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Waiting for MongoDB connection to establish...","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Mongoose connected to MongoDB","service":"ethiopian-recipe-share"}
+{"level":"info","message":"MongoDB connection established successfully","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Successfully connected to MongoDB","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Attempting to start server on port 5000...","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Starting HTTP server on port 5000...","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Server running in development mode on :::5000","service":"ethiopian-recipe-share"}
+{"level":"info","message":"MongoDB URI: cluster0.dcsevss.mongodb.net/ethiopian_recipe_share","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Server is ready to handle requests","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Access the API at http://localhost:5000/api/v1","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Starting server initialization...","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Connecting to MongoDB...","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Attempting to connect to MongoDB with URI: cluster0.dcsevss.mongodb.net/ethiopian_recipe_share","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Creating new MongoDB connection...","service":"ethiopian-recipe-share"}
+{"level":"info","message":"MongoDB connection promise created","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Waiting for MongoDB connection to establish...","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Mongoose connected to MongoDB","service":"ethiopian-recipe-share"}
+{"level":"info","message":"MongoDB connection established successfully","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Successfully connected to MongoDB","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Attempting to start server on port 5000...","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Starting HTTP server on port 5000...","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Server running in development mode on :::5000","service":"ethiopian-recipe-share"}
+{"level":"info","message":"MongoDB URI: cluster0.dcsevss.mongodb.net/ethiopian_recipe_share","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Server is ready to handle requests","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Access the API at http://localhost:5000/api/v1","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Starting server initialization...","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Connecting to MongoDB...","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Attempting to connect to MongoDB with URI: cluster0.dcsevss.mongodb.net/ethiopian_recipe_share","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Creating new MongoDB connection...","service":"ethiopian-recipe-share"}
+{"level":"info","message":"MongoDB connection promise created","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Waiting for MongoDB connection to establish...","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Mongoose connected to MongoDB","service":"ethiopian-recipe-share"}
+{"level":"info","message":"MongoDB connection established successfully","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Successfully connected to MongoDB","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Attempting to start server on port 5000...","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Starting HTTP server on port 5000...","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Server running in development mode on :::5000","service":"ethiopian-recipe-share"}
+{"level":"info","message":"MongoDB URI: cluster0.dcsevss.mongodb.net/ethiopian_recipe_share","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Server is ready to handle requests","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Access the API at http://localhost:5000/api/v1","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Starting server initialization...","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Connecting to MongoDB...","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Attempting to connect to MongoDB with URI: cluster0.dcsevss.mongodb.net/ethiopian_recipe_share","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Creating new MongoDB connection...","service":"ethiopian-recipe-share"}
+{"level":"info","message":"MongoDB connection promise created","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Waiting for MongoDB connection to establish...","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Mongoose connected to MongoDB","service":"ethiopian-recipe-share"}
+{"level":"info","message":"MongoDB connection established successfully","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Successfully connected to MongoDB","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Attempting to start server on port 5000...","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Starting HTTP server on port 5000...","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Server running in development mode on :::5000","service":"ethiopian-recipe-share"}
+{"level":"info","message":"MongoDB URI: cluster0.dcsevss.mongodb.net/ethiopian_recipe_share","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Server is ready to handle requests","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Access the API at http://localhost:5000/api/v1","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Starting server initialization...","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Connecting to MongoDB...","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Attempting to connect to MongoDB with URI: cluster0.dcsevss.mongodb.net/ethiopian_recipe_share","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Creating new MongoDB connection...","service":"ethiopian-recipe-share"}
+{"level":"info","message":"MongoDB connection promise created","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Waiting for MongoDB connection to establish...","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Mongoose connected to MongoDB","service":"ethiopian-recipe-share"}
+{"level":"info","message":"MongoDB connection established successfully","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Successfully connected to MongoDB","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Attempting to start server on port 5000...","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Starting HTTP server on port 5000...","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Server running in development mode on :::5000","service":"ethiopian-recipe-share"}
+{"level":"info","message":"MongoDB URI: cluster0.dcsevss.mongodb.net/ethiopian_recipe_share","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Server is ready to handle requests","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Access the API at http://localhost:5000/api/v1","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Starting server initialization...","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Connecting to MongoDB...","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Attempting to connect to MongoDB with URI: cluster0.dcsevss.mongodb.net/ethiopian_recipe_share","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Creating new MongoDB connection...","service":"ethiopian-recipe-share"}
+{"level":"info","message":"MongoDB connection promise created","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Waiting for MongoDB connection to establish...","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Mongoose connected to MongoDB","service":"ethiopian-recipe-share"}
+{"level":"info","message":"MongoDB connection established successfully","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Successfully connected to MongoDB","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Attempting to start server on port 5000...","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Starting HTTP server on port 5000...","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Server running in development mode on :::5000","service":"ethiopian-recipe-share"}
+{"level":"info","message":"MongoDB URI: cluster0.dcsevss.mongodb.net/ethiopian_recipe_share","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Server is ready to handle requests","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Access the API at http://localhost:5000/api/v1","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Starting server initialization...","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Connecting to MongoDB...","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Attempting to connect to MongoDB with URI: cluster0.dcsevss.mongodb.net/ethiopian_recipe_share","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Creating new MongoDB connection...","service":"ethiopian-recipe-share"}
+{"level":"info","message":"MongoDB connection promise created","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Waiting for MongoDB connection to establish...","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Mongoose connected to MongoDB","service":"ethiopian-recipe-share"}
+{"level":"info","message":"MongoDB connection established successfully","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Successfully connected to MongoDB","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Attempting to start server on port 5000...","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Starting HTTP server on port 5000...","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Server running in development mode on :::5000","service":"ethiopian-recipe-share"}
+{"level":"info","message":"MongoDB URI: cluster0.dcsevss.mongodb.net/ethiopian_recipe_share","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Server is ready to handle requests","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Access the API at http://localhost:5000/api/v1","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Starting server initialization...","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Connecting to MongoDB...","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Attempting to connect to MongoDB with URI: cluster0.dcsevss.mongodb.net/ethiopian_recipe_share","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Creating new MongoDB connection...","service":"ethiopian-recipe-share"}
+{"level":"info","message":"MongoDB connection promise created","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Waiting for MongoDB connection to establish...","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Mongoose connected to MongoDB","service":"ethiopian-recipe-share"}
+{"level":"info","message":"MongoDB connection established successfully","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Successfully connected to MongoDB","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Attempting to start server on port 5000...","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Starting HTTP server on port 5000...","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Server running in development mode on :::5000","service":"ethiopian-recipe-share"}
+{"level":"info","message":"MongoDB URI: cluster0.dcsevss.mongodb.net/ethiopian_recipe_share","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Server is ready to handle requests","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Access the API at http://localhost:5000/api/v1","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Starting server initialization...","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Connecting to MongoDB...","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Attempting to connect to MongoDB with URI: cluster0.dcsevss.mongodb.net/ethiopian_recipe_share","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Creating new MongoDB connection...","service":"ethiopian-recipe-share"}
+{"level":"info","message":"MongoDB connection promise created","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Waiting for MongoDB connection to establish...","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Mongoose connected to MongoDB","service":"ethiopian-recipe-share"}
+{"level":"info","message":"MongoDB connection established successfully","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Successfully connected to MongoDB","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Attempting to start server on port 5000...","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Starting HTTP server on port 5000...","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Server running in development mode on :::5000","service":"ethiopian-recipe-share"}
+{"level":"info","message":"MongoDB URI: cluster0.dcsevss.mongodb.net/ethiopian_recipe_share","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Server is ready to handle requests","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Access the API at http://localhost:5000/api/v1","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Starting server initialization...","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Connecting to MongoDB...","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Attempting to connect to MongoDB with URI: cluster0.dcsevss.mongodb.net/ethiopian_recipe_share","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Creating new MongoDB connection...","service":"ethiopian-recipe-share"}
+{"level":"info","message":"MongoDB connection promise created","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Waiting for MongoDB connection to establish...","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Mongoose connected to MongoDB","service":"ethiopian-recipe-share"}
+{"level":"info","message":"MongoDB connection established successfully","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Successfully connected to MongoDB","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Attempting to start server on port 5000...","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Starting HTTP server on port 5000...","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Server running in development mode on :::5000","service":"ethiopian-recipe-share"}
+{"level":"info","message":"MongoDB URI: cluster0.dcsevss.mongodb.net/ethiopian_recipe_share","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Server is ready to handle requests","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Access the API at http://localhost:5000/api/v1","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Starting server initialization...","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Connecting to MongoDB...","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Attempting to connect to MongoDB with URI: cluster0.dcsevss.mongodb.net/ethiopian_recipe_share","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Creating new MongoDB connection...","service":"ethiopian-recipe-share"}
+{"level":"info","message":"MongoDB connection promise created","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Waiting for MongoDB connection to establish...","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Mongoose connected to MongoDB","service":"ethiopian-recipe-share"}
+{"level":"info","message":"MongoDB connection established successfully","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Successfully connected to MongoDB","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Attempting to start server on port 5000...","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Starting HTTP server on port 5000...","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Server running in development mode on :::5000","service":"ethiopian-recipe-share"}
+{"level":"info","message":"MongoDB URI: cluster0.dcsevss.mongodb.net/ethiopian_recipe_share","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Server is ready to handle requests","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Access the API at http://localhost:5000/api/v1","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Starting server initialization...","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Connecting to MongoDB...","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Attempting to connect to MongoDB with URI: cluster0.dcsevss.mongodb.net/ethiopian_recipe_share","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Creating new MongoDB connection...","service":"ethiopian-recipe-share"}
+{"level":"info","message":"MongoDB connection promise created","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Waiting for MongoDB connection to establish...","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Mongoose connected to MongoDB","service":"ethiopian-recipe-share"}
+{"level":"info","message":"MongoDB connection established successfully","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Successfully connected to MongoDB","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Attempting to start server on port 5000...","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Starting HTTP server on port 5000...","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Server running in development mode on :::5000","service":"ethiopian-recipe-share"}
+{"level":"info","message":"MongoDB URI: cluster0.dcsevss.mongodb.net/ethiopian_recipe_share","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Server is ready to handle requests","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Access the API at http://localhost:5000/api/v1","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Starting server initialization...","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Connecting to MongoDB...","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Attempting to connect to MongoDB with URI: cluster0.dcsevss.mongodb.net/ethiopian_recipe_share","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Creating new MongoDB connection...","service":"ethiopian-recipe-share"}
+{"level":"info","message":"MongoDB connection promise created","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Waiting for MongoDB connection to establish...","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Mongoose connected to MongoDB","service":"ethiopian-recipe-share"}
+{"level":"info","message":"MongoDB connection established successfully","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Successfully connected to MongoDB","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Attempting to start server on port 5000...","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Starting HTTP server on port 5000...","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Server running in development mode on :::5000","service":"ethiopian-recipe-share"}
+{"level":"info","message":"MongoDB URI: cluster0.dcsevss.mongodb.net/ethiopian_recipe_share","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Server is ready to handle requests","service":"ethiopian-recipe-share"}
+{"level":"info","message":"Access the API at http://localhost:5000/api/v1","service":"ethiopian-recipe-share"}
