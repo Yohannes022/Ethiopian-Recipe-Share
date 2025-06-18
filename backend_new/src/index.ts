@@ -63,6 +63,8 @@ import categoryRoutes from '@/routes/category.routes';
 import searchRoutes from '@/routes/search.routes';
 import analyticsRoutes from '@/routes/analytics.routes';
 import uploadRoutes from '@/routes/upload.routes';
+import notificationRoutes from '@/routes/notification.routes';
+import favoriteRoutes from '@/routes/favorite.routes';
 
 // Mount routes
 app.use('/api/v1', healthRoutes);
@@ -78,6 +80,8 @@ app.use('/api/v1/categories', categoryRoutes);
 app.use('/api/v1/search', searchRoutes);
 app.use('/api/v1/analytics', analyticsRoutes);
 app.use('/api/v1/upload', uploadRoutes);
+app.use('/api/v1/notifications', notificationRoutes);
+app.use('/api/v1/favorites', favoriteRoutes);
 
 // API Routes will be mounted here
 // app.use('/api/v1/users', userRoutes);

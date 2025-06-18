@@ -161,12 +161,22 @@ const restaurantSchema = new Schema<IRestaurant>(
   }
 );
 
-// Indexes
-restaurantSchema.index({ name: 'text', description: 'text' });
+// Indexes for efficient querying
+restaurantSchema.index({ name: 1 });
 restaurantSchema.index({ 'address.city': 1 });
 restaurantSchema.index({ 'address.coordinates': '2dsphere' });
 restaurantSchema.index({ cuisineType: 1 });
 restaurantSchema.index({ owner: 1 });
+restaurantSchema.index({ rating: 1 });
+restaurantSchema.index({ createdAt: -1 });
+// Add text index for search
+restaurantSchema.index({
+  name: 'text',
+  description: 'text',
+  cuisineType: 'text',
+  'address.city': 'text',
+  'address.state': 'text'
+});
 
 // Virtual for reviews (to be implemented later)
 restaurantSchema.virtual('reviews', {

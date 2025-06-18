@@ -48,6 +48,11 @@ categorySchema.pre('save', function(next) {
 
 // Create indexes for efficient querying
 categorySchema.index({ name: 1 });
+// Add text index for search
+categorySchema.index({
+  name: 'text',
+  description: 'text'
+});
 
 const Category = mongoose.model<ICategory>('Category', categorySchema);
 

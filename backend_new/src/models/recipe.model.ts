@@ -235,6 +235,21 @@ recipeSchema.post('save', function () {
   this.constructor.calcAverageRatings(this._id);
 });
 
+// Create indexes for efficient querying
+recipeSchema.index({ title: 1 });
+recipeSchema.index({ description: 1 });
+recipeSchema.index({ cuisine: 1 });
+recipeSchema.index({ mealType: 1 });
+recipeSchema.index({ createdAt: -1 });
+// Add text index for search
+recipeSchema.index({
+  title: 'text',
+  description: 'text',
+  cuisine: 'text',
+  mealType: 'text',
+  dietaryRestrictions: 'text'
+});
+
 const Recipe = mongoose.model<IRecipe>('Recipe', recipeSchema);
 
 export default Recipe;
