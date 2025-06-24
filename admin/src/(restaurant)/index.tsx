@@ -6,40 +6,52 @@ import {
   TextInput,
   TouchableOpacity,
   ScrollView,
+  ActivityIndicator,
 } from 'react-native';
 import { useAuthStore } from '../store/authStore';
-import { colors, spacing } from '../styles/theme';
+import { colors, spacing, typography } from '../styles/theme';
+import { useRouter } from 'expo-router';
 
 export default function LoginScreen() {
-  const { login } = useAuthStore();
+  const { login, error, isAuthenticated, loading, clearError } = useAuthStore();
   const [email, setEmail] = React.useState('');
   const [password, setPassword] = React.useState('');
-  const [error, setError] = React.useState('');
-  const [isLoading, setIsLoading] = React.useState(false);
+  const router = useRouter();
 
   const handleLogin = async () => {
+    if (!email || !password) {
+      clearError();
+      return;
+    }
+
     try {
-      setIsLoading(true);
-      setError('');
-
-      // TODO: Replace with actual API call
-      const mockLogin = async () => {
-        return {
-          token: 'mock-token',
-          role: 'owner',
-          userId: '123',
-          restaurantId: '456',
-        };
-      };
-
-      const response = await mockLogin();
-      login(response.token, response.role, response.userId, response.restaurantId);
+      await login(email, password);
     } catch (err) {
-      setError('Invalid credentials');
-    } finally {
-      setIsLoading(false);
+      clearError();
     }
   };
+
+  React.useEffect(() => {
+    if (isAuthenticated) {
+      router.replace('/(restaurant)/dashboard');
+    }
+  }, [isAuthenticated, router]);
+
+  if (loading) {
+    return (
+      <View style={styles.container}>
+        <ActivityIndicator size="large" color={colors.primary} />
+      </View>
+    );
+  }
+
+  if (error) {
+    return (
+      <View style={styles.container}>
+        <Text style={styles.error}>{error}</Text>
+      </View>
+    );
+  }
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
@@ -70,12 +82,12 @@ export default function LoginScreen() {
         )}
 
         <TouchableOpacity
-          style={[styles.button, isLoading && styles.buttonLoading]}
+          style={[styles.button, loading && styles.buttonLoading]}
           onPress={handleLogin}
-          disabled={isLoading}
+          disabled={loading}
         >
           <Text style={styles.buttonText}>
-            {isLoading ? 'Loading...' : 'Login'}
+            {loading ? 'Loading...' : 'Login'}
           </Text>
         </TouchableOpacity>
 
@@ -96,54 +108,54 @@ const styles = StyleSheet.create({
   container: {
     flexGrow: 1,
     backgroundColor: colors.background,
-    padding: spacing.xl,
+    padding: spacing.md,
+    justifyContent: 'center',
   },
   logoContainer: {
     alignItems: 'center',
-    justifyContent: 'center',
     marginBottom: spacing.xl,
   },
   logo: {
-    fontSize: 32,
-    fontWeight: 'bold',
+    fontSize: typography.h1.fontSize,
+    fontWeight: typography.h1.fontWeight as 'bold',
     color: colors.text,
-    marginBottom: spacing.sm,
   },
   form: {
     width: '100%',
   },
   input: {
     backgroundColor: colors.light,
-    borderRadius: 8,
-    padding: spacing.sm,
+    borderRadius: spacing.sm,
+    padding: spacing.md,
     marginBottom: spacing.sm,
     color: colors.text,
-  },
-  error: {
-    color: colors.danger,
-    marginBottom: spacing.sm,
-    textAlign: 'center',
   },
   button: {
     backgroundColor: colors.primary,
-    padding: spacing.sm,
-    borderRadius: 8,
+    borderRadius: spacing.sm,
+    padding: spacing.md,
     alignItems: 'center',
-    marginTop: spacing.sm,
+    marginBottom: spacing.sm,
   },
   buttonLoading: {
-    opacity: 0.7,
+    backgroundColor: colors.secondary,
   },
   buttonText: {
     color: colors.light,
-    fontWeight: 'bold',
+    ...typography.body,
+  },
+  error: {
+    color: colors.danger,
+    textAlign: 'center',
+    marginBottom: spacing.sm,
   },
   registerButton: {
-    marginTop: spacing.sm,
     alignItems: 'center',
   },
   registerText: {
-    color: colors.text,
+    color: colors.secondary,
     textDecorationLine: 'underline',
+    fontSize: typography.body.fontSize,
+    lineHeight: typography.body.lineHeight,
   },
 });

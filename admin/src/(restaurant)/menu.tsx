@@ -10,7 +10,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { useAuthStore } from '../store/authStore';
-import { colors, spacing } from '../styles/theme';
+import { colors, spacing, typography, shadows, borders } from '../styles/theme';
 
 interface MenuItem {
   id: string;
@@ -29,7 +29,7 @@ interface MenuCategory {
 }
 
 export default function MenuScreen() {
-  const { userRole, token } = useAuthStore();
+  const { userRole, token, restaurantId } = useAuthStore();
   const [menu, setMenu] = React.useState<MenuCategory[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
@@ -106,58 +106,135 @@ export default function MenuScreen() {
   };
 
   const handleAddItem = async () => {
+    if (!newItem.name || !newItem.price || !newItem.description) {
+      setError('Please fill in all fields');
+      return;
+    }
+
     try {
-      if (!newItem.name || !newItem.price || !newItem.category) {
-        setError('Please fill in all required fields');
-        return;
+      // TODO: Implement API call
+      const response = await fetch(`http://localhost:3000/api/v1/restaurants/${restaurantId}/menu`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(newItem),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to add menu item');
       }
 
-      // TODO: Replace with actual API call
-      const mockAddItem = async () => {
-        return { success: true, message: 'Item added successfully' };
-      };
-
-      await mockAddItem();
-      await fetchMenu();
+      const data = await response.json();
+      const categoryIndex = menu.findIndex(cat => cat.name === data.category);
+      if (categoryIndex === -1) {
+        // Create new category
+        setMenu([...menu, {
+          id: data.id,
+          name: data.category,
+          items: [{
+            id: data.id,
+            name: data.name,
+            description: data.description,
+            price: data.price,
+            category: data.category,
+            isAvailable: data.isAvailable,
+            imageUrl: data.imageUrl,
+          }]
+        }]);
+      } else {
+        // Add to existing category
+        const updatedMenu = [...menu];
+        updatedMenu[categoryIndex] = {
+          ...updatedMenu[categoryIndex],
+          items: [...updatedMenu[categoryIndex].items, {
+            id: data.id,
+            name: data.name,
+            description: data.description,
+            price: data.price,
+            category: data.category,
+            isAvailable: data.isAvailable,
+            imageUrl: data.imageUrl,
+          }]
+        };
+        setMenu(updatedMenu);
+      }
+      setNewItem({ name: '', description: '', price: 0, category: '', isAvailable: true });
       setShowAddModal(false);
-      setNewItem({
-        name: '',
-        description: '',
-        price: 0,
-        category: '',
-        isAvailable: true,
-      });
+      setError('');
     } catch (error) {
-      setError('Failed to add item');
+      setError(error instanceof Error ? error.message : 'An error occurred');
     }
   };
 
   const handleEditItem = async (item: MenuItem) => {
     try {
-      // TODO: Replace with actual API call
-      const mockEditItem = async () => {
-        return { success: true, message: 'Item updated successfully' };
-      };
+      // TODO: Implement API call
+      const response = await fetch(`http://localhost:3000/api/v1/restaurants/${restaurantId}/menu/${item.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(item),
+      });
 
-      await mockEditItem();
-      await fetchMenu();
+      if (!response.ok) {
+        throw new Error('Failed to update menu item');
+      }
+
+      const data = await response.json();
+      
+      // Update the menu state with the new item data
+      setMenu(menu.map(category => {
+        if (category.name !== item.category) return category; // Skip categories that don't match
+        return {
+          ...category,
+          items: category.items.map(menuItem => 
+            menuItem.id === item.id ? {
+              ...menuItem,
+              ...data
+            } : menuItem
+          )
+        };
+      }));
+
+      setSelectedItem(null);
       setShowEditModal(false);
     } catch (error) {
-      setError('Failed to update item');
+      setError(error instanceof Error ? error.message : 'An error occurred');
     }
   };
 
   const handleDeleteItem = async (itemId: string) => {
     try {
-      // TODO: Replace with actual API call
-      const mockDeleteItem = async () => {
-        return { success: true, message: 'Item deleted successfully' };
-      };
+      // TODO: Implement API call
+      const response = await fetch(`http://localhost:3000/api/v1/restaurants/${restaurantId}/menu/${itemId}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
-      await mockDeleteItem();
-      await fetchMenu();
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to delete menu item');
+      }
+
+      // Update the menu state by removing the item
+      setMenu(menu.map(category => {
+        const updatedItems = category.items.filter(item => item.id !== itemId);
+        return {
+          ...category,
+          items: updatedItems
+        };
+      }));
+
+      setError('');
     } catch (error) {
-      setError('Failed to delete item');
+      setError(error instanceof Error ? error.message : 'Failed to delete menu item');
     }
   };
 
@@ -169,10 +246,10 @@ export default function MenuScreen() {
     );
   }
 
-  if (!menu) {
+  if (!menu.length) {
     return (
       <View style={styles.container}>
-        <Text style={styles.error}>Failed to load menu</Text>
+        <Text style={styles.error}>No menu items found</Text>
       </View>
     );
   }
@@ -188,8 +265,10 @@ export default function MenuScreen() {
           <Text style={styles.addButtonText}>Add Item</Text>
         </TouchableOpacity>
       </View>
+      
+      {error ? <Text style={styles.error}>{error}</Text> : null}
 
-      <ScrollView style={styles.menuContainer}>
+      <ScrollView style={styles.scrollView}>
         {menu.map((category) => (
           <View key={category.id} style={styles.category}>
             <Text style={styles.categoryTitle}>{category.name}</Text>
@@ -198,11 +277,11 @@ export default function MenuScreen() {
                 <View style={styles.itemDetails}>
                   <Text style={styles.itemName}>{item.name}</Text>
                   <Text style={styles.itemDescription}>{item.description}</Text>
-                  <Text style={styles.itemPrice}>${item.price}</Text>
+                  <Text style={styles.itemPrice}>${item.price.toFixed(2)}</Text>
                 </View>
                 <View style={styles.itemActions}>
                   <TouchableOpacity
-                    style={styles.actionButton}
+                    style={[styles.actionButton, styles.editButton]}
                     onPress={() => {
                       setSelectedItem(item);
                       setShowEditModal(true);
@@ -227,6 +306,7 @@ export default function MenuScreen() {
       <Modal
         visible={showAddModal}
         onRequestClose={() => setShowAddModal(false)}
+        transparent
       >
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
@@ -242,15 +322,13 @@ export default function MenuScreen() {
               value={newItem.description}
               onChangeText={(text) => setNewItem({ ...newItem, description: text })}
               style={styles.input}
-              multiline
-              numberOfLines={3}
             />
             <TextInput
               placeholder="Price"
-              value={newItem.price.toString()}
+              value={newItem.price?.toString()}
               onChangeText={(text) => setNewItem({ ...newItem, price: parseFloat(text) || 0 })}
-              style={styles.input}
               keyboardType="numeric"
+              style={styles.input}
             />
             <TextInput
               placeholder="Category"
@@ -261,7 +339,10 @@ export default function MenuScreen() {
             <View style={styles.modalButtons}>
               <TouchableOpacity
                 style={styles.cancelButton}
-                onPress={() => setShowAddModal(false)}
+                onPress={() => {
+                  setShowAddModal(false);
+                  setNewItem({ name: '', description: '', price: 0, category: '', isAvailable: true });
+                }}
               >
                 <Text style={styles.buttonText}>Cancel</Text>
               </TouchableOpacity>
@@ -280,11 +361,54 @@ export default function MenuScreen() {
       <Modal
         visible={showEditModal}
         onRequestClose={() => setShowEditModal(false)}
+        transparent
       >
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
             <Text style={styles.modalTitle}>Edit Item</Text>
-            {/* Similar form fields as Add Item modal */}
+            <TextInput
+              placeholder="Name"
+              value={selectedItem?.name}
+              onChangeText={(text) => setSelectedItem({ ...selectedItem!, name: text })}
+              style={styles.input}
+            />
+            <TextInput
+              placeholder="Description"
+              value={selectedItem?.description}
+              onChangeText={(text) => setSelectedItem({ ...selectedItem!, description: text })}
+              style={styles.input}
+            />
+            <TextInput
+              placeholder="Price"
+              value={selectedItem?.price.toString()}
+              onChangeText={(text) => setSelectedItem({ ...selectedItem!, price: parseFloat(text) || 0 })}
+              keyboardType="numeric"
+              style={styles.input}
+            />
+            <TextInput
+              placeholder="Category"
+              value={selectedItem?.category}
+              onChangeText={(text) => setSelectedItem({ ...selectedItem!, category: text })}
+              style={styles.input}
+            />
+            <View style={styles.modalButtons}>
+              <TouchableOpacity
+                style={styles.cancelButton}
+                onPress={() => setShowEditModal(false)}
+              >
+                <Text style={styles.buttonText}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.saveButton}
+                onPress={() => {
+                  if (selectedItem) {
+                    handleEditItem(selectedItem);
+                  }
+                }}
+              >
+                <Text style={styles.buttonText}>Save</Text>
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
       </Modal>
@@ -305,55 +429,63 @@ const styles = StyleSheet.create({
     marginBottom: spacing.xl,
   },
   title: {
-    fontSize: 24,
-    fontWeight: 'bold',
+    fontSize: typography.h2.fontSize,
+    fontWeight: 'bold' as const,
     color: colors.text,
   },
   addButton: {
     backgroundColor: colors.primary,
     padding: spacing.sm,
-    borderRadius: 8,
+    borderRadius: borders.radius.medium,
   },
   addButtonText: {
     color: colors.light,
     fontWeight: 'bold',
   },
-  menuContainer: {
+  scrollView: {
     flex: 1,
   },
   category: {
     marginBottom: spacing.xl,
   },
   categoryTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
+    fontSize: typography.h3.fontSize,
+    fontWeight: 'bold' as const,
     color: colors.text,
     marginBottom: spacing.sm,
   },
   itemCard: {
     backgroundColor: colors.light,
-    borderRadius: 8,
+    borderRadius: borders.radius.medium,
     padding: spacing.sm,
     marginBottom: spacing.sm,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    shadowColor: colors.dark,
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
   },
   itemDetails: {
     flex: 1,
   },
   itemName: {
-    fontSize: 16,
-    fontWeight: 'bold',
+    fontSize: typography.body.fontSize,
+    fontWeight: 'bold' as const,
     color: colors.text,
   },
   itemDescription: {
+    ...typography.caption,
     color: colors.gray,
-    fontSize: 14,
   },
   itemPrice: {
-    fontSize: 16,
-    fontWeight: 'bold',
+    fontSize: typography.body.fontSize,
+    fontWeight: 'bold' as const,
     color: colors.primary,
   },
   itemActions: {
@@ -362,8 +494,11 @@ const styles = StyleSheet.create({
   },
   actionButton: {
     padding: spacing.sm,
-    borderRadius: 4,
+    borderRadius: borders.radius.small,
     backgroundColor: colors.secondary,
+  },
+  editButton: {
+    backgroundColor: colors.owner.primary,
   },
   deleteButton: {
     backgroundColor: colors.danger,
@@ -381,21 +516,22 @@ const styles = StyleSheet.create({
   modalContent: {
     backgroundColor: colors.light,
     padding: spacing.xl,
-    borderRadius: 8,
+    borderRadius: borders.radius.medium,
     width: '90%',
   },
   modalTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
+    fontSize: typography.h2.fontSize,
+    fontWeight: 'bold' as const,
     color: colors.text,
     marginBottom: spacing.sm,
   },
   input: {
     backgroundColor: colors.background,
-    borderRadius: 8,
+    borderRadius: borders.radius.medium,
     padding: spacing.sm,
     marginBottom: spacing.sm,
     color: colors.text,
+    fontSize: typography.body.fontSize,
   },
   modalButtons: {
     flexDirection: 'row',
@@ -405,13 +541,13 @@ const styles = StyleSheet.create({
   },
   cancelButton: {
     padding: spacing.sm,
-    borderRadius: 4,
+    borderRadius: borders.radius.small,
     backgroundColor: colors.secondary,
   },
   saveButton: {
     padding: spacing.sm,
-    borderRadius: 4,
-    backgroundColor: colors.primary,
+    borderRadius: borders.radius.small,
+    backgroundColor: colors.owner.primary,
   },
   buttonText: {
     color: colors.light,
@@ -419,7 +555,8 @@ const styles = StyleSheet.create({
   },
   error: {
     color: colors.danger,
-    fontSize: 16,
+    fontSize: typography.body.fontSize,
     textAlign: 'center',
+    marginTop: spacing.sm,
   },
 });
