@@ -1,0 +1,32 @@
+﻿{
+  "expo": {
+    "slug": "restaurant-admin",
+    "ios": {
+      "supportsTablet": true
+    },
+    "updates": {
+      "fallbackToCacheTimeout": 0
+    },
+
+    
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#FFFFFF",
+        "foregroundImage": "./assets/adaptive-icon.png"
+      }
+    },
+    "name": "Restaurant Admin",
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "assetBundlePatterns": ["**/*"],
+    "splash": {
+      "backgroundColor": "#ffffff",
+      "resizeMode": "contain",
+      "image": "./assets/splash.png"
+    }
+  }
+}

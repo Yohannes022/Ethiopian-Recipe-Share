@@ -133,7 +133,7 @@ export default function LoginScreen() {
         </View>
 
         <View style={styles.form}>
-          <Text style={styles.label}>I am a</Text>
+          {/*<Text style={styles.label}>I am a</Text>
           <TouchableOpacity
             style={styles.userTypePicker}
             onPress={() => setShowUserTypePicker(!showUserTypePicker)}
@@ -142,7 +142,7 @@ export default function LoginScreen() {
             <ChevronDown size={20} color={colors.text} />
           </TouchableOpacity>
 
-          {showUserTypePicker && (
+           {showUserTypePicker && (
             <View style={styles.userTypeDropdown}>
               <TouchableOpacity
                 style={[
@@ -193,7 +193,7 @@ export default function LoginScreen() {
                 </Text>
               </TouchableOpacity>
             </View>
-          )}
+          )} */}
 
           <Text style={styles.label}>Phone Number</Text>
           <View style={styles.phoneInputContainer}>

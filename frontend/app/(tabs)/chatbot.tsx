@@ -198,7 +198,7 @@ export default function ChatbotScreen() {
           onPress={handleSend}
           disabled={!inputText.trim() || isLoading}
         >
-          <Send size={20} color={colors.white} />
+          <Send size={18} color={colors.white} />
         </TouchableOpacity>
       </View>
     </KeyboardAvoidingView>
@@ -307,29 +307,36 @@ const styles = StyleSheet.create({
     marginLeft: 8,
   },
   inputContainer: {
+    // position: "absolute",
+    bottom: 0,
+    zIndex: 1,
     flexDirection: "row",
-    padding: 16,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 14,
+    paddingVertical: 13,
     backgroundColor: colors.white,
-    borderTopWidth: 1,
+    borderTopWidth: StyleSheet.hairlineWidth,
     borderTopColor: colors.divider,
   },
   input: {
     flex: 1,
+    height: 46,
     backgroundColor: colors.inputBackground,
     borderRadius: 24,
     paddingHorizontal: 16,
-    paddingVertical: 10,
+    paddingVertical: 15,
     paddingRight: 48,
     maxHeight: 100,
     ...typography.body,
   },
   sendButton: {
     position: "absolute",
-    right: 24,
-    bottom: 24,
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    right: 22,
+    bottom: 20,
+    width: 32,
+    height: 32,
+    borderRadius: 18,
     backgroundColor: colors.primary,
     justifyContent: "center",
     alignItems: "center",

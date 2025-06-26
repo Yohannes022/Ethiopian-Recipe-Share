@@ -31,12 +31,14 @@ export default function CategoryPill({
 
 const styles = StyleSheet.create({
   pill: {
-    paddingHorizontal: 16,
+    paddingHorizontal: 13,
     paddingVertical: 8,
     borderRadius: 20,
     backgroundColor: colors.inputBackground,
     marginRight: 8,
-    marginBottom: 8,
+    marginVertical: 4,
+    alignItems: "center",
+    justifyContent: "center",
   },
   selectedPill: {
     backgroundColor: colors.primary,
@@ -44,7 +46,7 @@ const styles = StyleSheet.create({
   pillText: {
     ...typography.caption,
     color: colors.text,
-    fontWeight: "500",
+    fontWeight: "700",
   },
   selectedPillText: {
     color: colors.white,

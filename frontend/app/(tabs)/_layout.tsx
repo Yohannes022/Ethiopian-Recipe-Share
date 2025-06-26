@@ -11,11 +11,15 @@ import {
 } from "lucide-react-native";
 import React from "react";
 import { Platform, StyleSheet } from "react-native";
+import { StatusBar } from "expo-status-bar";
 
 export default function TabsLayout() {
 
   return (
+    <>
+    <StatusBar style="light" />
     <Tabs
+      //statusBar
       screenOptions={{
         tabBarActiveTintColor: colors.primary,
         tabBarInactiveTintColor: colors.lightText,
@@ -39,11 +43,11 @@ export default function TabsLayout() {
           // elevation: 5,
         },
         tabBarItemStyle: {
-          paddingVertical: 4,
+          paddingVertical: 5,
         },
         tabBarLabelStyle: {
-          fontSize: 12,
-          fontWeight: "500",
+          fontSize: 11,
+          fontWeight: "400",
         },
         headerStyle: {
           backgroundColor: colors.background,
@@ -63,52 +67,53 @@ export default function TabsLayout() {
         name="index"
         options={{
           title: "Home",
-          tabBarIcon: ({ color }) => <Home size={24} color={color} />,
+          tabBarIcon: ({ color }) => <Home size={20} color={color} />,
         }}
       />
       <Tabs.Screen
         name="search"
         options={{
           title: "Search",
-          tabBarIcon: ({ color }) => <Search size={24} color={color} />,
+          tabBarIcon: ({ color }) => <Search size={20} color={color} />,
         }}
       />
       <Tabs.Screen
         name="restaurants"
         options={{
           title: "Restaurants",
-          tabBarIcon: ({ color }) => <Utensils size={24} color={color} />,
+          tabBarIcon: ({ color }) => <Utensils size={20} color={color} />,
         }}
       />
       <Tabs.Screen
         name="create"
         options={{
           title: "Create",
-          tabBarIcon: ({ color }) => <Plus size={24} color={color} />,
+          tabBarIcon: ({ color }) => <Plus size={20} color={color} />,
         }}
       />
       <Tabs.Screen
         name="cart"
         options={{
           title: "Cart",
-          tabBarIcon: ({ color }) => <ShoppingBag size={24} color={color} />,
+          tabBarIcon: ({ color }) => <ShoppingBag size={20} color={color} />,
         }}
       />
       <Tabs.Screen
         name="chatbot"
         options={{
           title: "Chat",
-          tabBarIcon: ({ color }) => <MessageSquare size={24} color={color} />,
+          tabBarIcon: ({ color }) => <MessageSquare size={20} color={color} />,
         }}
       />
       <Tabs.Screen
         name="profile"
         options={{
           title: "Profile",
-          tabBarIcon: ({ color }) => <User size={24} color={color} />,
+          tabBarIcon: ({ color }) => <User size={20} color={color} />,
         }}
       />
     </Tabs>
+    </>
   );
 }
 

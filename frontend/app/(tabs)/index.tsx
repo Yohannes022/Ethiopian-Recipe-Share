@@ -10,6 +10,8 @@ import { Image } from "expo-image";
 import { useRouter } from "expo-router";
 import { ChevronRight, MapPin, Star } from "lucide-react-native";
 import React, { useState } from "react";
+// statusBar
+import { StatusBar } from "expo-status-bar";
 import {
   ActivityIndicator,
   Dimensions,
@@ -84,6 +86,8 @@ export default function HomeScreen() {
   }
 
   return (
+    <>
+    <StatusBar style="light" />
     <ScrollView
       style={styles.container}
       showsVerticalScrollIndicator={false}
@@ -208,6 +212,7 @@ export default function HomeScreen() {
         />
       </View>
     </ScrollView>
+    </>
   );
 }
 

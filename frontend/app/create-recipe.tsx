@@ -269,6 +269,8 @@ export default function CreateRecipeScreen() {
         region: region || undefined,
         tags: selectedTags.length > 0 ? selectedTags : ["traditional"],
         creditTo: creditTo.trim() || undefined,
+        restaurantId: "",
+        updatedAt: ""
       });
 
       Alert.alert(
@@ -480,7 +482,7 @@ export default function CreateRecipeScreen() {
             <Text style={styles.errorText}>{errors.ingredients}</Text>
           )}
 
-          {ingredients.map((ingredient, index) => (
+          {ingredients.map((ingredient) => (
             <View key={ingredient.id} style={styles.ingredientRow}>
               <View style={styles.ingredientInputs}>
                 <Input
@@ -653,6 +655,8 @@ const styles = StyleSheet.create({
   row: {
     flexDirection: "row",
     justifyContent: "space-between",
+    alignItems: "center",
+    gap: 16,
   },
   halfInput: {
     width: "48%",
@@ -794,14 +798,20 @@ const styles = StyleSheet.create({
   ingredientRow: {
     flexDirection: "row",
     alignItems: "center",
+    justifyContent: "space-between",
     marginBottom: 12,
   },
   ingredientInputs: {
     flex: 1,
     flexDirection: "row",
+    alignItems: "center",
+    // justifyContent: "space-between",
+    gap: 8,
+    ...typography.body,
+    color: colors.text,
   },
   amountInput: {
-    width: "25%",
+    width: "35%",
     marginRight: 8,
     marginBottom: 0,
   },
