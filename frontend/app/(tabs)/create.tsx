@@ -44,7 +44,7 @@ export default function CreateScreen() {
       <TouchableOpacity
         style={styles.createCard}
         onPress={handleCreateRecipe}
-        activeOpacity={0.8}
+        activeOpacity={1}
       >
         <View style={styles.createCardContent}>
           <View>

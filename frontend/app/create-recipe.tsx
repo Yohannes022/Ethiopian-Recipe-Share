@@ -315,23 +315,42 @@ export default function CreateRecipeScreen() {
         <View style={styles.content}>
           <Text style={styles.sectionTitle}>Recipe Details</Text>
 
-          <Input
-            label="Recipe Title"
-            placeholder="Enter recipe name"
-            value={title}
-            onChangeText={setTitle}
-            error={errors.title}
-          />
+          <View style={styles.inputContainer}>
+            <Text style={styles.label}>Recipe Title</Text>
+            <View style={styles.inputWrapper}>
+              <TextInput
+                style={[
+                  styles.textInput,
+                  !title && styles.emptyInput
+                ]}
+                placeholder="Recipe Title"
+                placeholderTextColor={colors.placeholderText}
+                value={title}
+                onChangeText={setTitle}
+              />
+            </View>
+            {errors.title && <Text style={styles.errorText}>{errors.title}</Text>}
+          </View>
 
-          <Input
-            label="Description"
-            placeholder="Describe your recipe"
-            value={description}
-            onChangeText={setDescription}
-            multiline
-            numberOfLines={4}
-            error={errors.description}
-          />
+          <View style={styles.inputContainer}>
+            <Text style={styles.label}>Description</Text>
+            <View style={[styles.inputWrapper, { minHeight: 100 }]}>
+              <TextInput
+                style={[
+                  styles.textInput,
+                  { textAlignVertical: 'top', minHeight: 100 },
+                  !description && styles.emptyInput
+                ]}
+                placeholder="Enter a brief description of your recipe..."
+                placeholderTextColor={colors.placeholderText}
+                multiline
+                value={description}
+                onChangeText={setDescription}
+                numberOfLines={4}
+              />
+            </View>
+            {errors.description && <Text style={styles.errorText}>{errors.description}</Text>}
+          </View>
 
           <View style={styles.creditContainer}>
             <Award size={20} color={colors.primary} style={styles.creditIcon} />
@@ -372,33 +391,57 @@ export default function CreateRecipeScreen() {
           )}
 
           <View style={styles.row}>
-            <Input
-              label="Prep Time (min)"
-              placeholder="30"
-              value={prepTime}
-              onChangeText={setPrepTime}
-              keyboardType="number-pad"
-              style={styles.halfInput}
-            />
-            <Input
-              label="Cook Time (min)"
-              placeholder="45"
-              value={cookTime}
-              onChangeText={setCookTime}
-              keyboardType="number-pad"
-              style={styles.halfInput}
-            />
+            <View style={[styles.inputContainer, { flex: 1 }]}>
+              <Text style={styles.label}>Prep Time (min)</Text>
+              <View style={styles.inputWrapper}>
+                <TextInput
+                  style={[
+                    styles.textInput,
+                    !prepTime && styles.emptyInput
+                  ]}
+                  placeholder="0"
+                  placeholderTextColor={colors.placeholderText}
+                  keyboardType="numeric"
+                  value={prepTime}
+                  onChangeText={setPrepTime}
+                />
+              </View>
+            </View>
+            <View style={[styles.inputContainer, { flex: 1 }]}>
+              <Text style={styles.label}>Cook Time (min)</Text>
+              <View style={styles.inputWrapper}>
+                <TextInput
+                  style={[
+                    styles.textInput,
+                    !cookTime && styles.emptyInput
+                  ]}
+                  placeholder="45"
+                  placeholderTextColor={colors.placeholderText}
+                  keyboardType="numeric"
+                  value={cookTime}
+                  onChangeText={setCookTime}
+                />
+              </View>
+            </View>
           </View>
 
-          <View style={styles.row}>
-            <Input
-              label="Servings"
-              placeholder="4"
-              value={servings}
-              onChangeText={setServings}
-              keyboardType="number-pad"
-              style={styles.halfInput}
-            />
+          <View style={[styles.row, { marginTop: 20 }]}>
+            <View style={[styles.inputContainer, { flex: 1 }]}>
+              <Text style={styles.label}>Servings</Text>
+              <View style={styles.inputWrapper}>
+                <TextInput
+                  style={[
+                    styles.textInput,
+                    !servings && styles.emptyInput
+                  ]}
+                  placeholder="1"
+                  placeholderTextColor={colors.placeholderText}
+                  keyboardType="numeric"
+                  value={servings}
+                  onChangeText={setServings}
+                />
+              </View>
+            </View>
             <View style={[styles.halfInput, styles.difficultyContainer]}>
               <Text style={styles.label}>Difficulty</Text>
               <View style={styles.difficultyButtons}>
@@ -485,30 +528,50 @@ export default function CreateRecipeScreen() {
           {ingredients.map((ingredient) => (
             <View key={ingredient.id} style={styles.ingredientRow}>
               <View style={styles.ingredientInputs}>
-                <Input
-                  placeholder="Amount"
-                  value={ingredient.amount}
-                  onChangeText={(text) =>
-                    updateIngredient(ingredient.id, "amount", text)
-                  }
-                  style={styles.amountInput}
-                />
-                <Input
-                  placeholder="Unit (optional)"
-                  value={ingredient.unit}
-                  onChangeText={(text) =>
-                    updateIngredient(ingredient.id, "unit", text)
-                  }
-                  style={styles.unitInput}
-                />
-                <Input
-                  placeholder="Ingredient name"
-                  value={ingredient.name}
-                  onChangeText={(text) =>
-                    updateIngredient(ingredient.id, "name", text)
-                  }
-                  style={styles.nameInput}
-                />
+                <View style={[styles.ingredientInput, styles.amountInput]}>
+                  <TextInput
+                    style={[
+                      styles.textInput,
+                      !ingredient.amount && styles.emptyInput
+                    ]}
+                    placeholder="Amount"
+                    placeholderTextColor={colors.placeholderText}
+                    keyboardType="numeric"
+                    value={ingredient.amount}
+                    onChangeText={(text) =>
+                      updateIngredient(ingredient.id, "amount", text)
+                    }
+                  />
+                </View>
+                <View style={[styles.ingredientInput, styles.unitInput]}>
+                  <TextInput
+                    style={[
+                      styles.textInput,
+                      !ingredient.unit && styles.emptyInput
+                    ]}
+                    placeholder="Unit"
+                    placeholderTextColor={colors.placeholderText}
+                    keyboardType="numeric"
+                    value={ingredient.unit}
+                    onChangeText={(text) =>
+                      updateIngredient(ingredient.id, "unit", text)
+                    }
+                  />
+                </View>
+                <View style={[styles.ingredientInput, styles.nameInput]}>
+                  <TextInput
+                    style={[
+                      styles.textInput,
+                      !ingredient.name && styles.emptyInput
+                    ]}
+                    placeholder="Ingredient name"
+                    placeholderTextColor={colors.placeholderText}
+                    value={ingredient.name}
+                    onChangeText={(text) =>
+                      updateIngredient(ingredient.id, "name", text)
+                    }
+                  />
+                </View>
               </View>
               <TouchableOpacity
                 style={styles.removeButton}
@@ -656,7 +719,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    gap: 16,
+    gap: 12,
   },
   halfInput: {
     width: "48%",
@@ -667,7 +730,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.inputBackground,
     borderRadius: 8,
     paddingHorizontal: 12,
-    marginBottom: 16,
+    marginBottom: 12,
   },
   creditIcon: {
     marginRight: 8,
@@ -684,10 +747,34 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     justifyContent: "center",
     alignItems: "center",
-    marginBottom: 16,
+    marginBottom: 12,
     borderWidth: 1,
     borderColor: colors.divider,
     borderStyle: "dashed",
+  },
+  inputContainer: {
+    // marginBottom: 12,
+  },
+  inputWrapper: {
+    backgroundColor: colors.inputBackground,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: colors.divider,
+    justifyContent: 'center',
+  },
+  textInput: {
+    ...typography.body,
+    color: colors.text,
+    fontSize: 15,
+    padding: 14,
+    width: '100%',
+  },
+  // Style for input when it's empty (showing placeholder)
+  emptyInput: {
+    color: colors.placeholderText,
+  },
+  inputPlaceholder: {
+    color: colors.lightText + '99', // Slightly transparent light text for placeholders
   },
   imagePickerText: {
     ...typography.body,
@@ -695,7 +782,7 @@ const styles = StyleSheet.create({
     marginTop: 12,
   },
   imagePreviewContainer: {
-    marginBottom: 16,
+    marginBottom: 12,
     position: "relative",
   },
   imagePreview: {
@@ -717,7 +804,8 @@ const styles = StyleSheet.create({
     color: colors.white,
   },
   difficultyContainer: {
-    marginBottom: 16,
+    width: '48%',
+    // marginTop: 12,
   },
   difficultyButtons: {
     flexDirection: "row",
@@ -745,7 +833,7 @@ const styles = StyleSheet.create({
   },
   regionsContainer: {
     flexDirection: "row",
-    marginBottom: 16,
+    marginBottom: 12,
   },
   regionButton: {
     paddingHorizontal: 16,
@@ -769,7 +857,7 @@ const styles = StyleSheet.create({
   tagsContainer: {
     flexDirection: "row",
     flexWrap: "wrap",
-    marginBottom: 16,
+    marginBottom: 12,
   },
   tagButton: {
     paddingHorizontal: 16,
@@ -793,7 +881,7 @@ const styles = StyleSheet.create({
   divider: {
     height: 1,
     backgroundColor: colors.divider,
-    marginVertical: 24,
+    marginVertical: 12,
   },
   ingredientRow: {
     flexDirection: "row",
@@ -805,10 +893,23 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: "row",
     alignItems: "center",
-    // justifyContent: "space-between",
     gap: 8,
     ...typography.body,
     color: colors.text,
+  },
+  ingredientInput: {
+    backgroundColor: colors.inputBackground,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: colors.divider,
+    justifyContent: 'center',
+  },
+  ingredientTextInput: {
+    ...typography.body,
+    color: colors.text,
+    fontSize: 15,
+    padding: 10,
+    width: '100%',
   },
   amountInput: {
     width: "35%",
@@ -846,7 +947,7 @@ const styles = StyleSheet.create({
     fontWeight: "500",
   },
   stepContainer: {
-    marginBottom: 16,
+    marginBottom: 12,
   },
   stepHeader: {
     flexDirection: "row",
@@ -872,7 +973,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.error + "15",
     padding: 12,
     borderRadius: 8,
-    marginTop: 16,
+    marginTop: 12,
   },
   contentErrorText: {
     ...typography.body,
@@ -883,7 +984,7 @@ const styles = StyleSheet.create({
   validationResultContainer: {
     padding: 16,
     borderRadius: 8,
-    marginTop: 16,
+    marginTop: 12,
   },
   validContainer: {
     backgroundColor: colors.success + "15",

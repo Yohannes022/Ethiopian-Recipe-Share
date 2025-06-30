@@ -12,7 +12,7 @@ const colors = {
   // Text colors
   text: "#000000",
   lightText: "#666666",
-  placeholderText: "#999999",
+  placeholderText: "#757575", // Darker gray for better visibility
   
   // Status colors (using grayscale)
   success: "#888888",

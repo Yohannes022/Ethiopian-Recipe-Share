@@ -1,32 +1,42 @@
-﻿{
+{
   "expo": {
+    "name": "Restaurant Admin",
     "slug": "restaurant-admin",
-    "ios": {
-      "supportsTablet": true
-    },
-    "updates": {
-      "fallbackToCacheTimeout": 0
-    },
-
-    
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "updates": {
+      "fallbackToCacheTimeout": 0,
+      "url": "https://u.expo.dev/your-project-id"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.yourcompany.restaurantadmin"
+    },
     "android": {
       "adaptiveIcon": {
-        "backgroundColor": "#FFFFFF",
-        "foregroundImage": "./assets/adaptive-icon.png"
-      }
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#FFFFFF"
+      },
+      "package": "com.yourcompany.restaurantadmin"
     },
-    "name": "Restaurant Admin",
     "web": {
       "favicon": "./assets/favicon.png"
     },
-    "assetBundlePatterns": ["**/*"],
-    "splash": {
-      "backgroundColor": "#ffffff",
-      "resizeMode": "contain",
-      "image": "./assets/splash.png"
-    }
+    "extra": {
+      "eas": {
+        "projectId": "your-project-id"
+      }
+    },
+    "owner": "your-username"
   }
 }
