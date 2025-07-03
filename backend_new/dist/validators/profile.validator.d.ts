@@ -1,2 +1,0 @@
-export declare const updateProfileValidator: (((validations: import("express-validator").ValidationChain[]) => (req: import("express").Request, res: import("express").Response, next: import("express").NextFunction) => Promise<void>) | import("express-validator").ValidationChain)[];
-export declare const userIdValidator: (((validations: import("express-validator").ValidationChain[]) => (req: import("express").Request, res: import("express").Response, next: import("express").NextFunction) => Promise<void>) | import("express-validator").ValidationChain)[];
