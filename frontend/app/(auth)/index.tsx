@@ -12,7 +12,7 @@ export default function WelcomeScreen() {
   const isTablet = width > 768;
 
   const handleGetStarted = () => {
-    router.push("/login");
+    router.push("/register");
   };
 
   const handleRestaurantOwner = () => {
@@ -26,11 +26,6 @@ export default function WelcomeScreen() {
           uri: "https://images.unsplash.com/photo-1567364816519-cbc9c4ffe1eb?q=80&w=1000",
         }}
         style={styles.backgroundImage}
-      />
-      
-      <LinearGradient
-        colors={["transparent", "rgba(0,0,0,0.7)", "rgba(0,0,0,0.9)"]}
-        style={styles.gradient}
       />
       
       <SafeAreaView style={styles.content}>
@@ -55,9 +50,7 @@ export default function WelcomeScreen() {
             onPress={handleRestaurantOwner}
             variant="outline"
             size="large"
-            fullWidth
-            style={styles.secondaryButton}
-            textStyle={styles.secondaryButtonText}
+            fullWidth 
           />
           
           <Text style={styles.termsText}>
@@ -72,14 +65,12 @@ export default function WelcomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    padding: 24,
   },
   backgroundImage: {
     ...StyleSheet.absoluteFillObject,
     width: "100%",
     height: "100%",
-  },
-  gradient: {
-    ...StyleSheet.absoluteFillObject,
   },
   content: {
     flex: 1,
@@ -92,32 +83,33 @@ const styles = StyleSheet.create({
   },
   title: {
     ...typography.heading1,
-    color: colors.white,
+    color: colors.black,
     fontSize: 36,
     textAlign: "center",
     marginBottom: 16,
   },
   subtitle: {
     ...typography.body,
-    color: colors.white,
+    color: colors.black,
     textAlign: "center",
     opacity: 0.9,
     fontSize: 18,
   },
   footer: {
     marginBottom: 24,
+    alignItems: "center",
+    gap: 16,
   },
   secondaryButton: {
     marginTop: 16,
-    backgroundColor: "rgba(255, 255, 255, 0.2)",
-    borderColor: colors.white,
+    borderColor: colors.black,
   },
   secondaryButtonText: {
-    color: colors.white,
+    color: colors.black,
   },
   termsText: {
     ...typography.caption,
-    color: colors.white,
+    color: colors.black,
     opacity: 0.7,
     textAlign: "center",
     marginTop: 24,

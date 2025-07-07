@@ -19,7 +19,7 @@ export default function AuthLayout() {
       <Stack.Screen
         name="index"
         options={{
-          title: "Welcome",
+          title: "",
           headerShown: false,
         }}
       />

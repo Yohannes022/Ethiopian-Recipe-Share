@@ -4,9 +4,11 @@ import colors from "@/constants/colors";
 import countryCodes, { formatPhoneNumber } from "@/constants/countryCodes";
 import typography from "@/constants/typography";
 import { useAuthStore } from "@/store/authStore";
-import { CountryCode, UserRole } from "@/types/auth";
-import { Image } from "expo-image";
+import { CountryCode } from "@/types/auth";
+import { Image, ImageStyle } from "expo-image";
+import { StyleProp, TextStyle, ViewStyle } from "react-native";
 import { useRouter } from "expo-router";
+import { UserRole } from "@/types/user";
 import { ChevronDown, ChevronRight } from "lucide-react-native";
 import React, { useState } from "react";
 import {
@@ -20,49 +22,138 @@ import {
   View
 } from "react-native";
 
-export default function LoginScreen() {
+export default function LoginScreen(): React.ReactElement {
+  /**
+   * Login Screen Component
+   * 
+   * Handles user authentication through phone number or email/password.
+   * Users can switch between login methods and navigate to registration.
+   * 
+   * @component
+   * @example
+   * // Example API calls:
+   * 
+   * // Phone Login
+   * fetch('/api/auth/login', {
+   *   method: 'POST',
+   *   headers: { 'Content-Type': 'application/json' },
+   *   body: JSON.stringify({
+   *     phone: '+1234567890',
+   *     userType: 'user'
+   *   })
+   * });
+   * 
+   * // Email Login
+   * fetch('/api/auth/login', {
+   *   method: 'POST',
+   *   headers: { 'Content-Type': 'application/json' },
+   *   body: JSON.stringify({
+   *     email: 'user@example.com',
+   *     password: 'yourpassword',
+   *     userType: 'user'
+   *   })
+   * });
+   * 
+   * // Registration
+   * fetch('/api/auth/register', {
+   *   method: 'POST',
+   *   headers: { 'Content-Type': 'application/json' },
+   *   body: JSON.stringify({
+   *     email: 'user@example.com',
+   *     password: 'yourpassword',
+   *     userType: 'user',
+   *     name: 'John Doe',
+   *     // ... other user data
+   *   })
+   * });
+   */
   const router = useRouter();
   const { login, isLoading, error } = useAuthStore();
-  const [phoneNumber, setPhoneNumber] = useState("");
-  const [countryCode, setCountryCode] = useState("+1");
-  const [selectedCountry, setSelectedCountry] = useState<CountryCode>(countryCodes[0]);
+  const [isPhoneLogin, setIsPhoneLogin] = useState(true);
   const [showCountryPicker, setShowCountryPicker] = useState(false);
+  const [selectedCountry, setSelectedCountry] = useState<CountryCode>({
+    name: "Ethiopia",
+    code: "+251",
+    flag: "",
+    minLength: 9,
+    maxLength: 9
+  });
+  const [countryCode, setCountryCode] = useState("+251");
+  const [phoneNumber, setPhoneNumber] = useState("");
   const [phoneError, setPhoneError] = useState("");
-  const [userType, setUserType] = useState<UserRole>("user");
-  const [showUserTypePicker, setShowUserTypePicker] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [formError, setFormError] = useState("");
 
-  const validatePhoneNumber = () => {
-    if (!phoneNumber.trim()) {
-      setPhoneError("Phone number is required");
-      return false;
-    }
-    
-    const cleanedNumber = phoneNumber.replace(/\D/g, "");
-    
-    if (selectedCountry.minLength && cleanedNumber.length < selectedCountry.minLength) {
-      setPhoneError(`Phone number must be at least ${selectedCountry.minLength} digits`);
-      return false;
-    }
-    
-    if (selectedCountry.maxLength && cleanedNumber.length > selectedCountry.maxLength) {
-      setPhoneError(`Phone number cannot exceed ${selectedCountry.maxLength} digits`);
-      return false;
-    }
-    
+  /**
+   * Validates the login form based on the selected login method
+   * @returns {boolean} True if form is valid, false otherwise
+   */
+  const validateForm = () => {
+    // Clear previous errors
     setPhoneError("");
-    return true;
+    setFormError("");
+
+    if (isPhoneLogin) {
+      if (!phoneNumber.trim()) {
+        setPhoneError("Phone number is required");
+        return false;
+      }
+      
+      const cleanedNumber = phoneNumber.replace(/\D/g, "");
+      
+      if (selectedCountry.minLength && cleanedNumber.length < selectedCountry.minLength) {
+        setPhoneError(`Phone number must be at least ${selectedCountry.minLength} digits`);
+        return false;
+      }
+      
+      if (selectedCountry.maxLength && cleanedNumber.length > selectedCountry.maxLength) {
+        setPhoneError(`Phone number cannot exceed ${selectedCountry.maxLength} digits`);
+        return false;
+      }
+      
+      return true;
+    } else {
+      // Email validation regex
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      
+      if (!email.trim()) {
+        setFormError("Email is required");
+        return false;
+      } else if (!emailRegex.test(email.trim())) {
+        setFormError("Please enter a valid email address");
+        return false;
+      }
+      
+      if (!password.trim()) {
+        setFormError("Password is required");
+        return false;
+      }
+      
+      return true;
+    }
   };
 
+  /**
+   * Handles the login form submission
+   */
   const handleLogin = async () => {
-    if (!validatePhoneNumber()) {
+    if (!validateForm()) {
       return;
     }
     
     try {
-      await login(countryCode + phoneNumber, userType);
-      router.push("/(auth)/verify");
-    } catch (error) {
+      if (isPhoneLogin) {
+        await login(countryCode + phoneNumber, UserRole.USER);
+        router.push("/(auth)/verify");
+      } else {
+        // For email login, the login function will use the default role
+        await login(email, password);
+        router.push("/");
+      }
+    } catch (error: any) {
       console.error("Login error:", error);
+      setFormError(error?.message || "An error occurred during login");
     }
   };
 
@@ -74,20 +165,8 @@ export default function LoginScreen() {
     setPhoneError("");
   };
 
-  const handleUserTypeSelect = (type: UserRole) => {
-    setUserType(type);
-    setShowUserTypePicker(false);
-  };
-
-  const getUserTypeLabel = () => {
-    switch (userType) {
-      case "owner":
-        return "Restaurant Owner";
-      case "manager":
-        return "Restaurant Manager";
-      default:
-        return "Customer";
-    }
+  const toggleLoginMethod = () => {
+    setIsPhoneLogin(!isPhoneLogin);
   };
 
   const handlePhoneNumberChange = (text: string) => {
@@ -98,19 +177,20 @@ export default function LoginScreen() {
 
   const getPhoneInputPlaceholder = () => {
     switch (countryCode) {
+      case "+251":
+        return "911234567";
       case "+1":
         return "(555) 123-4567";
       case "+44":
         return "7911 123456";
       case "+91":
         return "9876543210";
-      case "+251":
-        return "911234567";
       default:
         return "Phone number";
     }
   };
 
+  // Move styles to the bottom to avoid reference errors
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : "height"}
@@ -125,6 +205,7 @@ export default function LoginScreen() {
             source={require("@/assets/images/icon.png")}
             style={styles.logo}
             contentFit="contain"
+            transition={1000}
           />
           <Text style={styles.title}>Welcome Back</Text>
           <Text style={styles.subtitle}>
@@ -133,97 +214,63 @@ export default function LoginScreen() {
         </View>
 
         <View style={styles.form}>
-          {/*<Text style={styles.label}>I am a</Text>
-          <TouchableOpacity
-            style={styles.userTypePicker}
-            onPress={() => setShowUserTypePicker(!showUserTypePicker)}
-          >
-            <Text style={styles.userTypeText}>{getUserTypeLabel()}</Text>
-            <ChevronDown size={20} color={colors.text} />
-          </TouchableOpacity>
 
-           {showUserTypePicker && (
-            <View style={styles.userTypeDropdown}>
-              <TouchableOpacity
-                style={[
-                  styles.userTypeOption,
-                  userType === "user" && styles.selectedUserType,
-                ]}
-                onPress={() => handleUserTypeSelect("user")}
-              >
-                <Text
-                  style={[
-                    styles.userTypeOptionText,
-                    userType === "user" && styles.selectedUserTypeText,
-                  ]}
+          {isPhoneLogin ? (
+            <>
+              <Text style={styles.label}>Phone Number</Text>
+              <View style={styles.phoneInputContainer}>
+                <TouchableOpacity
+                  style={styles.countryCodeButton}
+                  onPress={() => setShowCountryPicker(!showCountryPicker)}
                 >
-                  Customer
+                  <Text style={styles.countryCodeText}>{countryCode}</Text>
+                  <ChevronDown size={16} color={colors.text} />
+                </TouchableOpacity>
+                <TextInput
+                  style={styles.phoneInput}
+                  placeholder={getPhoneInputPlaceholder()}
+                  placeholderTextColor={colors.placeholderText}
+                  keyboardType="phone-pad"
+                  value={phoneNumber}
+                  onChangeText={handlePhoneNumberChange}
+                  maxLength={15}
+                />
+              </View>
+              
+              {phoneError ? (
+                <Text style={styles.errorText}>{phoneError}</Text>
+              ) : (
+                <Text style={styles.helperText}>
+                  We'll send a verification code to this number
                 </Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[
-                  styles.userTypeOption,
-                  userType === "owner" && styles.selectedUserType,
-                ]}
-                onPress={() => handleUserTypeSelect("owner")}
-              >
-                <Text
-                  style={[
-                    styles.userTypeOptionText,
-                    userType === "owner" && styles.selectedUserTypeText,
-                  ]}
-                >
-                  Restaurant Owner
-                </Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[
-                  styles.userTypeOption,
-                  userType === "manager" && styles.selectedUserType,
-                ]}
-                onPress={() => handleUserTypeSelect("manager")}
-              >
-                <Text
-                  style={[
-                    styles.userTypeOptionText,
-                    userType === "manager" && styles.selectedUserTypeText,
-                  ]}
-                >
-                  Restaurant Manager
-                </Text>
-              </TouchableOpacity>
-            </View>
-          )} */}
-
-          <Text style={styles.label}>Phone Number</Text>
-          <View style={styles.phoneInputContainer}>
-            <TouchableOpacity
-              style={styles.countryCodeButton}
-              onPress={() => setShowCountryPicker(!showCountryPicker)}
-            >
-              <Text style={styles.countryCodeText}>{countryCode}</Text>
-              <ChevronDown size={16} color={colors.text} />
-            </TouchableOpacity>
-            <TextInput
-              style={styles.phoneInput}
-              placeholder={getPhoneInputPlaceholder()}
-              placeholderTextColor={colors.placeholderText}
-              keyboardType="phone-pad"
-              value={phoneNumber}
-              onChangeText={handlePhoneNumberChange}
-              maxLength={15}
-            />
-          </View>
-          
-          {phoneError ? (
-            <Text style={styles.errorText}>{phoneError}</Text>
+              )}
+            </>
           ) : (
-            <Text style={styles.helperText}>
-              We'll send a verification code to this number
-            </Text>
+            <>
+              <Text style={styles.label}>Email</Text>
+              <TextInput
+                style={styles.emailInput}
+                placeholder="Enter your email"
+                placeholderTextColor={colors.placeholderText}
+                keyboardType="email-address"
+                value={email}
+                onChangeText={setEmail}
+                autoCapitalize="none"
+              />
+              
+              <Text style={styles.label}>Password</Text>
+              <TextInput
+                style={styles.passwordInput}
+                placeholder="Enter your password"
+                placeholderTextColor={colors.placeholderText}
+                value={password}
+                onChangeText={setPassword}
+                secureTextEntry
+              />
+            </>
           )}
 
-          {showCountryPicker && (
+          {showCountryPicker && isPhoneLogin && (
             <CountryCodePicker
               visible={showCountryPicker}
               onClose={() => setShowCountryPicker(false)}
@@ -232,6 +279,15 @@ export default function LoginScreen() {
               currentCode={countryCode}
             />
           )}
+
+          <TouchableOpacity
+            style={styles.toggleMethodButton}
+            onPress={toggleLoginMethod}
+          >
+            <Text style={styles.toggleMethodText}>
+              {isPhoneLogin ? "Login with email" : "Login with phone"}
+            </Text>
+          </TouchableOpacity>
 
           {error && <Text style={styles.errorText}>{error}</Text>}
 
@@ -251,16 +307,10 @@ export default function LoginScreen() {
 
           <TouchableOpacity
             style={styles.registerButton}
-            onPress={() => {
-              if (userType === "owner" || userType === "manager") {
-                router.push("/(auth)/restaurant-owner-signup");
-              } 
-            }}
+            onPress={() => router.push("/(auth)/register")}
           >
             <Text style={styles.registerButtonText}>
-              {userType === "user"
-                ? "Create a new account"
-                : "Register your restaurant"}
+              Create a new account
             </Text>
             <ChevronRight size={16} color={colors.primary} />
           </TouchableOpacity>
@@ -268,25 +318,55 @@ export default function LoginScreen() {
       </ScrollView>
     </KeyboardAvoidingView>
   );
+};
+
+// Define interface for styles to ensure type safety
+interface Styles {
+  container: ViewStyle;
+  scrollContent: ViewStyle;
+  header: ViewStyle;
+  logo: ImageStyle;
+  title: TextStyle;
+  subtitle: TextStyle;
+  form: ViewStyle;
+  label: TextStyle;
+  toggleMethodButton: ViewStyle;
+  toggleMethodText: TextStyle;
+  emailInput: TextStyle;
+  passwordInput: TextStyle;
+  phoneInputContainer: ViewStyle;
+  countryCodeButton: ViewStyle;
+  countryCodeText: TextStyle;
+  phoneInput: TextStyle;
+  helperText: TextStyle;
+  errorText: TextStyle;
+  continueButton: ViewStyle;
+  divider: ViewStyle;
+  dividerLine: ViewStyle;
+  dividerText: TextStyle;
+  registerButton: ViewStyle;
+  registerButtonText: TextStyle;
 }
 
-const styles = StyleSheet.create({
+const styles = StyleSheet.create<Styles>({
   container: {
     flex: 1,
     backgroundColor: colors.background,
   },
   scrollContent: {
     flexGrow: 1,
-    padding: 24,
+    padding: 16,
   },
   header: {
-    alignItems: "center",
+    alignItems: 'center',
     marginBottom: 40,
+    padding: 16, // added padding
   },
   logo: {
     width: 80,
     height: 80,
     marginBottom: 24,
+    resizeMode: 'contain',
   },
   title: {
     ...typography.heading1,
@@ -298,61 +378,56 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   form: {
-    width: "100%",
+    width: '100%',
   },
   label: {
     ...typography.bodySmall,
-    fontWeight: "500",
+    fontWeight: '500',
     marginBottom: 8,
   },
-  userTypePicker: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    backgroundColor: colors.inputBackground,
-    borderRadius: 8,
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    marginBottom: 16,
-  },
-  userTypeText: {
-    ...typography.body,
-  },
-  userTypeDropdown: {
+  toggleMethodButton: {
+    alignItems: 'center',
+    padding: 12,
     backgroundColor: colors.cardBackground,
     borderRadius: 8,
-    marginTop: -8,
+    marginTop: 16,
     marginBottom: 16,
-    padding: 8,
-    elevation: 4,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
   },
-  userTypeOption: {
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    borderRadius: 4,
-  },
-  selectedUserType: {
-    backgroundColor: colors.primary + "20",
-  },
-  userTypeOptionText: {
+  toggleMethodText: {
     ...typography.body,
-  },
-  selectedUserTypeText: {
     color: colors.primary,
-    fontWeight: "600",
+    textAlign: 'center',
+  },
+  emailInput: {
+    backgroundColor: colors.inputBackground,
+    borderRadius: 8,
+    padding: 12,
+    marginBottom: 16,
+    ...typography.body,
+    color: colors.text,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  passwordInput: {
+    backgroundColor: colors.inputBackground,
+    borderRadius: 8,
+    padding: 12,
+    marginBottom: 16,
+    ...typography.body,
+    color: colors.text,
+    borderWidth: 1,
+    borderColor: colors.border,
   },
   phoneInputContainer: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.inputBackground,
+    borderRadius: 8,
     marginBottom: 8,
   },
   countryCodeButton: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
     backgroundColor: colors.inputBackground,
     borderRadius: 8,
     paddingHorizontal: 12,
@@ -370,6 +445,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 14,
     ...typography.body,
+    color: colors.text,
+    borderWidth: 1,
+    borderColor: colors.border,
   },
   helperText: {
     ...typography.caption,
@@ -382,27 +460,32 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   continueButton: {
-    marginBottom: 24,
+    marginTop: 8,
+    marginBottom: 16,
   },
   divider: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
     marginBottom: 24,
   },
   dividerLine: {
     flex: 1,
     height: 1,
-    backgroundColor: colors.divider,
+    backgroundColor: colors.border,
   },
   dividerText: {
     ...typography.bodySmall,
     color: colors.lightText,
     marginHorizontal: 16,
+    marginVertical: 0,
   },
   registerButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 16,
+    backgroundColor: colors.cardBackground,
+    borderRadius: 8,
   },
   registerButtonText: {
     ...typography.body,

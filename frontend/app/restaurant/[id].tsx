@@ -28,6 +28,7 @@ import {
   Alert,
   Animated,
   Dimensions,
+  Linking,
   Modal,
   Platform,
   ScrollView,
@@ -128,6 +129,72 @@ export default function RestaurantDetailScreen() {
     return () => clearTimeout(timer);
   }, []);
   
+  // const toggleMap = () => {
+  //   setShowMap(!showMap);
+  // };
+
+  // const getDirections = async () => {
+  //   if (!restaurant?.location) return;
+    
+  //   // First, make sure the map is visible
+  //   if (!showMap) {
+  //     setShowMap(true);
+  //     // Small delay to ensure the map is rendered before trying to open directions
+  //     await new Promise(resolve => setTimeout(resolve, 300));
+  //   }
+
+  //   // If we're on web, open Google Maps in a new tab
+  //   if (Platform.OS === 'web') {
+  //     const { latitude, longitude } = restaurant.location;
+  //     const url = `https://www.google.com/maps/dir/?api=1&destination=${latitude},${longitude}`;
+  //     window.open(url, '_blank');
+  //     return;
+  //   }
+
+  //   // On mobile, try to open in the native maps app
+  //   const { latitude, longitude } = restaurant.location;
+  //   const url = Platform.select({
+  //     ios: `maps:${latitude},${longitude}?q=${encodeURIComponent(restaurant.address || restaurant.name || '')}`,
+  //     android: `geo:${latitude},${longitude}?q=${latitude},${longitude}(${encodeURIComponent(restaurant.name || '')})`
+  //   });
+
+  //   if (url) {
+  //     try {
+  //       await Linking.openURL(url);
+  //     } catch (error) {
+  //       console.error('Error opening maps app:', error);
+  //       // Fallback to web URL if native maps app fails
+  //       const webUrl = `https://www.google.com/maps/dir/?api=1&destination=${latitude},${longitude}`;
+  //       await Linking.openURL(webUrl);
+  //     }
+  //   }
+  // };
+
+  // const requestLocationPermission = async () => {
+  //   if (Platform.OS === 'web') return;
+    
+  //   try {
+  //     const { status } = await Location.requestForegroundPermissionsAsync();
+  //     setLocationPermission(status === 'granted');
+      
+  //     if (status === 'granted') {
+  //       const location = await Location.getCurrentPositionAsync({});
+  //       setUserLocation({
+  //         latitude: location.coords.latitude,
+  //         longitude: location.coords.longitude,
+  //       });
+  //     } else {
+  //       Alert.alert(
+  //         "Location Permission",
+  //         "We need your location to show directions. Please enable location services in your settings.",
+  //         [{ text: "OK" }]
+  //       );
+  //     }
+  //   } catch (error) {
+  //     console.warn('Error requesting location permission:', error);
+  //   }
+  // };
+  
   if (isLoading) {
     return (
       <View style={styles.loadingContainer}>
@@ -137,6 +204,72 @@ export default function RestaurantDetailScreen() {
     );
   }
   
+  const toggleMap = () => {
+    setShowMap(!showMap);
+  };
+
+  const getDirections = async () => {
+    if (!restaurant?.location) return;
+    
+    // First, make sure the map is visible
+    if (!showMap) {
+      setShowMap(true);
+      // Small delay to ensure the map is rendered before trying to open directions
+      await new Promise(resolve => setTimeout(resolve, 300));
+    }
+
+    // If we're on web, open Google Maps in a new tab
+    if (Platform.OS === 'web') {
+      const { latitude, longitude } = restaurant.location;
+      const url = `https://www.google.com/maps/dir/?api=1&destination=${latitude},${longitude}`;
+      window.open(url, '_blank');
+      return;
+    }
+
+    // On mobile, try to open in the native maps app
+    const { latitude, longitude } = restaurant.location;
+    const url = Platform.select({
+      ios: `maps:${latitude},${longitude}?q=${encodeURIComponent(restaurant.address || restaurant.name || '')}`,
+      android: `geo:${latitude},${longitude}?q=${latitude},${longitude}(${encodeURIComponent(restaurant.name || '')})`
+    });
+
+    if (url) {
+      try {
+        await Linking.openURL(url);
+      } catch (error) {
+        console.error('Error opening maps app:', error);
+        // Fallback to web URL if native maps app fails
+        const webUrl = `https://www.google.com/maps/dir/?api=1&destination=${latitude},${longitude}`;
+        await Linking.openURL(webUrl);
+      }
+    }
+  };
+
+  const requestLocationPermission = async () => {
+    if (Platform.OS === 'web') return;
+    
+    try {
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      setLocationPermission(status === 'granted');
+      
+      if (status === 'granted') {
+        const location = await Location.getCurrentPositionAsync({});
+        setUserLocation({
+          latitude: location.coords.latitude,
+          longitude: location.coords.longitude,
+        });
+      } else {
+        Alert.alert(
+          "Location Permission",
+          "We need your location to show directions. Please enable location services in your settings.",
+          [{ text: "OK" }]
+        );
+      }
+    } catch (error) {
+      console.warn('Error requesting location permission:', error);
+    }
+  };
+
   if (!restaurant) {
     return (
       <View style={styles.notFound}>
@@ -212,45 +345,7 @@ export default function RestaurantDetailScreen() {
     router.push(`/menu-item/${restaurant.id}/${menuItemId}`);
   };
 
-  const toggleMap = () => {
-    setShowMap(!showMap);
-  };
 
-  const requestLocationPermission = async () => {
-    if (Platform.OS === "web" || !Location) return;
-    
-    try {
-      const { status } = await Location.requestForegroundPermissionsAsync();
-      setLocationPermission(status === "granted");
-      
-      if (status === "granted") {
-        const location = await Location.getCurrentPositionAsync({});
-        setUserLocation({
-          latitude: location.coords.latitude,
-          longitude: location.coords.longitude,
-        });
-      } else {
-        Alert.alert(
-          "Location Permission",
-          "We need your location to show directions. Please enable location services in your settings.",
-          [{ text: "OK" }]
-        );
-      }
-    } catch (error) {
-      console.warn("Error requesting location permission:", error);
-    }
-  };
-
-  const getDirections = () => {
-    if (!userLocation && Platform.OS !== "web" && Location) {
-      requestLocationPermission();
-      return;
-    }
-    
-    // On a real app, this would open maps with directions
-    // For now, we'll just toggle the map view
-    setShowMap(true);
-  };
 
   const handleOpenReviewModal = () => {
     if (!user) {
@@ -443,32 +538,43 @@ export default function RestaurantDetailScreen() {
                 <View style={styles.mapContainer}>
                   <MapView
                     style={styles.map}
-                    provider={PROVIDER_GOOGLE}
-                    initialRegion={{
-                      latitude: restaurant.location.latitude,
-                      longitude: restaurant.location.longitude,
-                      latitudeDelta: 0.01,
-                      longitudeDelta: 0.01,
+                    // provider={PROVIDER_GOOGLE}
+                    // initialRegion={{
+                    //   latitude: restaurant.location.latitude,
+                    //   longitude: restaurant.location.longitude,
+                    //   latitudeDelta: 0.01,
+                    //   longitudeDelta: 0.01,
+                    // }}
+                    darkModeAllowed={false}
+                    userInterfaceStyle="light"
+                    showUserLocation={true}
+                    followUserLocation={true}
+                    showsUserLocation={true}
+                    loadingEnabled={true}
+                    zoomControlEnabled={true}
+                    showsCompass={true}
+                    showsScale={true}
+                    mapPadding={{
+                      top: 50,
+                      bottom: 50,
+                      left: 50,
+                      right: 50,
                     }}
+                    minimumZoomLevel={1}
+
                   >
                     <Marker
                       coordinate={restaurant.location}
                       title={restaurant.name}
-                    >
-                      <View style={styles.markerContainer}>
-                        <MapPin size={24} color={colors.primary} />
-                      </View>
-                    </Marker>
+                      pinColor={"red"}
+                    />
                     
                     {userLocation && (
                       <Marker
                         coordinate={userLocation}
                         title="Your Location"
-                      >
-                        <View style={styles.userMarker}>
-                          <View style={styles.userMarkerInner} />
-                        </View>
-                      </Marker>
+                        pinColor={"blue"}
+                      />
                     )}
                   </MapView>
                   
@@ -733,7 +839,7 @@ const styles = StyleSheet.create({
   cartBadgeText: {
     color: colors.white,
     fontSize: 10,
-    fontWeight: "bold",
+    fontWeight: 'bold',
   },
   content: {
     padding: 20,
@@ -783,6 +889,8 @@ const styles = StyleSheet.create({
   category: {
     ...typography.bodySmall,
     color: colors.lightText,
+    marginRight: 8,
+    marginBottom: 8,
   },
   categoryDot: {
     ...typography.bodySmall,
@@ -840,7 +948,9 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   map: {
-    ...StyleSheet.absoluteFillObject,
+    flex: 1,
+    width: '100%',
+    height: '100%',
   },
   markerContainer: {
     width: 40,
@@ -867,9 +977,9 @@ const styles = StyleSheet.create({
     width: 24,
     height: 24,
     borderRadius: 12,
-    backgroundColor: colors.primary + "40",
-    justifyContent: "center",
-    alignItems: "center",
+    backgroundColor: `${colors.primary}40`,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   userMarkerInner: {
     width: 12,
@@ -958,11 +1068,11 @@ const styles = StyleSheet.create({
     justifyContent: "flex-end",
   },
   modalContent: {
-    backgroundColor: colors.white,
+    backgroundColor: colors.background,
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     padding: 20,
-    maxHeight: "80%",
+    maxHeight: '80%',
   },
   modalTitle: {
     ...typography.heading2,

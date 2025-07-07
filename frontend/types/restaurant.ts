@@ -18,8 +18,8 @@ export interface Restaurant {
   contactPhone?: string;
   contactEmail?: string;
   location?: {
-    latitude: number;
-    longitude: number;
+    latitude: 9.025;
+    longitude: 38.75;
   };
   distance?: string;
   categories?: string[];

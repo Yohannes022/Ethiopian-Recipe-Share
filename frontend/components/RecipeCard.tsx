@@ -133,8 +133,8 @@ export default function RecipeCard({
             >
               <Heart
                 size={18}
-                color={recipe.isLiked ? colors.error : colors.lightText}
-                fill={recipe.isLiked ? colors.error : "none"}
+                color={recipe.isLiked ? "red" : colors.lightText}
+                fill={recipe.isLiked ? "red" : "none"}
               />
             </TouchableOpacity>
             <TouchableOpacity
@@ -240,9 +240,14 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     marginTop: 8,
+    width: '100%',
+    flexWrap: 'nowrap',
   },
   metaContainer: {
     flexDirection: "row",
+    flexShrink: 1,
+    flexWrap: 'nowrap',
+    alignItems: 'center',
   },
   metaItem: {
     flexDirection: "row",
@@ -255,6 +260,8 @@ const styles = StyleSheet.create({
   },
   actions: {
     flexDirection: "row",
+    marginLeft: 8,
+    flexShrink: 0,
   },
   actionButton: {
     marginLeft: 16,

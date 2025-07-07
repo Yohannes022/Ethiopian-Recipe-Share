@@ -220,6 +220,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background,
+    paddingHorizontal: 7
   },
   loadingContainer: {
     flex: 1,
@@ -323,6 +324,7 @@ const styles = StyleSheet.create({
   },
   popularContainer: {
     marginBottom: 24,
+    paddingHorizontal: 5,
   },
   sectionHeader: {
     flexDirection: "row",
