@@ -1,669 +1,520 @@
-import React, { useState, useRef, useCallback } from 'react';
+import React, { useState, useEffect } from "react";
 import {
+  StyleSheet,
   View,
   Text,
-  TextInput,
-  TouchableOpacity,
-  StyleSheet,
   FlatList,
   ScrollView,
-  SafeAreaView,
-  ViewStyle,
-  TextStyle,
-  ImageStyle,
-} from 'react-native';
-import { useRouter } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
-import { BottomSheetModal, BottomSheetModalProvider } from '@gorhom/bottom-sheet';
-import colors from '@/constants/colors';
-import typography from '@/constants/typography';
+  TouchableOpacity,
+  Platform,
+  Dimensions,
+} from "react-native";
+import { useRouter } from "expo-router";
+import { Filter, SlidersHorizontal, ChevronDown } from "lucide-react-native";
+import colors from "@/constants/colors";
+import typography from "@/constants/typography";
+import SearchBar from "@/components/SearchBar";
+import RecipeCard from "@/components/RecipeCard";
+import CategoryPill from "@/components/CategoryPill";
+import { useRecipeStore } from "@/store/recipeStore";
+import { popularTags, regions, difficulties } from "@/mocks/recipes";
 
-// Types
-type Recipe = {
-  id: string;
-  title: string;
-  image: string;
-  rating: number;
-  cookTime: number;
-  difficulty: 'Easy' | 'Medium' | 'Hard';
-  region: string;
-  tags: string[];
-};
-
-type FilterType = 'cuisine' | 'diet' | 'cookingTime' | 'ingredients' | 'difficulty' | 'region';
-
-type Filter = {
-  id: string;
+type SortOption = {
   label: string;
-  type: FilterType;
-  selected: boolean;
+  value: string;
 };
 
-// Mock data
-const mockRecipes: Recipe[] = [
-  {
-    id: '1',
-    title: 'Injera with Doro Wat',
-    image: 'https://example.com/injera-doro-wat.jpg',
-    rating: 4.8,
-    cookTime: 120,
-    difficulty: 'Medium',
-    region: 'Ethiopia',
-    tags: ['dinner', 'spicy', 'chicken'],
-  },
-  {
-    id: '2',
-    title: 'Shiro Wat',
-    image: 'https://example.com/shiro-wat.jpg',
-    rating: 4.5,
-    cookTime: 45,
-    difficulty: 'Easy',
-    region: 'Ethiopia',
-    tags: ['lunch', 'vegetarian', 'stew'],
-  },
-  {
-    id: '3',
-    title: 'Kitfo',
-    image: 'https://example.com/kitfo.jpg',
-    rating: 4.7,
-    cookTime: 30,
-    difficulty: 'Medium',
-    region: 'Ethiopia',
-    tags: ['dinner', 'meat', 'spicy'],
-  },
-];
-
-const filters: Filter[] = [
-  { id: 'breakfast', label: 'Breakfast', type: 'cuisine', selected: false },
-  { id: 'lunch', label: 'Lunch', type: 'cuisine', selected: false },
-  { id: 'dinner', label: 'Dinner', type: 'cuisine', selected: false },
-  { id: 'vegetarian', label: 'Vegetarian', type: 'diet', selected: false },
-  { id: 'vegan', label: 'Vegan', type: 'diet', selected: false },
-  { id: 'under-30', label: 'Under 30 min', type: 'cookingTime', selected: false },
-  { id: 'easy', label: 'Easy', type: 'difficulty', selected: false },
-  { id: 'medium', label: 'Medium', type: 'difficulty', selected: false },
-  { id: 'hard', label: 'Hard', type: 'difficulty', selected: false },
-  { id: 'northern', label: 'Northern', type: 'region', selected: false },
-  { id: 'southern', label: 'Southern', type: 'region', selected: false },
+const sortOptions: SortOption[] = [
+  { label: "Most Popular", value: "popular" },
+  { label: "Highest Rated", value: "rating" },
+  { label: "Newest", value: "newest" },
+  { label: "Cooking Time", value: "time" },
 ];
 
 export default function SearchScreen() {
   const router = useRouter();
-  const [searchQuery, setSearchQuery] = useState('');
-  const [activeFilters, setActiveFilters] = useState<Filter[]>([]);
-  const [recipes, setRecipes] = useState<Recipe[]>(mockRecipes);
-  const bottomSheetModalRef = useRef<BottomSheetModal>(null);
-  const snapPoints = ['25%', '50%'];
+  const {
+    recipes,
+    filteredRecipes,
+    selectedTag,
+    selectedRegion,
+    searchQuery,
+    setSelectedTag,
+    setSelectedRegion,
+    setSearchQuery,
+    sortRecipes,
+    filterByDifficulty,
+    filterByTime,
+  } = useRecipeStore();
 
-  // Handle search
-  const handleSearch = (query: string) => {
-    setSearchQuery(query);
-    // Filter recipes based on search query
-    if (query.trim() === '') {
-      setRecipes(mockRecipes);
-    } else {
-      const filtered = mockRecipes.filter(recipe =>
-        recipe.title.toLowerCase().includes(query.toLowerCase())
-      );
-      setRecipes(filtered);
-    }
-  };
-
-  // Toggle filter selection
-  const toggleFilter = (filterId: string) => {
-    const updatedFilters = filters.map(filter => 
-      filter.id === filterId 
-        ? { ...filter, selected: !filter.selected }
-        : filter
-    );
-    
-    setActiveFilters(updatedFilters.filter(f => f.selected));
-    // Apply filters to recipes
-    applyFilters(updatedFilters);
-  };
-
-  // Apply all active filters
-  const applyFilters = (filtersToApply: Filter[]) => {
-    // This is a simplified filter logic
-    // You can enhance it based on your specific requirements
-    let filteredRecipes = [...mockRecipes];
-    
-    // Apply search query filter
-    if (searchQuery.trim() !== '') {
-      filteredRecipes = filteredRecipes.filter(recipe =>
-        recipe.title.toLowerCase().includes(searchQuery.toLowerCase())
-      );
-    }
-    
-    // Apply other active filters
-    const activeFilterTypes = new Set(filtersToApply
-      .filter(f => f.selected)
-      .map(f => f.type));
-    
-    if (activeFilterTypes.size > 0) {
-      filteredRecipes = filteredRecipes.filter(recipe => {
-        // This is a simplified check - adjust according to your filter logic
-        return true; // Replace with actual filter logic
-      });
-    }
-    
-    setRecipes(filteredRecipes);
-  };
-
-  // Clear all filters
-  const clearFilters = () => {
-    const clearedFilters = filters.map(filter => ({
-      ...filter,
-      selected: false,
-    }));
-    setActiveFilters([]);
-    setRecipes(mockRecipes);
-  };
-
-  // Render filter chip
-  const renderFilterChip = (filter: Filter) => (
-    <TouchableOpacity
-      key={filter.id}
-      style={[
-        styles.filterChip,
-        filter.selected && styles.filterChipActive,
-      ]}
-      onPress={() => toggleFilter(filter.id)}
-    >
-      <Text style={[
-        styles.filterChipText,
-        filter.selected && styles.filterChipTextActive,
-      ]}>
-        {filter.label}
-      </Text>
-    </TouchableOpacity>
+  const [showFilters, setShowFilters] = useState(false);
+  const [showSortOptions, setShowSortOptions] = useState(false);
+  const [selectedSort, setSelectedSort] = useState<string>("popular");
+  const [selectedDifficulty, setSelectedDifficulty] = useState<string | null>(
+    null
   );
+  const [maxTime, setMaxTime] = useState<number | null>(null);
+  const { width } = Dimensions.get("window");
+  const isTablet = width > 768;
 
-  // Render recipe item
-  const renderRecipeItem = ({ item }: { item: Recipe }) => (
-    <TouchableOpacity
-      style={styles.recipeCard}
-      onPress={() => router.push(`/recipe/${item.id}`)}
-    >
-      <Text style={styles.recipeTitle}>{item.title}</Text>
-      <View style={styles.recipeMeta}>
-        <Text style={styles.recipeMetaText}>{item.cookTime} min</Text>
-        <Text style={styles.recipeMetaText}>•</Text>
-        <Text style={styles.recipeMetaText}>{item.difficulty}</Text>
-        <Text style={styles.recipeMetaText}>•</Text>
-        <Text style={styles.recipeMetaText}>{item.region}</Text>
-      </View>
-      <View style={styles.ratingContainer}>
-        <Ionicons name="star" size={16} color={colors.warning} />
-        <Text style={styles.ratingText}>{item.rating}</Text>
-      </View>
-    </TouchableOpacity>
-  );
+  useEffect(() => {
+    // Apply sorting when selected option changes
+    sortRecipes(selectedSort);
+  }, [selectedSort, sortRecipes]);
+
+  const handleClearSearch = () => {
+    setSearchQuery("");
+  };
+
+  const handleTagSelect = (tag: string) => {
+    setSelectedTag(selectedTag === tag ? null : tag);
+  };
+
+  const handleRegionSelect = (region: string) => {
+    setSelectedRegion(selectedRegion === region ? null : region);
+  };
+
+  const handleDifficultySelect = (difficulty: string) => {
+    const newDifficulty = selectedDifficulty === difficulty ? null : difficulty;
+    setSelectedDifficulty(newDifficulty);
+    filterByDifficulty(newDifficulty);
+  };
+
+  const handleTimeSelect = (time: number | null) => {
+    setMaxTime(time);
+    filterByTime(time);
+  };
+
+  const toggleFilters = () => {
+    setShowFilters(!showFilters);
+    if (showSortOptions) setShowSortOptions(false);
+  };
+
+  const toggleSortOptions = () => {
+    setShowSortOptions(!showSortOptions);
+    if (showFilters) setShowFilters(false);
+  };
+
+  const handleSortSelect = (sortValue: string) => {
+    setSelectedSort(sortValue);
+    setShowSortOptions(false);
+  };
+
+  const clearAllFilters = () => {
+    setSelectedTag(null);
+    setSelectedRegion(null);
+    setSelectedDifficulty(null);
+    setMaxTime(null);
+    setSearchQuery("");
+    filterByDifficulty(null);
+    filterByTime(null);
+  };
+
+  const getSelectedSortLabel = () => {
+    return sortOptions.find((option) => option.value === selectedSort)?.label;
+  };
 
   return (
-    <BottomSheetModalProvider>
-      <SafeAreaView style={styles.container}>
-        {/* Search Bar */}
-        <View style={styles.searchContainer}>
-          <Ionicons name="search" size={20} color={colors.gray} style={styles.searchIcon} />
-          <TextInput
-            style={styles.searchInput}
-            placeholder="Search recipes..."
+    <View style={styles.container}>
+      <View style={styles.searchHeader}>
+        <View style={{ flex: 1, marginRight: 8 }}>
+          <SearchBar
             value={searchQuery}
-            onChangeText={handleSearch}
-            placeholderTextColor={colors.gray}
-            returnKeyType="search"
+            onChangeText={setSearchQuery}
+            onClear={handleClearSearch}
+            placeholder="Search recipes..."
           />
-          {searchQuery ? (
-            <TouchableOpacity onPress={() => setSearchQuery('')}>
-              <Ionicons name="close-circle" size={20} color={colors.gray} />
-            </TouchableOpacity>
-          ) : null}
         </View>
+        <View style={styles.filterSortContainer}>
+          <TouchableOpacity
+            style={[
+              styles.filterButton,
+              selectedTag || selectedRegion || selectedDifficulty || maxTime
+                ? styles.activeFilterButton
+                : null,
+            ]}
+            onPress={toggleFilters}
+          >
+            <Filter
+              size={20}
+              color={
+                selectedTag || selectedRegion || selectedDifficulty || maxTime
+                  ? colors.white
+                  : colors.text
+              }
+            />
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.sortButton}
+            onPress={toggleSortOptions}
+          >
+            <SlidersHorizontal size={20} color={colors.text} />
+            {!isTablet && (
+              <Text style={styles.sortButtonText}>
+                {getSelectedSortLabel()}
+              </Text>
+            )}
+            <ChevronDown size={16} color={colors.text} />
+          </TouchableOpacity>
+        </View>
+      </View>
 
-        {/* Active Filters */}
-        {activeFilters.length > 0 && (
-          <View style={styles.activeFiltersContainer}>
-            <ScrollView 
-              horizontal 
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={styles.activeFiltersScroll}
+      {showSortOptions && (
+        <View style={styles.sortOptionsContainer}>
+          {sortOptions.map((option) => (
+            <TouchableOpacity
+              key={option.value}
+              style={[
+                styles.sortOption,
+                selectedSort === option.value && styles.selectedSortOption,
+              ]}
+              onPress={() => handleSortSelect(option.value)}
             >
-              {activeFilters.map(filter => (
-                <View key={filter.id} style={styles.activeFilter}>
-                  <Text style={styles.activeFilterText}>{filter.label}</Text>
-                  <TouchableOpacity onPress={() => toggleFilter(filter.id)}>
-                    <Ionicons name="close" size={16} color={colors.white} />
-                  </TouchableOpacity>
-                </View>
-              ))}
-              <TouchableOpacity 
-                style={styles.clearFiltersButton}
-                onPress={clearFilters}
+              <Text
+                style={[
+                  styles.sortOptionText,
+                  selectedSort === option.value &&
+                    styles.selectedSortOptionText,
+                ]}
               >
-                <Text style={styles.clearFiltersText}>Clear all</Text>
-              </TouchableOpacity>
+                {option.label}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+      )}
+
+      {showFilters && (
+        <View style={styles.filtersContainer}>
+          <View style={styles.filterSection}>
+            <View style={styles.filterHeader}>
+              <Text style={styles.filterTitle}>Categories</Text>
+              {selectedTag && (
+                <TouchableOpacity onPress={() => setSelectedTag(null)}>
+                  <Text style={styles.clearText}>Clear</Text>
+                </TouchableOpacity>
+              )}
+            </View>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.tagsContainer}
+            >
+              {popularTags.map((tag) => (
+                <CategoryPill
+                  key={tag}
+                  title={tag}
+                  selected={selectedTag === tag}
+                  onPress={() => handleTagSelect(tag)}
+                />
+              ))}
             </ScrollView>
           </View>
-        )}
 
-        {/* Filter Button */}
-        <TouchableOpacity 
-          style={styles.filterButton}
-          onPress={() => bottomSheetModalRef.current?.present()}
-        >
-          <Ionicons name="filter" size={20} color={colors.primary} />
-          <Text style={styles.filterButtonText}>Filters</Text>
-          {activeFilters.length > 0 && (
-            <View style={styles.filterBadge}>
-              <Text style={styles.filterBadgeText}>{activeFilters.length}</Text>
+          <View style={styles.filterSection}>
+            <View style={styles.filterHeader}>
+              <Text style={styles.filterTitle}>Regions</Text>
+              {selectedRegion && (
+                <TouchableOpacity onPress={() => setSelectedRegion(null)}>
+                  <Text style={styles.clearText}>Clear</Text>
+                </TouchableOpacity>
+              )}
             </View>
-          )}
-        </TouchableOpacity>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.tagsContainer}
+            >
+              {regions.map((region) => (
+                <CategoryPill
+                  key={region}
+                  title={region}
+                  selected={selectedRegion === region}
+                  onPress={() => handleRegionSelect(region)}
+                />
+              ))}
+            </ScrollView>
+          </View>
 
-        {/* Recipe List */}
+          <View style={styles.filterSection}>
+            <View style={styles.filterHeader}>
+              <Text style={styles.filterTitle}>Difficulty</Text>
+              {selectedDifficulty && (
+                <TouchableOpacity
+                  onPress={() => handleDifficultySelect(selectedDifficulty)}
+                >
+                  <Text style={styles.clearText}>Clear</Text>
+                </TouchableOpacity>
+              )}
+            </View>
+            <View style={styles.difficultyContainer}>
+              {difficulties.map((difficulty) => (
+                <TouchableOpacity
+                  key={difficulty}
+                  style={[
+                    styles.difficultyButton,
+                    selectedDifficulty === difficulty &&
+                      styles.selectedDifficultyButton,
+                  ]}
+                  onPress={() => handleDifficultySelect(difficulty)}
+                >
+                  <Text
+                    style={[
+                      styles.difficultyButtonText,
+                      selectedDifficulty === difficulty &&
+                        styles.selectedDifficultyButtonText,
+                    ]}
+                  >
+                    {difficulty.charAt(0).toUpperCase() + difficulty.slice(1)}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          </View>
+
+          <View style={styles.filterSection}>
+            <View style={styles.filterHeader}>
+              <Text style={styles.filterTitle}>Cooking Time</Text>
+              {maxTime && (
+                <TouchableOpacity onPress={() => handleTimeSelect(null)}>
+                  <Text style={styles.clearText}>Clear</Text>
+                </TouchableOpacity>
+              )}
+            </View>
+            <View style={styles.timeContainer}>
+              {[30, 60, 90, 120].map((time) => (
+                <TouchableOpacity
+                  key={time}
+                  style={[
+                    styles.timeButton,
+                    maxTime === time && styles.selectedTimeButton,
+                  ]}
+                  onPress={() => handleTimeSelect(time)}
+                >
+                  <Text
+                    style={[
+                      styles.timeButtonText,
+                      maxTime === time && styles.selectedTimeButtonText,
+                    ]}
+                  >
+                    {time === 120 ? "2+ hours" : `${time} min`}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          </View>
+
+          <TouchableOpacity
+            style={styles.clearAllButton}
+            onPress={clearAllFilters}
+          >
+            <Text style={styles.clearAllText}>Clear All Filters</Text>
+          </TouchableOpacity>
+        </View>
+      )}
+
+      {filteredRecipes.length > 0 ? (
         <FlatList
-          data={recipes}
-          renderItem={renderRecipeItem}
-          keyExtractor={item => item.id}
-          contentContainerStyle={styles.recipeList}
-          ListEmptyComponent={
-            <View style={styles.emptyState}>
-              <Ionicons name="search" size={48} color={colors.gray} />
-              <Text style={styles.emptyStateTitle}>No recipes found</Text>
-              <Text style={styles.emptyStateText}>
-                Try adjusting your search or filters
-              </Text>
-            </View>
+          data={filteredRecipes}
+          keyExtractor={(item) => item.id}
+          renderItem={({ item }) => <RecipeCard recipe={item} />}
+          contentContainerStyle={styles.recipesList}
+          showsVerticalScrollIndicator={false}
+          numColumns={isTablet ? 2 : 1}
+          key={isTablet ? "two-column" : "one-column"}
+          columnWrapperStyle={
+            isTablet ? { justifyContent: "space-between" } : undefined
           }
         />
-
-        {/* Filter Bottom Sheet */}
-        <BottomSheetModal
-          ref={bottomSheetModalRef}
-          index={1}
-          snapPoints={snapPoints}
-          backgroundStyle={styles.bottomSheetBackground}
-          handleIndicatorStyle={styles.bottomSheetHandle}
-        >
-          <View style={styles.bottomSheetContent}>
-            <View style={styles.bottomSheetHeader}>
-              <Text style={styles.bottomSheetTitle}>Filters</Text>
-              <TouchableOpacity onPress={() => bottomSheetModalRef.current?.dismiss()}>
-                <Ionicons name="close" size={24} color={colors.text} />
-              </TouchableOpacity>
-            </View>
-            
-            <ScrollView style={styles.filtersContainer}>
-              <Text style={styles.sectionTitle}>Categories</Text>
-              <View style={styles.filtersRow}>
-                {filters.filter(f => f.type === 'cuisine').map(renderFilterChip)}
-              </View>
-
-              <Text style={styles.sectionTitle}>Dietary</Text>
-              <View style={styles.filtersRow}>
-                {filters.filter(f => f.type === 'diet').map(renderFilterChip)}
-              </View>
-
-              <Text style={styles.sectionTitle}>Cooking Time</Text>
-              <View style={styles.filtersRow}>
-                {filters.filter(f => f.type === 'cookingTime').map(renderFilterChip)}
-              </View>
-
-              <Text style={styles.sectionTitle}>Difficulty</Text>
-              <View style={styles.filtersRow}>
-                {filters.filter(f => f.type === 'difficulty').map(renderFilterChip)}
-              </View>
-
-              <Text style={styles.sectionTitle}>Region</Text>
-              <View style={styles.filtersRow}>
-                {filters.filter(f => f.type === 'region').map(renderFilterChip)}
-              </View>
-            </ScrollView>
-
-            <View style={styles.bottomSheetActions}>
-              <TouchableOpacity 
-                style={styles.clearButton}
-                onPress={clearFilters}
-              >
-                <Text style={styles.clearButtonText}>Clear All</Text>
-              </TouchableOpacity>
-              <TouchableOpacity 
-                style={styles.applyButton}
-                onPress={() => bottomSheetModalRef.current?.dismiss()}
-              >
-                <Text style={styles.applyButtonText}>Apply Filters</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </BottomSheetModal>
-      </SafeAreaView>
-    </BottomSheetModalProvider>
+      ) : (
+        <View style={styles.emptyContainer}>
+          <Text style={styles.emptyTitle}>No recipes found</Text>
+          <Text style={styles.emptyText}>
+            Try adjusting your search or filters to find what you're looking for
+          </Text>
+        </View>
+      )}
+    </View>
   );
-};
-
-interface Styles {
-  container: ViewStyle;
-  searchContainer: ViewStyle;
-  searchIcon: TextStyle;
-  searchInput: TextStyle;
-  activeFiltersContainer: ViewStyle;
-  activeFiltersScroll: ViewStyle;
-  activeFilter: ViewStyle;
-  activeFilterText: TextStyle;
-  clearFiltersButton: ViewStyle;
-  clearFiltersText: TextStyle;
-  filterButton: ViewStyle;
-  filterButtonText: TextStyle;
-  filterBadge: ViewStyle;
-  filterBadgeText: TextStyle;
-  filterChip: ViewStyle;
-  filterChipActive: ViewStyle;
-  filterChipText: TextStyle;
-  filterChipTextActive: TextStyle;
-  recipeList: ViewStyle;
-  recipeCard: ViewStyle;
-  recipeTitle: TextStyle;
-  recipeMeta: ViewStyle;
-  recipeMetaText: TextStyle;
-  ratingContainer: ViewStyle;
-  ratingText: TextStyle;
-  emptyState: ViewStyle;
-  emptyStateTitle: TextStyle;
-  emptyStateText: TextStyle;
-  bottomSheetBackground: ViewStyle;
-  bottomSheetHandle: ViewStyle;
-  bottomSheetContent: ViewStyle;
-  bottomSheetHeader: ViewStyle;
-  bottomSheetTitle: TextStyle;
-  filtersContainer: ViewStyle;
-  sectionTitle: TextStyle;
-  filtersRow: ViewStyle;
-  bottomSheetActions: ViewStyle;
-  clearButton: ViewStyle;
-  clearButtonText: TextStyle;
-  applyButton: ViewStyle;
-  applyButtonText: TextStyle;
 }
 
-const styles = StyleSheet.create<Styles>({
+const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background,
+    padding: 20,
   },
-  searchContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
+  searchHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 10,
+    width: "100%",
+  },
+  filterSortContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginLeft: 8,
+  },
+  filterButton: {
+    width: 48,
+    height: 48,
+    borderRadius: 12,
+    backgroundColor: colors.inputBackground,
+    justifyContent: "center",
+    alignItems: "center",
+    marginLeft: 12,
+  },
+  activeFilterButton: {
+    backgroundColor: colors.primary,
+  },
+  sortButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    height: 48,
+    paddingHorizontal: 12,
+    borderRadius: 12,
+    backgroundColor: colors.inputBackground,
+    marginLeft: 8,
+  },
+  sortButtonText: {
+    ...typography.bodySmall,
+    marginHorizontal: 8,
+  },
+  sortOptionsContainer: {
     backgroundColor: colors.white,
-    borderRadius: 10,
-    margin: 16,
-    paddingHorizontal: 16,
-    height: 50,
-    shadowColor: '#000',
+    borderRadius: 12,
+    marginBottom: 16,
+    elevation: 2,
+    shadowColor: colors.black,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
-    elevation: 3,
+    overflow: "hidden",
   },
-  searchIcon: {
-    marginRight: 10,
-  },
-  searchInput: {
-    flex: 1,
-    height: '100%',
-    fontFamily: typography.body.fontFamily,
-    fontSize: typography.body.fontSize,
-    lineHeight: typography.body.lineHeight,
-    color: colors.text,
-  },
-  activeFiltersContainer: {
+  sortOption: {
+    paddingVertical: 12,
     paddingHorizontal: 16,
-    marginBottom: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.divider,
   },
-  activeFiltersScroll: {
-    paddingBottom: 8,
+  selectedSortOption: {
+    backgroundColor: colors.primary + "10",
   },
-  activeFilter: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: colors.primary,
-    borderRadius: 16,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    marginRight: 8,
+  sortOptionText: {
+    ...typography.body,
+    color: colors.text,
   },
-  activeFilterText: {
-    fontFamily: typography.bodySmall.fontFamily,
-    fontSize: typography.bodySmall.fontSize,
-    lineHeight: typography.bodySmall.lineHeight,
-    color: colors.white,
-    fontWeight: '500',
-    marginRight: 6,
-  },
-  clearFiltersButton: {
-    padding: 6,
-    marginLeft: 4,
-  },
-  clearFiltersText: {
-    fontFamily: typography.bodySmall.fontFamily,
-    fontSize: typography.bodySmall.fontSize,
-    lineHeight: typography.bodySmall.lineHeight,
+  selectedSortOptionText: {
     color: colors.primary,
-    fontWeight: '500',
-  },
-  filterButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    alignSelf: 'flex-start',
-    marginLeft: 16,
-    marginBottom: 12,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: colors.border,
-    position: 'relative',
-  },
-  filterButtonText: {
-    marginLeft: 6,
-    color: colors.primary,
-    fontFamily: typography.bodySmall.fontFamily,
-    fontSize: typography.bodySmall.fontSize,
-    lineHeight: typography.bodySmall.lineHeight,
-    fontWeight: '500',
-  },
-  filterBadge: {
-    position: 'absolute',
-    top: -4,
-    right: -4,
-    backgroundColor: colors.accent,
-    borderRadius: 8,
-    width: 16,
-    height: 16,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  filterBadgeText: {
-    color: colors.white,
-    fontSize: 10,
-    fontWeight: '700',
-  },
-  filterChip: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 16,
-    backgroundColor: colors.lightGray,
-    marginRight: 8,
-    marginBottom: 8,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  filterChipActive: {
-    backgroundColor: colors.primary,
-    borderColor: colors.primary,
-  },
-  filterChipText: {
-    fontFamily: typography.bodySmall.fontFamily,
-    fontSize: typography.bodySmall.fontSize,
-    lineHeight: typography.bodySmall.lineHeight,
-    color: colors.text,
-  },
-  filterChipTextActive: {
-    fontFamily: typography.bodySmall.fontFamily,
-    fontSize: typography.bodySmall.fontSize,
-    lineHeight: typography.bodySmall.lineHeight,
-    color: colors.primary,
-    fontWeight: '500',
-  },
-  recipeList: {
-    padding: 16,
-    paddingTop: 0,
-  },
-  recipeCard: {
-    backgroundColor: colors.white,
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
-  },
-  recipeTitle: {
-    fontFamily: typography.body.fontFamily,
-    fontSize: typography.body.fontSize,
-    lineHeight: typography.body.lineHeight,
-    fontWeight: '600',
-    color: colors.text,
-    marginBottom: 8,
-  },
-  recipeMeta: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 4,
-  },
-  recipeMetaText: {
-    fontFamily: typography.bodySmall.fontFamily,
-    fontSize: typography.bodySmall.fontSize,
-    lineHeight: typography.bodySmall.lineHeight,
-    color: colors.gray,
-    marginRight: 8,
-  },
-  ratingContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  ratingText: {
-    fontFamily: typography.bodySmall.fontFamily,
-    fontSize: typography.bodySmall.fontSize,
-    lineHeight: typography.bodySmall.lineHeight,
-    color: colors.text,
-    marginLeft: 4,
-    fontWeight: '500',
-  },
-  emptyState: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 40,
-  },
-  emptyStateTitle: {
-    fontFamily: typography.bodyLarge.fontFamily,
-    fontSize: typography.bodyLarge.fontSize,
-    lineHeight: typography.bodyLarge.lineHeight,
-    fontWeight: '600',
-    color: colors.text,
-    marginTop: 16,
-    marginBottom: 8,
-  },
-  emptyStateText: {
-    fontFamily: typography.bodySmall.fontFamily,
-    fontSize: typography.bodySmall.fontSize,
-    lineHeight: typography.bodySmall.lineHeight,
-    color: colors.gray,
-    textAlign: 'center',
-  },
-  bottomSheetBackground: {
-    backgroundColor: colors.background,
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-  },
-  bottomSheetHandle: {
-    backgroundColor: colors.border,
-    width: 40,
-    height: 4,
-    marginTop: 12,
-  },
-  bottomSheetContent: {
-    flex: 1,
-    padding: 24,
-  },
-  bottomSheetHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 24,
-  },
-  bottomSheetTitle: {
-    fontFamily: typography.heading3.fontFamily,
-    fontSize: typography.heading3.fontSize,
-    lineHeight: typography.heading3.lineHeight,
-    color: colors.text,
+    fontWeight: "600",
   },
   filtersContainer: {
-    flex: 1,
+    backgroundColor: colors.white,
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 16,
+    elevation: 2,
+    shadowColor: colors.black,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
   },
-  sectionTitle: {
-    fontFamily: typography.body.fontFamily,
-    fontSize: typography.body.fontSize,
-    lineHeight: typography.body.lineHeight,
-    fontWeight: '600',
-    color: colors.text,
-    marginBottom: 12,
-    marginTop: 8,
-  },
-  filtersRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
+  filterSection: {
     marginBottom: 16,
   },
-  bottomSheetActions: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    paddingTop: 16,
-    borderTopWidth: 1,
-    borderTopColor: colors.border,
+  filterHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 12,
   },
-  clearButton: {
-    padding: 12,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: colors.border,
+  filterTitle: {
+    ...typography.heading4,
+  },
+  clearText: {
+    ...typography.bodySmall,
+    color: colors.primary,
+  },
+  tagsContainer: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+  },
+  difficultyContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
+  difficultyButton: {
     flex: 1,
-    marginRight: 12,
-    alignItems: 'center',
+    paddingVertical: 10,
+    paddingHorizontal: 8,
+    marginHorizontal: 4,
+    borderRadius: 8,
+    backgroundColor: colors.inputBackground,
+    alignItems: "center",
   },
-  clearButtonText: {
-    fontFamily: typography.body.fontFamily,
-    fontSize: typography.body.fontSize,
-    lineHeight: typography.body.lineHeight,
-    fontWeight: '500',
+  selectedDifficultyButton: {
+    backgroundColor: colors.primary,
+  },
+  difficultyButtonText: {
+    ...typography.bodySmall,
     color: colors.text,
   },
-  applyButton: {
-    flex: 2,
-    backgroundColor: colors.primary,
-    borderRadius: 8,
-    padding: 12,
-    alignItems: 'center',
-  },
-  applyButtonText: {
-    fontFamily: typography.button.fontFamily,
-    fontSize: typography.button.fontSize,
-    lineHeight: typography.button.lineHeight,
+  selectedDifficultyButtonText: {
     color: colors.white,
+    fontWeight: "600",
+  },
+  timeContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
+  timeButton: {
+    flex: 1,
+    paddingVertical: 10,
+    paddingHorizontal: 8,
+    marginHorizontal: 4,
+    borderRadius: 8,
+    backgroundColor: colors.inputBackground,
+    alignItems: "center",
+  },
+  selectedTimeButton: {
+    backgroundColor: colors.primary,
+  },
+  timeButtonText: {
+    ...typography.bodySmall,
+    color: colors.text,
+  },
+  selectedTimeButtonText: {
+    color: colors.white,
+    fontWeight: "600",
+  },
+  clearAllButton: {
+    alignItems: "center",
+    paddingVertical: 12,
+    borderTopWidth: 1,
+    borderTopColor: colors.divider,
+  },
+  clearAllText: {
+    ...typography.body,
+    color: colors.primary,
+    fontWeight: "600",
+  },
+  recipesList: {
+    paddingBottom: 20,
+  },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 20,
+  },
+  emptyTitle: {
+    ...typography.heading3,
+    marginBottom: 8,
+  },
+  emptyText: {
+    ...typography.body,
+    color: colors.lightText,
+    textAlign: "center",
   },
 });
-
-// export default SearchScreen;
