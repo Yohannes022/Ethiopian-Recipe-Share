@@ -121,7 +121,7 @@ export default function SearchScreen() {
             value={searchQuery}
             onChangeText={setSearchQuery}
             onClear={handleClearSearch}
-            placeholder="Search recipes..."
+            placeholder="Search recipes..."        
           />
         </View>
         <TouchableOpacity
@@ -332,9 +332,9 @@ const styles = StyleSheet.create({
   },
   searchHeader: {
     flexDirection: "row",
-    alignItems: "center",
     justifyContent: "center",
     marginBottom: 10,
+    paddingHorizontal: 18,
     width: "100%",
   },
   filterSortContainer: {
@@ -343,10 +343,10 @@ const styles = StyleSheet.create({
     marginLeft: 8,
   },
   filterButton: {
-    width: 48,
-    height: 48,
-    borderRadius: 12,
-    backgroundColor: colors.inputBackground,
+    width: 44,
+    height: 44,
+    borderRadius: 14,
+    borderWidth: StyleSheet.hairlineWidth,
     justifyContent: "center",
     alignItems: "center",
     marginLeft: 12,
