@@ -87,7 +87,6 @@ export default function SearchScreen() {
 
   const toggleFilters = () => {
     setShowFilters(!showFilters);
-    if (showSortOptions) setShowSortOptions(false);
   };
 
   const toggleSortOptions = () => {
@@ -125,64 +124,23 @@ export default function SearchScreen() {
             placeholder="Search recipes..."
           />
         </View>
-        <View style={styles.filterSortContainer}>
-          <TouchableOpacity
-            style={[
-              styles.filterButton,
+        <TouchableOpacity
+          style={[
+            styles.filterButton,
+            (selectedTag || selectedRegion || selectedDifficulty || maxTime) ? styles.activeFilterButton : {},
+          ]}
+          onPress={toggleFilters}
+        >
+          <Filter
+            size={20}
+            color={
               selectedTag || selectedRegion || selectedDifficulty || maxTime
-                ? styles.activeFilterButton
-                : null,
-            ]}
-            onPress={toggleFilters}
-          >
-            <Filter
-              size={20}
-              color={
-                selectedTag || selectedRegion || selectedDifficulty || maxTime
-                  ? colors.white
-                  : colors.text
-              }
-            />
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.sortButton}
-            onPress={toggleSortOptions}
-          >
-            <SlidersHorizontal size={20} color={colors.text} />
-            {!isTablet && (
-              <Text style={styles.sortButtonText}>
-                {getSelectedSortLabel()}
-              </Text>
-            )}
-            <ChevronDown size={16} color={colors.text} />
-          </TouchableOpacity>
-        </View>
+                ? colors.white
+                : colors.text
+            }
+          />
+        </TouchableOpacity>
       </View>
-
-      {showSortOptions && (
-        <View style={styles.sortOptionsContainer}>
-          {sortOptions.map((option) => (
-            <TouchableOpacity
-              key={option.value}
-              style={[
-                styles.sortOption,
-                selectedSort === option.value && styles.selectedSortOption,
-              ]}
-              onPress={() => handleSortSelect(option.value)}
-            >
-              <Text
-                style={[
-                  styles.sortOptionText,
-                  selectedSort === option.value &&
-                    styles.selectedSortOptionText,
-                ]}
-              >
-                {option.label}
-              </Text>
-            </TouchableOpacity>
-          ))}
-        </View>
-      )}
 
       {showFilters && (
         <View style={styles.filtersContainer}>
@@ -304,6 +262,34 @@ export default function SearchScreen() {
             </View>
           </View>
 
+          <View style={styles.filterSection}>
+            <Text style={styles.filterTitle}>Sort By</Text>
+            <View style={styles.sortOptionsContainer}>
+              {sortOptions.map((option) => (
+                <TouchableOpacity
+                  key={option.value}
+                  style={[
+                    styles.sortOption,
+                    selectedSort === option.value && styles.selectedSortOption,
+                  ]}
+                  onPress={() => {
+                    setSelectedSort(option.value);
+                    sortRecipes(option.value);
+                  }}
+                >
+                  <Text
+                    style={[
+                      styles.sortOptionText,
+                      selectedSort === option.value && styles.selectedSortOptionText,
+                    ]}
+                  >
+                    {option.label}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          </View>
+
           <TouchableOpacity
             style={styles.clearAllButton}
             onPress={clearAllFilters}
@@ -382,31 +368,27 @@ const styles = StyleSheet.create({
     marginHorizontal: 8,
   },
   sortOptionsContainer: {
-    backgroundColor: colors.white,
-    borderRadius: 12,
-    marginBottom: 16,
-    elevation: 2,
-    shadowColor: colors.black,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    overflow: "hidden",
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    marginTop: 8,
   },
   sortOption: {
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.divider,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 8,
+    backgroundColor: colors.inputBackground,
+    marginRight: 8,
+    marginBottom: 8,
   },
   selectedSortOption: {
-    backgroundColor: colors.primary + "10",
+    backgroundColor: colors.primary,
   },
   sortOptionText: {
-    ...typography.body,
+    ...typography.bodySmall,
     color: colors.text,
   },
   selectedSortOptionText: {
-    color: colors.primary,
+    color: colors.white,
     fontWeight: "600",
   },
   filtersContainer: {
