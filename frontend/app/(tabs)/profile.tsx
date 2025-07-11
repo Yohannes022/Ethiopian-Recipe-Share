@@ -7,6 +7,7 @@ import { useProfileStore } from "@/store/profileStore";
 import { useRecipeStore } from "@/store/recipeStore";
 import { Image } from "expo-image";
 import { useRouter } from "expo-router";
+import type { User } from "@/types/auth";
 import {
   Bookmark,
   ChevronRight,
@@ -27,20 +28,39 @@ import {
   ScrollView,
   StyleSheet,
   Text,
+  TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
+import { useLocalSearchParams } from "expo-router";
 
 export default function ProfileScreen() {
   const router = useRouter();
-  const { user, logout, followUser, unfollowUser, isFollowing } = useAuthStore();
+  const params = useLocalSearchParams();
+  const { user, logout, followUser, unfollowUser, isFollowing, updateProfile } = useAuthStore();
   const { recipes } = useRecipeStore();
   const { addresses, paymentMethods } = useProfileStore();
   const { orders } = useCartStore();
   const [activeTab, setActiveTab] = useState<"recipes" | "saved">("recipes");
   const [isLoading, setIsLoading] = useState(false);
+  const [isSetupMode, setIsSetupMode] = useState(false);
   const [profileUser, setProfileUser] = useState(user);
   const [isFollowingUser, setIsFollowingUser] = useState(false);
+  
+  // Form state for profile setup
+  const [formData, setFormData] = useState({
+    name: user?.name || "",
+    email: user?.email || "",
+    phone: user?.phone || "",
+    bio: user?.bio || "",
+  });
+  
+  // Check if we're in setup mode
+  useEffect(() => {
+    if (params?.setup === 'true') {
+      setIsSetupMode(true);
+    }
+  }, [params]);
 
   useEffect(() => {
     if (user && profileUser) {
@@ -51,6 +71,132 @@ export default function ProfileScreen() {
   if (!user) {
     router.replace("/(auth)");
     return null;
+  }
+  
+  const handleProfileUpdate = async () => {
+    if (!formData.name?.trim()) {
+      Alert.alert("Error", "Please enter your name");
+      return;
+    }
+    
+    // Prevent multiple submissions
+    if (isLoading) return;
+    
+    setIsLoading(true);
+    
+    try {
+      // Create the update data object with only the fields that have values
+      const updateData: Partial<User> = {
+        name: formData.name?.trim() || '',
+        ...(formData.email ? { email: formData.email.trim() } : {}),
+        ...(formData.bio ? { bio: formData.bio.trim() } : {}),
+        isProfileComplete: true
+      };
+      
+      // Update the profile - we don't use the return value since it's void
+      await updateProfile(updateData);
+      
+      // Update the local profile user state with the form data
+      // The auth store will update the user data in its state and AsyncStorage
+      setProfileUser(prev => ({
+        ...prev!,
+        ...updateData
+      }));
+      
+      // Show success message
+      const successMessage = isSetupMode 
+        ? "Your profile has been set up successfully!"
+        : "Your profile has been updated!";
+      
+      Alert.alert("Success", successMessage, [
+        {
+          text: "OK",
+          onPress: () => {
+            if (isSetupMode) {
+              setIsSetupMode(false);
+            }
+          }
+        }
+      ]);
+      
+    } catch (error) {
+      console.error("Profile update error:", error);
+      const errorMessage = error instanceof Error 
+        ? error.message 
+        : "Failed to update profile. Please try again.";
+      
+      Alert.alert("Error", errorMessage);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  
+  // Show profile setup form if in setup mode
+  if (isSetupMode) {
+    return (
+      <ScrollView style={styles.setupContainer}>
+        <Text style={styles.setupTitle}>Complete Your Profile</Text>
+        <Text style={styles.setupSubtitle}>Tell us a bit about yourself</Text>
+        
+        <View style={styles.formGroup}>
+          <Text style={styles.label}>Full Name</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Enter your full name"
+            value={formData.name}
+            onChangeText={(text) => setFormData({...formData, name: text})}
+            autoCapitalize="words"
+          />
+        </View>
+        
+        <View style={styles.formGroup}>
+          <Text style={styles.label}>Email</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Enter your email"
+            value={formData.email}
+            onChangeText={(text) => setFormData({...formData, email: text})}
+            keyboardType="email-address"
+            autoCapitalize="none"
+          />
+        </View>
+        
+        <View style={styles.formGroup}>
+          <Text style={styles.label}>Phone Number</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Enter your phone number"
+            value={formData.phone}
+            onChangeText={(text) => setFormData({...formData, phone: text})}
+            keyboardType="phone-pad"
+          />
+        </View>
+        
+        <View style={styles.formGroup}>
+          <Text style={styles.label}>Bio (Optional)</Text>
+          <TextInput
+            style={[styles.input, { height: 100, textAlignVertical: 'top' }]}
+            placeholder="Tell us about yourself..."
+            value={formData.bio}
+            onChangeText={(text) => setFormData({...formData, bio: text})}
+            multiline
+            numberOfLines={4}
+          />
+        </View>
+        
+        <TouchableOpacity 
+          style={[styles.button, isLoading && styles.buttonDisabled]}
+          onPress={handleProfileUpdate}
+          disabled={isLoading}
+        >
+          {isLoading ? (
+            <ActivityIndicator color="#fff" />
+          ) : (
+            <Text style={styles.buttonText}>Save Profile</Text>
+          )}
+        </TouchableOpacity>
+      </ScrollView>
+    );
   }
 
   const userRecipes = recipes.filter((recipe) => recipe.authorId === user.id);
@@ -146,7 +292,10 @@ export default function ProfileScreen() {
           <View style={styles.statsContainer}>
             <TouchableOpacity 
               style={styles.statItem}
-              onPress={() => router.push("/profile/recipes")}
+              onPress={() => router.push({
+                pathname: "/recipes",
+                params: { userId: user?.id }
+              } as any)}
             >
               <Text style={styles.statNumber}>{userRecipes.length}</Text>
               <Text style={styles.statLabel}>Recipes</Text>
@@ -376,6 +525,58 @@ export default function ProfileScreen() {
 }
 
 const styles = StyleSheet.create({
+  // Setup mode styles
+  setupContainer: {
+    flex: 1,
+    padding: 20,
+    backgroundColor: colors.background,
+  },
+  setupTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 8,
+    color: colors.text,
+    textAlign: 'center',
+  },
+  setupSubtitle: {
+    fontSize: 16,
+    color: colors.lightText,
+    marginBottom: 32,
+    textAlign: 'center',
+  },
+  formGroup: {
+    marginBottom: 20,
+  },
+  label: {
+    fontSize: 16,
+    fontWeight: '500',
+    marginBottom: 8,
+    color: colors.text,
+  },
+  input: {
+    backgroundColor: colors.cardBackground,
+    borderRadius: 12,
+    padding: 16,
+    fontSize: 16,
+    color: colors.text,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  button: {
+    backgroundColor: colors.primary,
+    padding: 16,
+    borderRadius: 12,
+    alignItems: 'center',
+    marginTop: 20,
+  },
+  buttonDisabled: {
+    opacity: 0.7,
+  },
+  buttonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
+  },
   container: {
     flex: 1,
     backgroundColor: colors.background,

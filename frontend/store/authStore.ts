@@ -3,45 +3,27 @@ import { persist, createJSONStorage } from "zustand/middleware";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { AuthState, User, UserRole } from "@/types/auth";
 import { API_CONFIG } from "@/constants/api";
-import { authAPI } from "@/lib/api";
+import api, { authAPI } from "@/lib/api";
 
-// Mock user data for demo purposes
-const mockUsers: User[] = [
-  {
-    id: "user1",
-    name: "John Doe",
-    email: "john@example.com",
-    phone: "+1 (555) 123-4567",
-    avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?q=80&w=200",
-    bio: "Food enthusiast and home chef",
-    location: "New York, NY",
-    website: "https://johndoe.com",
-    followers: 120,
-    following: 85,
-    recipes: 24,
-    reviews: 36,
-    role: "user",
-    createdAt: "2023-01-15T12:00:00Z",
-  },
-  {
-    id: "owner1",
-    name: "Sarah Johnson",
-    email: "sarah@habesharestaurant.com",
-    phone: "+1 (555) 987-6543",
-    avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=200",
-    bio: "Restaurant owner and chef",
-    location: "Addis Ababa",
-    website: "https://habesharestaurant.com",
-    followers: 250,
-    following: 120,
-    recipes: 45,
-    reviews: 18,
-    role: "owner",
-    createdAt: "2022-11-10T10:30:00Z",
-    restaurantId: "1",
-  },
-];
+// Helper function to generate a mock user
+const createMockUser = (phone: string, role: UserRole = 'user'): User => ({
+  id: `user-${Date.now()}`,
+  name: `User ${Math.floor(Math.random() * 1000)}`,
+  phone,
+  role,
+  verified: true,
+  createdAt: new Date().toISOString(),
+  email: `${phone.replace(/\D/g, '')}@example.com`,
+  avatar: `https://i.pravatar.cc/150?u=${phone}`,
+  bio: 'Food enthusiast',
+  location: 'Addis Ababa, Ethiopia',
+  followers: Math.floor(Math.random() * 1000),
+  following: Math.floor(Math.random() * 500),
+  recipes: Math.floor(Math.random() * 50),
+  reviews: Math.floor(Math.random() * 100),
+});
 
+// Define the auth store with proper types
 export const useAuthStore = create<AuthState>()(
   persist(
     (set, get) => ({
@@ -50,174 +32,188 @@ export const useAuthStore = create<AuthState>()(
       isLoading: false,
       error: null,
       token: null,
-      phoneNumber: null,
-      userRole: "user",
-      generatedOtp: null,
-      
-      login: async (phone: string, role: UserRole = "user") => {
+      phoneNumber: '',
+      userRole: 'user' as UserRole,
+      generatedOtp: '123456', // Default OTP for development
+
+      login: async (phone: string, role: UserRole = 'user') => {
         set({ isLoading: true, error: null });
         
         try {
-          // Simulate API call
-          await new Promise(resolve => setTimeout(resolve, 1500));
+          // In a real app, call the API to request OTP
+          // const response = await authAPI.requestOtp(phone, role);
           
-          // Find user by phone number (for demo purposes)
-          const user = mockUsers.find(u => u.phone.replace(/\D/g, "") === phone.replace(/\D/g, ""));
+          // For demo, simulate API call with timeout
+          await new Promise(resolve => setTimeout(resolve, 1000));
           
           // Generate a 6-digit OTP for demo purposes
-          const otp = Math.floor(100000 + Math.random() * 900000).toString();
+          const otp = '123456';
+          console.log('Generated OTP:', otp);
           
           set({
-            isLoading: false,
-            token: "demo-token-" + Math.random().toString(36).substring(2),
             phoneNumber: phone,
+            generatedOtp: otp,
             userRole: role,
-            generatedOtp: otp, // Store the OTP for demo purposes
           });
           
-          console.log("Generated OTP:", otp);
           return otp;
-        } catch (error) {
-          console.error("Login error:", error);
-          set({ 
-            isLoading: false, 
-            error: "Failed to login. Please try again." 
-          });
+        } catch (error: any) {
+          console.error('Login error:', error);
+          const errorMessage = error.message || 'Failed to send OTP. Please try again.';
+          set({ error: errorMessage });
+          throw new Error(errorMessage);
+        } finally {
+          set({ isLoading: false });
         }
       },
-      
-      verifyOtp: async (otp: string) => {
+
+      resendOtp: async () => {
+        const { phoneNumber } = get();
+        
+        if (!phoneNumber) {
+          throw new Error('No phone number found');
+        }
+        
         set({ isLoading: true, error: null });
         
         try {
-          // Simulate API call
-          await new Promise(resolve => setTimeout(resolve, 1500));
+          // Call the API to resend OTP
+          const otp = await authAPI.resendOtp(phoneNumber);
           
-          const generatedOtp = get().generatedOtp;
-          const phoneNumber = get().phoneNumber;
-          const userRole = get().userRole;
+          // In a real app, the OTP would be sent via SMS
+          // For demo, we'll use the returned OTP and log it
+          console.log('Resent OTP:', otp);
           
-          // For demo purposes, check if OTP matches or if it's "123456"
-          if (otp !== generatedOtp && otp !== "123456") {
-            set({ 
-              isLoading: false, 
-              error: "Invalid OTP. Please enter a valid 6-digit code." 
-            });
-            return false;
+          set({ generatedOtp: otp });
+          return otp;
+        } catch (error: any) {
+          console.error('Resend OTP error:', error);
+          const errorMessage = error.message || 'Failed to resend OTP. Please try again.';
+          set({ error: errorMessage });
+          throw new Error(errorMessage);
+        } finally {
+          set({ isLoading: false });
+        }
+      },
+
+      updateProfile: async (userData: Partial<User>): Promise<void> => {
+        set({ isLoading: true, error: null });
+        
+        try {
+          // Call the API to update the user's profile
+          const updatedUser = await authAPI.updateProfile(userData);
+          
+          if (!updatedUser) {
+            throw new Error('Failed to update profile: No user data returned');
           }
           
-          // Find a user based on the phone number
-          const user = mockUsers.find(u => 
-            u.phone.replace(/\D/g, "") === (phoneNumber || "").replace(/\D/g, "")
-          );
-          
-          // If no user found, create a mock user
-          const authenticatedUser: User = user || {
-            id: "user-" + Math.random().toString(36).substring(2),
-            name: "Demo User",
-            email: "demo@example.com",
-            phone: phoneNumber || "",
-            avatar: "https://ui-avatars.com/api/?name=Demo+User&background=random",
-            role: userRole,
-            createdAt: new Date().toISOString(),
-          };
-          
           set({
-            user: authenticatedUser,
+            user: updatedUser,
+            error: null,
             isAuthenticated: true,
-            isLoading: false,
           });
           
-          return true;
+          // Update AsyncStorage
+          const authData = await AsyncStorage.getItem('auth');
+          if (authData) {
+            const parsedAuth = JSON.parse(authData);
+            await AsyncStorage.setItem('auth', JSON.stringify({
+              ...parsedAuth,
+              user: updatedUser,
+              isAuthenticated: true,
+            }));
+          }
         } catch (error) {
-          console.error("OTP verification error:", error);
-          set({ 
-            isLoading: false, 
-            error: "Failed to verify OTP. Please try again." 
-          });
-          return false;
+          const errorMessage = error instanceof Error ? error.message : 'Failed to update profile';
+          set({ error: errorMessage });
+          throw error;
+        } finally {
+          set({ isLoading: false });
         }
       },
-      
-      resendOtp: async () => {
+
+      verifyOtp: async (otp: string): Promise<boolean> => {
         set({ isLoading: true, error: null });
         
         try {
-          // Simulate API call
-          await new Promise(resolve => setTimeout(resolve, 1500));
-          
-          const phoneNumber = get().phoneNumber;
+          const { phoneNumber, generatedOtp } = get();
           
           if (!phoneNumber) {
-            set({ 
-              isLoading: false, 
-              error: "Phone number not found. Please try logging in again." 
-            });
-            return;
+            throw new Error('Phone number not found. Please try again.');
           }
           
-          // Generate a new 6-digit OTP for demo purposes
-          const otp = Math.floor(100000 + Math.random() * 900000).toString();
+          // In a real app, verify OTP with the server
+          // const response = await authAPI.verifyOtp(phoneNumber, otp);
+          
+          // For demo, simulate API call with timeout
+          await new Promise(resolve => setTimeout(resolve, 1000));
+          
+          // Verify OTP matches the generated one
+          if (otp !== generatedOtp) {
+            throw new Error('Invalid OTP. Please try again.');
+          }
+          
+          // For demo, create a mock user
+          const mockUser = createMockUser(phoneNumber, get().userRole);
           
           set({
-            isLoading: false,
-            generatedOtp: otp, // Store the new OTP
+            user: mockUser,
+            isAuthenticated: true,
+            token: `mock-jwt-token-${Date.now()}`,
+            error: null,
           });
           
-          console.log("Resent OTP:", otp);
-          return otp;
+          // Store in AsyncStorage for persistence
+          await AsyncStorage.setItem('auth', JSON.stringify({
+            user: mockUser,
+            token: `mock-jwt-token-${Date.now()}`,
+            isAuthenticated: true,
+          }));
+          
+          // For demo, treat as new user if no name is set
+          const isNewUser = !mockUser.name;
+          
+          return isNewUser;
         } catch (error) {
-          console.error("Resend OTP error:", error);
-          set({ 
-            isLoading: false, 
-            error: "Failed to resend OTP. Please try again." 
-          });
+          const errorMessage = error instanceof Error ? error.message : 'Failed to verify OTP';
+          set({ error: errorMessage });
+          throw error;
+        } finally {
+          set({ isLoading: false });
         }
       },
-      
+
       register: async (userData: Partial<User>) => {
         set({ isLoading: true, error: null });
         
         try {
-          // Simulate API call
-          await new Promise(resolve => setTimeout(resolve, 1500));
+          // In a real app, we would call the API to register the user
+          await new Promise(resolve => setTimeout(resolve, 1000));
           
-          // Check if user with this phone already exists
-          const phone = userData.phone || "";
-          const existingUser = mockUsers.find(u => 
-            u.phone.replace(/\D/g, "") === phone.replace(/\D/g, "")
-          );
+          // For demo, create a mock user
+          const phone = userData.phone || get().phoneNumber || '';
+          const user = createMockUser(phone, 'user');
           
-          if (existingUser) {
-            set({ 
-              isLoading: false, 
-              error: "An account with this phone number already exists." 
-            });
-            return;
-          }
-          
-          // Generate a 6-digit OTP for demo purposes
-          const otp = Math.floor(100000 + Math.random() * 900000).toString();
+          // Update with provided user data
+          Object.assign(user, userData);
           
           set({
-            isLoading: false,
-            token: "demo-token-" + Math.random().toString(36).substring(2),
-            phoneNumber: phone,
-            userRole: userData.role || "user",
-            generatedOtp: otp, // Store the OTP for demo purposes
+            user,
+            isAuthenticated: true,
+            token: `mock-jwt-token-${Date.now()}`,
+            error: null,
           });
           
-          console.log("Generated OTP for registration:", otp);
-          return otp;
+          return `user-${Date.now()}`; // Return user ID or token
         } catch (error) {
-          console.error("Registration error:", error);
-          set({ 
-            isLoading: false, 
-            error: "Failed to register. Please try again." 
-          });
+          console.error('Registration error:', error);
+          set({ error: 'Registration failed. Please try again.' });
+          return undefined;
+        } finally {
+          set({ isLoading: false });
         }
       },
-      
+
       logout: () => {
         set({
           user: null,
@@ -228,42 +224,7 @@ export const useAuthStore = create<AuthState>()(
           generatedOtp: null,
         });
       },
-      
-      updateProfile: async (userData) => {
-        set({ isLoading: true, error: null });
-        
-        try {
-          // Simulate API call
-          await new Promise(resolve => setTimeout(resolve, 1500));
-          
-          const currentUser = get().user;
-          if (!currentUser) {
-            set({ 
-              isLoading: false, 
-              error: "Not logged in" 
-            });
-            return;
-          }
-          
-          // Update user data
-          const updatedUser = {
-            ...currentUser,
-            ...userData,
-          };
-          
-          set({
-            user: updatedUser,
-            isLoading: false,
-          });
-        } catch (error) {
-          console.error("Profile update error:", error);
-          set({ 
-            isLoading: false, 
-            error: "Failed to update profile. Please try again." 
-          });
-        }
-      },
-      
+
       followUser: async (userId) => {
         const currentUser = get().user;
         if (!currentUser) return;

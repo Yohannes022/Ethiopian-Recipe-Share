@@ -12,7 +12,10 @@ export interface User {
   recipes?: number;
   reviews?: number;
   role?: UserRole;
+  verified?: boolean;
+  isProfileComplete?: boolean;
   createdAt?: string;
+  updatedAt?: string;
   preferences?: UserPreferences;
   restaurantId?: string;
   restaurantName?: string;

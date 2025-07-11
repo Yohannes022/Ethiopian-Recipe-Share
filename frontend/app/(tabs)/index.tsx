@@ -220,9 +220,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background,
-    // paddingHorizontal: 7,
-    borderWidth: 1,
-    borderColor: "red",
+    // paddingHorizontal: 7,w
   },
   loadingContainer: {
     flex: 1,

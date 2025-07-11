@@ -35,7 +35,10 @@ export default function AuthLayout() {
           backgroundColor: 'transparent',
         },
         headerBackground: () => <HeaderBackground />,
-        headerTintColor: colors.text,
+        headerTintColor: colors.white,
+        headerTitleStyle: {
+          color: colors.white,
+        },
         headerShadowVisible: false,
         contentStyle: {
           backgroundColor: colors.background,
@@ -50,21 +53,17 @@ export default function AuthLayout() {
         }}
       />
       <Stack.Screen
-        name="login"
+        name="phone-auth"
         options={{
-          title: "Login",
+          title: "Sign In / Sign Up",
+          headerShown: true,
         }}
       />
       <Stack.Screen
         name="verify"
         options={{
-          title: "Verify Phone",
-        }}
-      />
-      <Stack.Screen
-        name="restaurant-owner-signup"
-        options={{
-          title: "Restaurant Owner Signup",
+          title: "Verify Phone Number",
+          headerShown: true,
         }}
       />
     </Stack>

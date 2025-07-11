@@ -127,18 +127,22 @@ export const authAPI = {
       const response = await api.post('/auth/login', { email, password });
       return response.data;
     } catch (error) {
-      console.error('Login error:', error);
-      // For demo purposes, return mock data
-      return {
-        user: {
-          id: "user-" + Math.random().toString(36).substring(2),
-          name: "Demo User",
-          email: email,
-          role: "user",
-          verified: true,
-          createdAt: new Date().toISOString(),
-        }
-      };
+      if (axios.isAxiosError(error)) {
+        throw new Error(error.response?.data?.message || 'Login failed');
+      }
+      throw new Error('An unexpected error occurred during login');
+    }
+  },
+  
+  updateProfile: async (userData: any) => {
+    try {
+      const response = await api.put('/auth/profile', userData);
+      return response.data;
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        throw new Error(error.response?.data?.message || 'Failed to update profile');
+      }
+      throw new Error('An unexpected error occurred while updating profile');
     }
   },
 };
