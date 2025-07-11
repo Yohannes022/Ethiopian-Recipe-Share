@@ -159,9 +159,18 @@ export default function RestaurantsScreen() {
   const handleCategoryPress = (category: string) => {
     setSelectedCategory(category);
   };
-  
-  const handleRestaurantPress = (restaurantId: string) => {
-    router.push(`/restaurant/${restaurantId}`);
+
+  const handleRestaurantPress = (restaurant: Restaurant) => {
+    // The mock data in the store expects IDs prefixed with 'rest', but our local mock uses simple numbers
+    // So we need to ensure we're using the correct format when navigating
+    const restaurantId = restaurant.id;
+    console.log('Navigating to restaurant with ID:', restaurantId);
+    
+    // The restaurant detail page will need to handle both formats
+    router.push({
+      pathname: '/restaurant/[id]',
+      params: { id: restaurantId }
+    });
   };
 
   const toggleCuisine = (cuisineId: string) => {
@@ -480,7 +489,7 @@ export default function RestaurantsScreen() {
             <RestaurantCard
               key={restaurant.id}
               restaurant={restaurant}
-              onPress={() => handleRestaurantPress(restaurant.id)}
+              onPress={() => handleRestaurantPress(restaurant)}
             />
           ))}
         </ScrollView>

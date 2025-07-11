@@ -88,9 +88,19 @@ export default function RestaurantDetailScreen() {
   
   useEffect(() => {
     const loadRestaurant = async () => {
-      if (id) {
+      if (!id) return;
+      
+      try {
+        setIsLoading(true);
+        console.log('Fetching restaurant with ID:', id);
         const data = await fetchRestaurant(id);
+        console.log('Fetched restaurant data:', data);
         setRestaurant(data);
+      } catch (error) {
+        console.error('Error loading restaurant:', error);
+        Alert.alert('Error', 'Failed to load restaurant. Please try again.');
+      } finally {
+        setIsLoading(false);
       }
     };
     

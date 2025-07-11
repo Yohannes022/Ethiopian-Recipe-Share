@@ -53,19 +53,27 @@ export const useRestaurantStore = create<RestaurantState>()(
       },
       
       fetchRestaurant: async (id: string) => {
+        console.log('Fetching restaurant with ID:', id);
         set({ isLoading: true, error: null });
         
         try {
-          // Check if restaurant is already in state
-          const existingRestaurant = get().restaurants.find(r => r.id === id);
+          // Check if restaurant is already in state (try both prefixed and non-prefixed ID)
+          const existingRestaurant = get().restaurants.find(r => r.id === id || r.id === `rest${id}` || r.id === id.replace('rest', ''));
           
           if (existingRestaurant) {
             set({ currentRestaurant: existingRestaurant, isLoading: false });
             return existingRestaurant;
           }
           
-          // Find restaurant in mock data
-          const restaurant = mockRestaurants.find(r => r.id === id) || null;
+          // Log all available restaurant IDs for debugging
+          console.log('Available restaurant IDs:', mockRestaurants.map(r => r.id));
+          
+          // Find restaurant in mock data (try both prefixed and non-prefixed ID)
+          const restaurant = mockRestaurants.find(r => 
+            r.id === id || 
+            r.id === `rest${id}` || 
+            r.id === id.replace('rest', '')
+          ) || null;
           
           if (restaurant) {
             set({ 

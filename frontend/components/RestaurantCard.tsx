@@ -14,13 +14,13 @@ interface RestaurantCardProps {
 export default function RestaurantCard({ restaurant, onPress }: RestaurantCardProps) {
   const {
     name,
-    image,
+    imageUrl,
     cuisine,
-    rating,
-    deliveryFee,
+    rating = 0, // Default to 0 if rating is undefined
+    deliveryFee = 0,
     estimatedDeliveryTime,
     priceLevel,
-    isOpen,
+    isOpen = true,
   } = restaurant;
 
   // Format delivery fee
@@ -29,7 +29,7 @@ export default function RestaurantCard({ restaurant, onPress }: RestaurantCardPr
   return (
     <TouchableOpacity style={styles.container} onPress={onPress} activeOpacity={0.8}>
       <Image
-        source={{ uri: image }}
+        source={{ uri: imageUrl }}
         style={styles.image}
         contentFit="cover"
         transition={200}
@@ -44,10 +44,12 @@ export default function RestaurantCard({ restaurant, onPress }: RestaurantCardPr
       <View style={styles.content}>
         <View style={styles.header}>
           <Text style={styles.name} numberOfLines={1}>{name}</Text>
-          <View style={styles.ratingContainer}>
-            <Star size={14} color={colors.yellow} fill={colors.yellow} />
-            <Text style={styles.rating}>{rating.toFixed(1)}</Text>
-          </View>
+          {rating > 0 && (
+            <View style={styles.ratingContainer}>
+              <Star size={14} color={colors.warning} fill={colors.warning} />
+              <Text style={styles.rating}>{rating.toFixed(1)}</Text>
+            </View>
+          )}
         </View>
         
         <Text style={styles.cuisine}>{cuisine}</Text>
@@ -79,7 +81,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     overflow: "hidden",
     marginBottom: 16,
-    shadowColor: colors.shadow,
+    shadowColor: colors.gray,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 8,
@@ -90,13 +92,14 @@ const styles = StyleSheet.create({
     height: 160,
   },
   closedBadge: {
-    position: "absolute",
+    position: 'absolute',
     top: 12,
     right: 12,
-    backgroundColor: "rgba(0, 0, 0, 0.7)",
+    backgroundColor: 'rgba(0, 0, 0, 0.7)',
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 4,
+    zIndex: 1,
   },
   closedText: {
     color: colors.white,
@@ -118,10 +121,10 @@ const styles = StyleSheet.create({
     marginRight: 8,
   },
   ratingContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: colors.ratingBackground,
-    paddingHorizontal: 6,
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.lightGray,
+    paddingHorizontal: 8,
     paddingVertical: 2,
     borderRadius: 4,
   },
