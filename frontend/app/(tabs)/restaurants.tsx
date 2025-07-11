@@ -20,14 +20,11 @@ import {
 } from "react-native";
 
 // Define the Restaurant interface with all required properties
-interface OpeningHours {
-  [day: string]: {
-    open: string;
-    close: string;
-  };
-}
+// Import the base Restaurant type and extend it
+import type { Restaurant as BaseRestaurant } from '@/types/restaurant';
 
-interface Restaurant {
+// Define the extended Restaurant interface with proper typing
+interface Restaurant extends BaseRestaurant {
   id: string;
   name: string;
   image: string;
@@ -46,7 +43,8 @@ interface Restaurant {
   updatedAt: string;
   estimatedDeliveryTime?: string;
   dietaryOptions?: string[];
-  openingHours?: OpeningHours;
+  // Override the openingHours to be more specific about the type
+  openingHours?: Record<string, { open: string; close: string }>;
 }
 
 type PriceRange = [number, number];
@@ -325,27 +323,32 @@ export default function RestaurantsScreen() {
 
       filtered = filtered.filter((restaurant) => {
         const hours = restaurant.openingHours?.[currentDay];
-        if (!hours || hours === 'Closed') return false;
+        if (!hours || typeof hours === 'string') return false;
         
-        const [openTime, closeTime] = hours.split(' - ');
-        const [openHour, openMinute] = openTime
-          .replace(/[^0-9:]/g, '')
-          .split(':')
-          .map(Number);
-        const [closeHour, closeMinute] = closeTime
-          .replace(/[^0-9:]/g, '')
-          .split(':')
-          .map(Number);
+        // If hours is an object with open/close times, use them directly
+        if (typeof hours === 'object' && 'open' in hours && 'close' in hours) {
+          const parseTime = (timeStr: string) => {
+            const [hours, minutes] = timeStr
+              .replace(/[^0-9:]/g, '')
+              .split(':')
+              .map(Number);
+            return { hours, minutes: minutes || 0 };
+          };
 
-        const openTimeInMinutes = openHour * 100 + openMinute;
-        let closeTimeInMinutes = closeHour * 100 + closeMinute;
+          const openTime = parseTime(hours.open);
+          const closeTime = parseTime(hours.close);
 
-        // Handle overnight hours
-        if (closeTimeInMinutes < openTimeInMinutes) {
-          closeTimeInMinutes += 2400; // Add 24 hours
+          const openTimeInMinutes = openTime.hours * 100 + openTime.minutes;
+          let closeTimeInMinutes = closeTime.hours * 100 + closeTime.minutes;
+
+          // Handle overnight hours
+          if (closeTimeInMinutes < openTimeInMinutes) {
+            closeTimeInMinutes += 2400; // Add 24 hours
+          }
+
+          return currentTime >= openTimeInMinutes && currentTime <= closeTimeInMinutes;
         }
-
-        return currentTime >= openTimeInMinutes && currentTime <= closeTimeInMinutes;
+        return false; // If hours format is invalid, exclude from results
       });
     }
     
