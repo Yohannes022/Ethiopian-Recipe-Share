@@ -27,6 +27,7 @@ const createMockUser = (phone: string, role: UserRole = 'user'): User => ({
 export const useAuthStore = create<AuthState>()(
   persist(
     (set, get) => ({
+      // Initialize with default values
       user: null,
       isAuthenticated: false,
       isLoading: false,
@@ -274,6 +275,20 @@ export const useAuthStore = create<AuthState>()(
     {
       name: "auth-storage",
       storage: createJSONStorage(() => AsyncStorage),
+      // Add version and migration to handle any persisted state issues
+      version: 1,
+      migrate: (persistedState: any, version) => {
+        if (version === 0) {
+          // If coming from version 0, reset auth state
+          return {
+            ...persistedState,
+            isAuthenticated: false,
+            user: null,
+            token: null
+          };
+        }
+        return persistedState;
+      },
     }
   )
 );

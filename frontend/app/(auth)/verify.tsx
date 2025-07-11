@@ -96,6 +96,7 @@ export default function VerifyScreen() {
       const isNewUser = await verifyOtp(code);
       
       // Navigate based on whether the user is new or existing
+      // The auth store will handle redirection after successful verification
       if (isNewUser) {
         // For new users, navigate to the profile tab where they can complete setup
         // Using replace to prevent going back to the OTP screen

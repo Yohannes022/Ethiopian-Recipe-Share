@@ -8,6 +8,7 @@ import Button from "@/components/Button";
 import colors from "@/constants/colors";
 import typography from "@/constants/typography";
 
+// This is a route component for phone authentication
 export default function PhoneAuthScreen() {
   const router = useRouter();
   const [phone, setPhone] = useState("");
@@ -39,7 +40,7 @@ export default function PhoneAuthScreen() {
       router.push({
         pathname: "/verify",
         params: { phone: fullPhone }
-      });
+      } as any);
     } catch (error) {
       console.error("Auth error:", error);
       Alert.alert("Error", "Failed to send OTP. Please try again.");
@@ -112,7 +113,9 @@ export default function PhoneAuthScreen() {
       </ScrollView>
     </KeyboardAvoidingView>
   );
-}
+};
+
+
 
 const styles = StyleSheet.create({
   container: {
