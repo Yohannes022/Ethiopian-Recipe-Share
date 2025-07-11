@@ -49,13 +49,13 @@ interface Restaurant {
   openingHours?: OpeningHours;
 }
 
-type PriceRange = 'Under 100 ETB' | '100-300 ETB' | '300-500 ETB' | '500+ ETB';
+type PriceRange = [number, number];
 
 const priceRanges = [
-  { label: 'Under 100 ETB', value: 'Under 100 ETB' as const },
-  { label: '100-300 ETB', value: '100-300 ETB' as const },
-  { label: '300-500 ETB', value: '300-500 ETB' as const },
-  { label: '500+ ETB', value: '500+ ETB' as const },
+  { label: 'Under 100 ETB', value: [0, 100] as [number, number] },
+  { label: '100-300 ETB', value: [100, 300] as [number, number] },
+  { label: '300-500 ETB', value: [300, 500] as [number, number] },
+  { label: '500+ ETB', value: [500, Infinity] as [number, number] },
 ];
 
 // Mock data for restaurants
@@ -157,6 +157,25 @@ export default function RestaurantsScreen() {
   const [filteredRestaurants, setFilteredRestaurants] = useState<Restaurant[]>(mockRestaurants);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
+  
+  const handleCategoryPress = (category: string) => {
+    setSelectedCategory(category);
+  };
+  
+  const handleRestaurantPress = (restaurantId: string) => {
+    router.push(`/restaurant/${restaurantId}`);
+  };
+
+  const toggleCuisine = (cuisineId: string) => {
+    setFilters(prev => ({
+      ...prev,
+      cuisines: prev.cuisines.map(cuisine => 
+        cuisine.id === cuisineId 
+          ? { ...cuisine, selected: !cuisine.selected } 
+          : cuisine
+      )
+    }));
+  };
   
   const parseDeliveryTime = (timeStr: string | number | undefined): number => {
     if (!timeStr) return 0;
@@ -277,12 +296,14 @@ export default function RestaurantsScreen() {
     }
     
     // Apply price range filter
-    const [minPrice, maxPrice] = filters.priceRange || [0, 1000];
-    filtered = filtered.filter(
-      (restaurant) => restaurant.priceLevel && 
-        parseInt(restaurant.priceLevel) >= minPrice && 
-        parseInt(restaurant.priceLevel) <= maxPrice
-    );
+    if (filters.priceRange[0] !== 0 || filters.priceRange[1] !== 1000) {
+      const [minPrice, maxPrice] = filters.priceRange;
+      filtered = filtered.filter(restaurant => {
+        if (!restaurant.priceLevel) return false;
+        const price = parseInt(restaurant.priceLevel.replace(/[^0-9]/g, ''));
+        return price >= minPrice && price <= maxPrice;
+      });
+    }
     
     // Apply cuisine filter
     const selectedCuisines = filters.cuisines
@@ -365,16 +386,27 @@ export default function RestaurantsScreen() {
     }));
   };
 
+  const togglePriceRange = (price: [number, number]) => {
+    setFilters(prev => {
+      // If the same price range is clicked again, reset to default
+      if (prev.priceRange[0] === price[0] && prev.priceRange[1] === price[1]) {
+        return { ...prev, priceRange: [0, 1000] as [number, number] };
+      }
+      // Otherwise set the new price range
+      return { ...prev, priceRange: price };
+    });
+  };
+
   const applyFilters = () => {
     setShowFilterModal(false);
   };
 
   const resetFilters = () => {
     setFilters({
-      priceRange: '',
+      priceRange: [0, 1000],
       openNow: false,
       minRating: 0,
-      cuisines: [],
+      cuisines: initialCuisines,
       dietaryOptions: [],
       maxDeliveryTime: 60,
     });
@@ -473,17 +505,17 @@ export default function RestaurantsScreen() {
                 <View style={styles.priceRangeContainer}>
                   {priceRanges.map((price) => (
                     <TouchableOpacity
-                      key={price.value}
+                      key={price.label}
                       style={[
                         styles.priceButton,
-                        filters.priceRange === price.value && styles.priceButtonSelected,
+                        filters.priceRange[0] === price.value[0] && filters.priceRange[1] === price.value[1] && styles.priceButtonSelected,
                       ]}
                       onPress={() => togglePriceRange(price.value)}
                     >
                       <Text
                         style={[
                           styles.priceButtonText,
-                          filters.priceRange === price.value && styles.priceButtonTextSelected,
+                          filters.priceRange[0] === price.value[0] && filters.priceRange[1] === price.value[1] && styles.priceButtonTextSelected,
                         ]}
                       >
                         {price.label}
