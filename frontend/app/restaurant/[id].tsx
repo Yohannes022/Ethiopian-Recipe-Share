@@ -76,9 +76,12 @@ export default function RestaurantScreen() {
   };
 
   const handleCheckout = () => {
-    const title = "Login Required";
-    const message = "Please log in to place an order.";
-    Alert.alert(title, message, []);
+    // In the real app, this would navigate to the checkout screen and 
+    // handle the checkout process for registered users
+    // const title = "Login Required";
+    // const message = "Please log in to place an order.";
+    // Alert.alert(title, message, []);
+    router.push("/cart");
   };
 
   const renderMenuItem = (item: MenuItem) => {

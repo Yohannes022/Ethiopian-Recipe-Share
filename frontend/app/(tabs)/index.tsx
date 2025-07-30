@@ -371,17 +371,7 @@ const styles = StyleSheet.create({
     ...typography.bodySmall,
     fontWeight: "600",
     marginLeft: 4,
-  },
-  locationContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  locationText: {
-    ...typography.caption,
-    color: colors.lightText,
-    marginLeft: 4,
-    flex: 1,
-  },
+    },
   popularContainer: {
     marginBottom: 24,
     paddingHorizontal: 5,

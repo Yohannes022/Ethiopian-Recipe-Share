@@ -84,6 +84,7 @@ export interface Order {
   id: string;
   restaurantId: string | Restaurant;
   userId: string;
+  isGuest?: boolean;
   items: OrderItem[];
   status: OrderStatus;
   totalAmount: number;

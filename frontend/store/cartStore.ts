@@ -1,7 +1,7 @@
 import { addresses } from "@/mocks/addresses";
 import { mockRestaurants } from "@/mocks/restaurants";
 import { currentUser } from "@/mocks/users";
-import { CartItem, MenuItem, Order, ServiceType } from "@/types/restaurant";
+import { CartItem, MenuItem, Order, OrderServiceType } from "@/types/restaurant";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
@@ -9,7 +9,7 @@ import { createJSONStorage, persist } from "zustand/middleware";
 interface CartState {
   items: CartItem[];
   restaurantId: string | null;
-  serviceType: ServiceType;
+  serviceType: OrderServiceType;
   
   // Cart actions
   addToCart: (restaurantId: string, menuItemId: string, quantity: number, specialInstructions?: string) => void;
@@ -17,7 +17,7 @@ interface CartState {
   updateInstructions: (itemId: string, instructions: string) => void;
   removeFromCart: (itemId: string) => void;
   clearCart: () => void;
-  setServiceType: (type: ServiceType) => void;
+  setServiceType: (type: OrderServiceType) => void;
   
   // Cart calculations
   getCartTotal: () => number;
@@ -327,7 +327,8 @@ export const useCartStore = create<CartState>()(
         
         const newOrder: Order = {
           id: Date.now().toString(),
-          userId: currentUser?.id,
+          userId: currentUser?.id || `guest-${Date.now()}`,
+          isGuest: !currentUser?.id,
           restaurantId: restaurant.id,
           items: cartItems.map(item => ({
             id: Date.now() + "-" + item.menuItem.id,
@@ -349,7 +350,7 @@ export const useCartStore = create<CartState>()(
           pickupTime,
           createdAt: new Date().toISOString(),
           estimatedDeliveryTime: serviceType === 'delivery' ? restaurant.estimatedDeliveryTime : 0,
-          totalAmount: 0,
+          totalAmount: total,
           paymentStatus: "pending",
           updatedAt: ""
         };

@@ -12,6 +12,7 @@ import {
   Dimensions,
   Linking,
   Platform,
+  ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -197,165 +198,198 @@ export default function DeliveryTrackingScreen() {
         <View style={{ width: 24 }} />
       </View>
       
-      <View style={styles.mapContainer}>
-        {Platform.OS === "web" || !MapView ? (
-          <View style={[styles.map, { backgroundColor: "#e0e0e0", justifyContent: "center", alignItems: "center" }]}>
-            <Text style={{ ...typography.body, color: colors.lightText }}>Map View</Text>
-            <Text style={{ ...typography.caption, color: colors.lightText, marginTop: 8 }}>
-              (Map would be displayed here in a real app)
-            </Text>
-          </View>
-        ) : (
-          <MapView
-            ref={mapRef}
-            style={styles.map}
-            provider={PROVIDER_GOOGLE}
-            initialRegion={{
-              latitude: restaurant.location?.latitude,
-              longitude: restaurant.location?.longitude,
-              latitudeDelta: 0.05,
-              longitudeDelta: 0.05,
-            }}
-          >
-            {/* Restaurant marker */}
-            <Marker
-              coordinate={restaurant.location}
-              title={restaurant.name}
-              description="Restaurant location"
+      <ScrollView 
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollViewContent}
+        showsVerticalScrollIndicator={false}
+      >
+        <View style={styles.mapContainer}>
+          {Platform.OS === "web" || !MapView ? (
+            <View style={styles.mapPlaceholder}>
+              <Text style={styles.mapPlaceholderText}>Map View</Text>
+            </View>
+          ) : (
+            <MapView
+              ref={mapRef}
+              style={styles.map}
+              provider={PROVIDER_GOOGLE}
+              initialRegion={{
+                latitude: restaurant.location?.latitude,
+                longitude: restaurant.location?.longitude,
+                latitudeDelta: 0.05,
+                longitudeDelta: 0.05,
+              }}
             >
-              <View style={styles.restaurantMarker}>
-                <MapPin size={24} color={colors.white} />
-              </View>
-            </Marker>
-            
-            {/* Delivery address marker */}
-            {order.deliveryAddress?.location && (
+              {/* Restaurant marker */}
               <Marker
-                coordinate={order.deliveryAddress.location}
-                title="Delivery Address"
-                description={order.deliveryAddress.addressLine1}
+                coordinate={restaurant.location}
+                title={restaurant.name}
+                description="Restaurant location"
               >
-                <View style={styles.destinationMarker}>
+                <View style={styles.restaurantMarker}>
                   <MapPin size={24} color={colors.white} />
                 </View>
               </Marker>
-            )}
-            
-            {/* Driver marker */}
-            {driverLocation && (
-              <Marker
-                coordinate={driverLocation}
-                title={order.driverInfo?.name || "Driver"}
-                description="Your delivery driver"
-              >
-                <View style={styles.driverMarker}>
-                  <Navigation size={24} color={colors.white} />
-                </View>
-              </Marker>
-            )}
+              
+              {/* Delivery address marker */}
+              {order.deliveryAddress?.location && (
+                <Marker
+                  coordinate={order.deliveryAddress.location}
+                  title="Delivery Address"
+                  description={order.deliveryAddress.addressLine1}
+                >
+                  <View style={styles.destinationMarker}>
+                    <MapPin size={24} color={colors.white} />
+                  </View>
+                </Marker>
+              )}
+              
+              {/* Driver marker */}
+              {driverLocation && (
+                <Marker
+                  coordinate={driverLocation}
+                  title={order.driverInfo?.name || "Driver"}
+                  description="Your delivery driver"
+                >
+                  <View style={styles.driverMarker}>
+                    <Navigation size={24} color={colors.white} />
+                  </View>
+                </Marker>
+              )}
 
-            {/* User location marker */}
-            {userLocation && (
-              <Marker
-                coordinate={userLocation}
-                title="Your Location"
-              >
-                <View style={styles.userMarker}>
-                  <View style={styles.userMarkerInner} />
-                </View>
-              </Marker>
-            )}
-          </MapView>
-        )}
-
-        {!locationPermission && Platform.OS !== "web" && Location && (
-          <TouchableOpacity 
-            style={styles.locationPermissionButton}
-            onPress={requestLocationPermission}
-          >
-            <Text style={styles.locationPermissionText}>Show my location</Text>
-          </TouchableOpacity>
-        )}
-      </View>
-      
-      <View style={styles.content}>
-        <View style={styles.statusContainer}>
-          <OrderStatusTracker status={order.status} />
+              {/* User location marker */}
+              {userLocation && (
+                <Marker
+                  coordinate={userLocation}
+                  title="Your Location"
+                >
+                  <View style={styles.userMarker}>
+                    <View style={styles.userMarkerInner} />
+                  </View>
+                </Marker>
+              )}
+            </MapView>
+          )}
         </View>
         
-        <View style={styles.estimatedTimeContainer}>
-          <Text style={styles.estimatedTimeLabel}>Estimated Arrival</Text>
-          <Text style={styles.estimatedTimeValue}>
-            {estimatedTime} minutes
-          </Text>
-        </View>
-        
-        {order.status === "out-for-delivery" && order.driverInfo && (
-          <View style={styles.driverContainer}>
-            <View style={styles.driverHeader}>
+        {order.driverInfo && (
+          <View style={styles.driverInfoCard}>
+            <View style={styles.driverInfoHeader}>
               <Image
                 source={{ uri: order.driverInfo.photoUrl }}
                 style={styles.driverImage}
                 contentFit="cover"
               />
-              <View style={styles.driverInfo}>
+              <View style={styles.driverInfoText}>
                 <Text style={styles.driverName}>{order.driverInfo.name}</Text>
-                <Text style={styles.driverRole}>Your Delivery Driver</Text>
+                <Text style={styles.deliveryStatus}>{order.status}</Text>
               </View>
             </View>
-            
             <View style={styles.driverActions}>
               <TouchableOpacity
-                style={styles.driverAction}
+                style={styles.actionButton}
                 onPress={handleCallDriver}
               >
                 <Phone size={20} color={colors.white} />
+                <Text style={styles.actionButtonText}>Call Driver</Text>
               </TouchableOpacity>
-              
               <TouchableOpacity
-                style={styles.driverAction}
+                style={styles.actionButton}
                 onPress={handleMessageDriver}
               >
                 <MessageCircle size={20} color={colors.white} />
+                <Text style={styles.actionButtonText}>Message</Text>
               </TouchableOpacity>
             </View>
           </View>
         )}
         
-        <View style={styles.deliveryAddressContainer}>
-          <Text style={styles.deliveryAddressTitle}>Delivery Address</Text>
-          <Text style={styles.deliveryAddress}>
-            {order.deliveryAddress?.addressLine1}
-            {order.deliveryAddress?.addressLine2 ? `, ${order.deliveryAddress.addressLine2}` : ""}
-            {", "}
-            {order.deliveryAddress?.city}
-          </Text>
+        <View style={styles.content}>
+          <View style={styles.sectionContainer}>
+            <Text style={styles.sectionTitle}>Delivery Details</Text>
+            <View style={styles.detailRow}>
+              <View style={styles.detailIcon}>
+                <MapPin size={24} color={colors.white} />
+              </View>
+              <View style={styles.detailContent}>
+                <Text style={styles.detailLabel}>Delivery Address</Text>
+                <Text style={styles.detailValue}>{order.deliveryAddress?.addressLine1}</Text>
+                {order.deliveryAddress?.addressLine2 && (
+                  <Text style={styles.detailValue}>{order.deliveryAddress.addressLine2}</Text>
+                )}
+                <Text style={styles.detailNote}>{order.deliveryAddress?.instructions}</Text>
+              </View>
+            </View>
+            <View style={styles.detailRow}>
+              <View style={styles.detailIcon}>
+                <Navigation size={24} color={colors.white} />
+              </View>
+              <View style={styles.detailContent}>
+                <Text style={styles.detailLabel}>Estimated Arrival</Text>
+                <Text style={styles.detailValue}>{estimatedTime} minutes</Text>
+              </View>
+            </View>
+          </View>
           
-          {order.deliveryAddress?.instructions && (
-            <Text style={styles.deliveryInstructions}>
-              Note: {order.deliveryAddress.instructions}
-            </Text>
-          )}
-        </View>
-        
-        <View style={styles.orderSummaryContainer}>
-          <Text style={styles.orderSummaryTitle}>Order Summary</Text>
-          
-          <View style={styles.orderItems}>
+          <View style={styles.sectionContainer}>
+            <Text style={styles.sectionTitle}>Order Summary</Text>
             {order.items.map((item) => (
               <View key={item.menuItemId} style={styles.orderItem}>
-                <Text style={styles.orderItemQuantity}>{item.quantity}x</Text>
-                <Text style={styles.orderItemName}>{item.name}</Text>
+                <View style={styles.orderItemInfo}>
+                  <Text style={styles.orderItemName}>{item.name}</Text>
+                  <Text style={styles.orderItemQuantity}>x{item.quantity}</Text>
+                </View>
+                <Text style={styles.orderItemPrice}>{item.price.toFixed(2)} Birr</Text>
               </View>
             ))}
-          </View>
-          
-          <View style={styles.totalContainer}>
-            <Text style={styles.totalLabel}>Total</Text>
-            <Text style={styles.totalValue}>{order.totalAmount.toFixed(2)} Birr</Text>
+            <View style={styles.orderTotal}>
+              <Text style={styles.totalLabel}>Total</Text>
+              <Text style={styles.totalAmount}>{order.totalAmount.toFixed(2)} Birr</Text>
+            </View>
           </View>
         </View>
+      </ScrollView>
+      
+      {/* Footer with action buttons */}
+      <View style={styles.footer}>
+        <View style={styles.footerContent}>
+          <View style={styles.footerTextContainer}>
+            <Text style={styles.footerLabel}>Estimated Delivery</Text>
+            <Text style={styles.footerTime}>{estimatedTime} min</Text>
+          </View>
+          <TouchableOpacity 
+            style={styles.trackButton}
+            onPress={() => {
+              // Center map on driver's location
+              if (mapRef.current && driverLocation) {
+                mapRef.current.animateToRegion({
+                  ...driverLocation,
+                  latitudeDelta: 0.01,
+                  longitudeDelta: 0.01,
+                }, 1000);
+              }
+            }}
+          >
+            <Text style={styles.trackButtonText}>Track Order</Text>
+          </TouchableOpacity>
+        </View>
       </View>
+      
+      {/* Location Permission Banner */}
+      {!locationPermission && Platform.OS !== 'web' && (
+        <View style={styles.locationPermissionBanner}>
+          <MapPin size={20} color={colors.primary} />
+          <Text style={styles.locationPermissionText}>
+            Enable location to track your order in real-time
+          </Text>
+          <TouchableOpacity 
+            style={styles.enableButton}
+            onPress={requestLocationPermission}
+          >
+            <Text style={styles.enableButtonText}>Enable</Text>
+          </TouchableOpacity>
+        </View>
+      )}
     </View>
   );
 }
@@ -368,27 +402,26 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background,
   },
   header: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingTop: Platform.OS === "ios" ? 50 : 20,
-    paddingBottom: 10,
-    paddingHorizontal: 20,
-    backgroundColor: colors.white,
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    zIndex: 10,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 16,
+    backgroundColor: colors.cardBackground,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.divider,
   },
   backButton: {
-    width: 40,
-    height: 40,
-    justifyContent: "center",
-    alignItems: "center",
+    padding: 4,
   },
   headerTitle: {
     ...typography.heading3,
+    color: colors.text,
+  },
+  scrollView: {
+    flex: 1,
+  },
+  scrollViewContent: {
+    paddingBottom: 90,
   },
   notFound: {
     flex: 1,
@@ -402,68 +435,80 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
   mapContainer: {
-    height: height * 0.4,
-    width: width,
+    height: 300,
+    backgroundColor: colors.lightGray,
+    position: 'relative',
   },
   map: {
     ...StyleSheet.absoluteFillObject,
   },
-  restaurantMarker: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: colors.secondary,
-    justifyContent: "center",
-    alignItems: "center",
+  mapPlaceholder: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: colors.lightGray,
   },
-  destinationMarker: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: colors.accent,
-    justifyContent: "center",
-    alignItems: "center",
+  mapPlaceholderText: {
+    ...typography.body,
+    color: colors.text,
   },
-  driverMarker: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: colors.primary,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  userMarker: {
-    width: 24,
-    height: 24,
+  driverInfoCard: {
+    position: 'absolute',
+    bottom: 16,
+    left: 16,
+    right: 16,
+    backgroundColor: colors.cardBackground,
     borderRadius: 12,
-    backgroundColor: colors.primary + "40",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  userMarkerInner: {
-    width: 12,
-    height: 12,
-    borderRadius: 6,
-    backgroundColor: colors.primary,
-  },
-  locationPermissionButton: {
-    position: "absolute",
-    top: 20,
-    right: 20,
-    backgroundColor: colors.white,
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    borderRadius: 20,
-    elevation: 2,
+    padding: 16,
     shadowColor: colors.black,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
+    elevation: 3,
   },
-  locationPermissionText: {
-    ...typography.caption,
-    color: colors.primary,
-    fontWeight: "600",
+  driverInfoHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  driverImage: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    marginRight: 12,
+  },
+  driverInfoText: {
+    flex: 1,
+  },
+  driverName: {
+    ...typography.bodyLarge,
+    fontWeight: '600',
+    color: colors.text,
+  },
+  deliveryStatus: {
+    ...typography.bodySmall,
+    color: colors.lightText,
+    marginTop: 2,
+  },
+  driverActions: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  actionButton: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 10,
+    borderRadius: 8,
+    marginHorizontal: 4,
+    backgroundColor: colors.primary,
+  },
+  actionButtonText: {
+    ...typography.body,
+    color: colors.white,
+    marginLeft: 6,
+    fontWeight: '500',
   },
   content: {
     flex: 1,
@@ -474,118 +519,216 @@ const styles = StyleSheet.create({
     paddingTop: 20,
     paddingHorizontal: 20,
   },
-  statusContainer: {
+  sectionContainer: {
+    backgroundColor: colors.cardBackground,
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 16,
+    marginHorizontal: 16,
+  },
+  sectionTitle: {
+    ...typography.heading4,
+    color: colors.text,
     marginBottom: 16,
   },
-  estimatedTimeContainer: {
-    alignItems: "center",
-    marginBottom: 24,
+  detailRow: {
+    flexDirection: 'row',
+    marginBottom: 16,
+    alignItems: 'flex-start',
   },
-  estimatedTimeLabel: {
-    ...typography.bodySmall,
-    color: colors.lightText,
-    marginBottom: 4,
-  },
-  estimatedTimeValue: {
-    ...typography.heading2,
-    color: colors.primary,
-  },
-  driverContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    backgroundColor: colors.inputBackground,
-    borderRadius: 16,
-    padding: 16,
-    marginBottom: 24,
-  },
-  driverHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  driverImage: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
+  detailIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: colors.primary + '15',
+    justifyContent: 'center',
+    alignItems: 'center',
     marginRight: 12,
   },
-  driverInfo: {
+  detailContent: {
     flex: 1,
   },
-  driverName: {
-    ...typography.heading4,
+  detailLabel: {
+    ...typography.caption,
+    color: colors.lightText,
     marginBottom: 2,
   },
-  driverRole: {
-    ...typography.bodySmall,
+  detailValue: {
+    ...typography.body,
+    color: colors.text,
+  },
+  detailNote: {
+    ...typography.caption,
+    color: colors.lightText,
+    fontStyle: 'italic',
+    marginTop: 4,
+  },
+  orderItem: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.divider,
+  },
+  orderItemInfo: {
+    flex: 1,
+    marginRight: 12,
+  },
+  orderItemName: {
+    ...typography.body,
+    color: colors.text,
+    marginBottom: 2,
+  },
+  orderItemQuantity: {
+    ...typography.caption,
     color: colors.lightText,
   },
-  driverActions: {
-    flexDirection: "row",
+  orderItemPrice: {
+    ...typography.body,
+    color: colors.text,
+    fontWeight: '500',
   },
-  driverAction: {
+  orderTotal: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 12,
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: colors.divider,
+  },
+  totalLabel: {
+    ...typography.bodyLarge,
+    fontWeight: '600',
+    color: colors.text,
+  },
+  totalAmount: {
+    ...typography.heading4,
+    color: colors.primary,
+  },
+  
+  // Marker Styles
+  restaurantMarker: {
     width: 40,
     height: 40,
     borderRadius: 20,
     backgroundColor: colors.primary,
-    justifyContent: "center",
-    alignItems: "center",
-    marginLeft: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: colors.white,
   },
-  deliveryAddressContainer: {
-    marginBottom: 24,
+  destinationMarker: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: colors.accent,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: colors.white,
   },
-  deliveryAddressTitle: {
-    ...typography.heading4,
-    marginBottom: 8,
+  driverMarker: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: colors.secondary,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: colors.white,
+    transform: [{ rotate: '45deg' }],
   },
-  deliveryAddress: {
-    ...typography.body,
-    marginBottom: 4,
+  userMarker: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: colors.primary + '40',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: colors.white,
   },
-  deliveryInstructions: {
-    ...typography.bodySmall,
-    color: colors.lightText,
-    fontStyle: "italic",
+  userMarkerInner: {
+    width: 16,
+    height: 16,
+    borderRadius: 8,
+    backgroundColor: colors.primary,
   },
-  orderSummaryContainer: {
+  
+  // Footer
+  footer: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: colors.cardBackground,
     borderTopWidth: 1,
     borderTopColor: colors.divider,
-    paddingTop: 16,
+    padding: 16,
+    paddingBottom: Platform.OS === 'ios' ? 30 : 16,
   },
-  orderSummaryTitle: {
-    ...typography.heading4,
-    marginBottom: 12,
+  footerContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
   },
-  orderItems: {
-    marginBottom: 16,
-  },
-  orderItem: {
-    flexDirection: "row",
-    marginBottom: 8,
-  },
-  orderItemQuantity: {
-    ...typography.body,
-    fontWeight: "600",
-    marginRight: 8,
-    width: 30,
-  },
-  orderItemName: {
-    ...typography.body,
+  footerTextContainer: {
     flex: 1,
   },
-  totalContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    borderTopWidth: 1,
-    borderTopColor: colors.divider,
-    paddingTop: 12,
+  footerLabel: {
+    ...typography.caption,
+    color: colors.lightText,
+    marginBottom: 2,
   },
-  totalLabel: {
-    ...typography.heading4,
-  },
-  totalValue: {
+  footerTime: {
     ...typography.heading4,
     color: colors.primary,
+  },
+  trackButton: {
+    backgroundColor: colors.primary,
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    borderRadius: 8,
+    marginLeft: 16,
+  },
+  trackButtonText: {
+    ...typography.button,
+    color: colors.white,
+  },
+  
+  // Location Permission Banner
+  locationPermissionBanner: {
+    position: 'absolute',
+    bottom: 80,
+    left: 16,
+    right: 16,
+    backgroundColor: colors.primary + '15',
+    borderRadius: 8,
+    padding: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+    shadowColor: colors.black,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  locationPermissionText: {
+    ...typography.bodySmall,
+    color: colors.primary,
+    flex: 1,
+    marginLeft: 8,
+    marginRight: 12,
+  },
+  enableButton: {
+    backgroundColor: colors.primary,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
+  },
+  enableButtonText: {
+    ...typography.buttonSmall,
+    color: colors.white,
   },
 });
