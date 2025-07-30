@@ -2,7 +2,6 @@ import Button from "@/components/Button";
 import Input from "@/components/Input";
 import colors from "@/constants/colors";
 import typography from "@/constants/typography";
-import { useAuthStore } from "@/store/authStore";
 import { Image } from "expo-image";
 import * as ImagePicker from "expo-image-picker";
 import { useRouter } from "expo-router";
@@ -21,8 +20,16 @@ import {
 
 export default function EditProfileScreen() {
   const router = useRouter();
-  const { user, updateProfile } = useAuthStore();
   
+  // Mock user data
+  const user = {
+    name: 'Guest User',
+    phone: '123-456-7890',
+    bio: 'A passionate cook sharing the love for Ethiopian cuisine.',
+    location: 'Addis Ababa, Ethiopia',
+    avatar: 'https://images.unsplash.com/photo-1531123897727-8f129e1688ce?q=80&w=200',
+  };
+
   const [name, setName] = useState(user?.name || "");
   const [phone, setPhone] = useState(user?.phone || "");
   const [bio, setBio] = useState(user?.bio || "");
@@ -58,27 +65,22 @@ export default function EditProfileScreen() {
     setIsSubmitting(true);
     
     try {
-      updateProfile({
-        name,
-        phone,
-        bio,
-        location,
-        avatar,
-      });
-      
-      Alert.alert(
-        "Success",
-        "Profile updated successfully",
-        [
-          {
-            text: "OK",
-            onPress: () => router.back(),
-          },
-        ]
-      );
+      // Simulate API call
+      setTimeout(() => {
+        Alert.alert(
+          "Success",
+          "Profile updated successfully",
+          [
+            {
+              text: "OK",
+              onPress: () => router.back(),
+            },
+          ]
+        );
+        setIsSubmitting(false);
+      }, 1000);
     } catch (error) {
       Alert.alert("Error", "Failed to update profile");
-    } finally {
       setIsSubmitting(false);
     }
   };

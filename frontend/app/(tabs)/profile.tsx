@@ -1,26 +1,12 @@
 import RecipeCard from "@/components/RecipeCard";
 import colors from "@/constants/colors";
 import typography from "@/constants/typography";
-import { useAuthStore } from "@/store/authStore";
 import { useCartStore } from "@/store/cartStore";
 import { useProfileStore } from "@/store/profileStore";
 import { useRecipeStore } from "@/store/recipeStore";
 import { Image } from "expo-image";
 import { useRouter } from "expo-router";
-import type { User } from "@/types/auth";
-import {
-  Bookmark,
-  ChevronRight,
-  CreditCard,
-  Edit2,
-  Grid,
-  LogOut,
-  MapPin,
-  Settings,
-  ShoppingBag,
-  UserMinus,
-  UserPlus,
-} from "lucide-react-native";
+import { useLocalSearchParams } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
   ActivityIndicator,
@@ -32,18 +18,40 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { useLocalSearchParams } from "expo-router";
+import {
+  Bookmark,
+  ChevronRight,
+  CreditCard,
+  Edit2,
+  Grid,
+  LogOut,
+  MapPin,
+  Settings,
+  ShoppingBag,
+} from "lucide-react-native";
 
 export default function ProfileScreen() {
   const router = useRouter();
   const params = useLocalSearchParams();
-  const { user, logout, followUser, unfollowUser, isFollowing, updateProfile } = useAuthStore();
   const { recipes } = useRecipeStore();
   const { addresses, paymentMethods } = useProfileStore();
   const { orders } = useCartStore();
   const [activeTab, setActiveTab] = useState<"recipes" | "saved">("recipes");
   const [isLoading, setIsLoading] = useState(false);
   const [isSetupMode, setIsSetupMode] = useState(false);
+
+  // Mock user data
+  const user = {
+    id: '1',
+    name: 'Guest User',
+    email: 'guest@example.com',
+    avatar: 'https://images.unsplash.com/photo-1531123897727-8f129e1688ce?q=80&w=200',
+    location: 'Addis Ababa, Ethiopia',
+    bio: 'A passionate cook sharing the love for Ethiopian cuisine.',
+    followers: 1200,
+    following: 150,
+  };
+
   const [profileUser, setProfileUser] = useState(user);
   const [isFollowingUser, setIsFollowingUser] = useState(false);
   
@@ -51,7 +59,7 @@ export default function ProfileScreen() {
   const [formData, setFormData] = useState({
     name: user?.name || "",
     email: user?.email || "",
-    phone: user?.phone || "",
+    phone: "",
     bio: user?.bio || "",
   });
   
@@ -62,17 +70,6 @@ export default function ProfileScreen() {
     }
   }, [params]);
 
-  useEffect(() => {
-    if (user && profileUser) {
-      setIsFollowingUser(isFollowing(profileUser.id));
-    }
-  }, [user, profileUser, isFollowing]);
-
-  if (!user) {
-    router.replace("/(auth)");
-    return null;
-  }
-  
   const handleProfileUpdate = async () => {
     if (!formData.name?.trim()) {
       Alert.alert("Error", "Please enter your name");
@@ -85,25 +82,9 @@ export default function ProfileScreen() {
     setIsLoading(true);
     
     try {
-      // Create the update data object with only the fields that have values
-      const updateData: Partial<User> = {
-        name: formData.name?.trim() || '',
-        ...(formData.email ? { email: formData.email.trim() } : {}),
-        ...(formData.bio ? { bio: formData.bio.trim() } : {}),
-        isProfileComplete: true
-      };
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1000));
       
-      // Update the profile - we don't use the return value since it's void
-      await updateProfile(updateData);
-      
-      // Update the local profile user state with the form data
-      // The auth store will update the user data in its state and AsyncStorage
-      setProfileUser(prev => ({
-        ...prev!,
-        ...updateData
-      }));
-      
-      // Show success message
       const successMessage = isSetupMode 
         ? "Your profile has been set up successfully!"
         : "Your profile has been updated!";
@@ -121,9 +102,7 @@ export default function ProfileScreen() {
       
     } catch (error) {
       console.error("Profile update error:", error);
-      const errorMessage = error instanceof Error 
-        ? error.message 
-        : "Failed to update profile. Please try again.";
+      const errorMessage = "Failed to update profile. Please try again.";
       
       Alert.alert("Error", errorMessage);
     } finally {
@@ -207,25 +186,7 @@ export default function ProfileScreen() {
   const recentOrders = orders.slice(0, 3);
 
   const handleLogout = () => {
-    Alert.alert(
-      "Logout",
-      "Are you sure you want to logout?",
-      [
-        {
-          text: "Cancel",
-          style: "cancel",
-        },
-        {
-          text: "Logout",
-          onPress: () => {
-            logout();
-            router.replace("/(auth)");
-          },
-          style: "destructive",
-        },
-      ],
-      { cancelable: true }
-    );
+    Alert.alert("Logout", "This action is disabled.");
   };
 
   const handleEditProfile = () => {
@@ -237,24 +198,7 @@ export default function ProfileScreen() {
   };
 
   const handleFollowToggle = async () => {
-    if (!user || !profileUser) return;
-    
-    setIsLoading(true);
-    
-    try {
-      if (isFollowingUser) {
-        await unfollowUser(profileUser.id);
-        setIsFollowingUser(false);
-      } else {
-        await followUser(profileUser.id);
-        setIsFollowingUser(true);
-      }
-    } catch (error) {
-      console.error("Error toggling follow status:", error);
-      Alert.alert("Error", "Failed to update follow status");
-    } finally {
-      setIsLoading(false);
-    }
+    Alert.alert("Follow", "This action is disabled.");
   };
 
   const handleViewFollowers = () => {
@@ -327,34 +271,6 @@ export default function ProfileScreen() {
               <Text style={styles.editProfileText}>Edit Profile</Text>
             </TouchableOpacity>
             
-            {profileUser && profileUser.id !== user.id && (
-              <TouchableOpacity
-                style={[
-                  styles.followButton,
-                  isFollowingUser && styles.unfollowButton
-                ]}
-                onPress={handleFollowToggle}
-                disabled={isLoading}
-              >
-                {isLoading ? (
-                  <ActivityIndicator size="small" color={isFollowingUser ? colors.text : colors.white} />
-                ) : (
-                  <>
-                    {isFollowingUser ? (
-                      <UserMinus size={16} color={colors.text} />
-                    ) : (
-                      <UserPlus size={16} color={colors.white} />
-                    )}
-                    <Text style={[
-                      styles.followButtonText,
-                      isFollowingUser && styles.unfollowButtonText
-                    ]}>
-                      {isFollowingUser ? "Unfollow" : "Follow"}
-                    </Text>
-                  </>
-                )}
-              </TouchableOpacity>
-            )}
           </View>
         </View>
 
@@ -657,28 +573,6 @@ const styles = StyleSheet.create({
   editProfileText: {
     ...typography.bodySmall,
     marginLeft: 8,
-  },
-  followButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-    backgroundColor: colors.primary,
-    borderRadius: 20,
-    marginHorizontal: 8,
-  },
-  unfollowButton: {
-    backgroundColor: colors.lightGray,
-    borderWidth: 1,
-    borderColor: colors.divider,
-  },
-  followButtonText: {
-    ...typography.bodySmall,
-    color: colors.white,
-    marginLeft: 8,
-  },
-  unfollowButtonText: {
-    color: colors.text,
   },
   section: {
     backgroundColor: colors.cardBackground,

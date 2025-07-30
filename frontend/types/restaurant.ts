@@ -23,6 +23,8 @@ export interface Restaurant {
   };
   distance?: string;
   categories?: string[];
+  dietaryOptions?: string[];
+  
   createdAt: string;
   updatedAt: string;
   deliveryFee?: number;

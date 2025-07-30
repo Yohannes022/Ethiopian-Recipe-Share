@@ -1,111 +1,70 @@
 import colors from "@/constants/colors";
 import typography from "@/constants/typography";
-import { useAuthStore } from "@/store/authStore";
-import { useProfileStore } from "@/store/profileStore";
-import { User } from "@/types/auth";
 import { Image } from "expo-image";
-import { useLocalSearchParams, useRouter } from "expo-router";
-import { ArrowLeft, UserCheck } from "lucide-react-native";
-import React, { useEffect, useState } from "react";
+import { useRouter } from "expo-router";
+import { ChevronLeft } from "lucide-react-native";
+import React from "react";
 import {
-  ActivityIndicator,
   FlatList,
-  SafeAreaView,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
+  Platform,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+
+const mockFollowing = [
+  {
+    id: "3",
+    name: "Gordon Ramsay",
+    avatar: "https://i.pravatar.cc/150?u=a042581f4e29026706d",
+    isFollowing: true,
+  },
+];
 
 export default function FollowingScreen() {
   const router = useRouter();
-  const { id } = useLocalSearchParams<{ id: string }>();
-  const { fetchFollowing, following, isLoading, unfollowUser } = useProfileStore();
-  const { user } = useAuthStore();
-  const [refreshing, setRefreshing] = useState(false);
 
-  useEffect(() => {
-    loadFollowing();
-  }, [id]);
-
-  const loadFollowing = async () => {
-    if (id) {
-      await fetchFollowing(id);
-    }
+  const handleToggleFollow = (id: string) => {
+    // Disabled: Requires authentication
   };
 
-  const handleRefresh = async () => {
-    setRefreshing(true);
-    await loadFollowing();
-    setRefreshing(false);
-  };
-
-  const handleUnfollow = async (followingId: string) => {
-    await unfollowUser(followingId);
-  };
-
-  const renderFollowingItem = ({ item }: { item: User }) => {
-    const isCurrentUser = user?.id === id;
-
-    return (
+  const renderItem = ({ item }: { item: typeof mockFollowing[0] }) => (
+    <View style={styles.userRow}>
+      <Image source={{ uri: item.avatar }} style={styles.avatar} />
+      <Text style={styles.name}>{item.name}</Text>
       <TouchableOpacity
-        style={styles.followingItem}
-        onPress={() => router.push(`/profile/${item.id}`)}
+        style={[styles.button, styles.unfollowButton]}
+        onPress={() => handleToggleFollow(item.id)}
       >
-        <Image
-          source={{ uri: item.avatar }}
-          style={styles.avatar}
-          contentFit="cover"
-        />
-        <View style={styles.followingInfo}>
-          <Text style={styles.followingName}>{item.name}</Text>
-          <Text style={styles.followingBio}>{item.bio || "No bio"}</Text>
-        </View>
-        {isCurrentUser && (
-          <TouchableOpacity
-            style={styles.followingButton}
-            onPress={() => handleUnfollow(item.id)}
-          >
-            <UserCheck size={16} color={colors.primary} />
-            <Text style={styles.followingButtonText}>Following</Text>
-          </TouchableOpacity>
-        )}
+        <Text style={[styles.buttonText, styles.unfollowButtonText]}>
+          Unfollow
+        </Text>
       </TouchableOpacity>
-    );
-  };
+    </View>
+  );
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.container} edges={["top"]}>
       <View style={styles.header}>
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => router.back()}
-        >
-          <ArrowLeft size={24} color={colors.text} />
+        <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+          <ChevronLeft size={24} color={colors.text} />
         </TouchableOpacity>
-        <Text style={styles.title}>Following</Text>
-        <View style={{ width: 24 }} />
+        <Text style={styles.headerTitle}>Following</Text>
+        <View style={{ width: 40 }} />
       </View>
-
-      {isLoading && !refreshing ? (
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color={colors.primary} />
-        </View>
-      ) : (
-        <FlatList
-          data={following}
-          renderItem={renderFollowingItem}
-          keyExtractor={(item) => item.id}
-          contentContainerStyle={styles.listContent}
-          refreshing={refreshing}
-          onRefresh={handleRefresh}
-          ListEmptyComponent={
-            <View style={styles.emptyContainer}>
-              <Text style={styles.emptyText}>Not following anyone yet</Text>
-            </View>
-          }
-        />
-      )}
+      <FlatList
+        data={mockFollowing}
+        renderItem={renderItem}
+        keyExtractor={(item) => item.id}
+        contentContainerStyle={styles.listContainer}
+        ListEmptyComponent={() => (
+          <View style={styles.emptyContainer}>
+            <Text style={styles.emptyText}>You are not following anyone yet.</Text>
+          </View>
+        )}
+      />
     </SafeAreaView>
   );
 }
@@ -122,29 +81,25 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: colors.border,
+    borderBottomColor: colors.gray,
+    backgroundColor: colors.white,
   },
   backButton: {
     padding: 4,
   },
-  title: {
+  headerTitle: {
     ...typography.heading3,
-    color: colors.text,
   },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  listContent: {
+  listContainer: {
     padding: 16,
   },
-  followingItem: {
+  userRow: {
     flexDirection: "row",
     alignItems: "center",
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
+    marginBottom: 16,
+    backgroundColor: colors.white,
+    padding: 12,
+    borderRadius: 8,
   },
   avatar: {
     width: 50,
@@ -152,38 +107,32 @@ const styles = StyleSheet.create({
     borderRadius: 25,
     marginRight: 12,
   },
-  followingInfo: {
+  name: {
+    ...typography.body,
     flex: 1,
   },
-  followingName: {
-    ...typography.bodyLarge,
-    color: colors.text,
-    fontWeight: "600",
-    marginBottom: 4,
-  },
-  followingBio: {
-    ...typography.bodySmall,
-    color: colors.lightText,
-  },
-  followingButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: colors.lightGray,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 16,
+  button: {
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 20,
     borderWidth: 1,
-    borderColor: colors.primary,
   },
-  followingButtonText: {
-    ...typography.bodySmall,
-    color: colors.primary,
-    fontWeight: "600",
-    marginLeft: 4,
+  unfollowButton: {
+    backgroundColor: colors.white,
+    borderColor: colors.gray,
+  },
+  buttonText: {
+    ...typography.body,
+    fontWeight: "bold",
+  },
+  unfollowButtonText: {
+    color: colors.text,
   },
   emptyContainer: {
-    padding: 24,
+    flex: 1,
+    justifyContent: "center",
     alignItems: "center",
+    marginTop: 50,
   },
   emptyText: {
     ...typography.body,

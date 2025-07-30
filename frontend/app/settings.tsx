@@ -1,13 +1,12 @@
 import colors from "@/constants/colors";
 import typography from "@/constants/typography";
-import { useAuthStore } from "@/store/authStore";
 import { useRouter } from "expo-router";
 import {
   Bell,
   ChevronRight,
   Globe,
   HelpCircle,
-  LogOut,
+  LogIn,
   Moon,
   Shield,
 } from "lucide-react-native";
@@ -25,7 +24,6 @@ import {
 
 export default function SettingsScreen() {
   const router = useRouter();
-  const { logout } = useAuthStore();
   const [isLoading, setIsLoading] = useState(true);
   const [settings, setSettings] = useState({
     notifications: true,
@@ -50,25 +48,8 @@ export default function SettingsScreen() {
     });
   };
 
-  const handleLogout = () => {
-    Alert.alert(
-      "Logout",
-      "Are you sure you want to logout?",
-      [
-        {
-          text: "Cancel",
-          style: "cancel",
-        },
-        {
-          text: "Logout",
-          style: "destructive",
-          onPress: () => {
-            logout();
-            router.replace("/(auth)");
-          },
-        },
-      ]
-    );
+  const handleLoginSignUp = () => {
+    router.push('/welcome');
   };
 
   const handleLanguageSelect = () => {
@@ -250,11 +231,11 @@ export default function SettingsScreen() {
             </View>
             
             <TouchableOpacity
-              style={styles.logoutButton}
-              onPress={handleLogout}
+              style={styles.loginButton}
+              onPress={handleLoginSignUp}
             >
-              <LogOut size={20} color={colors.error} style={styles.logoutIcon} />
-              <Text style={styles.logoutText}>Logout</Text>
+              <LogIn size={20} color={colors.primary} style={styles.loginIcon} />
+              <Text style={styles.loginText}>Login / Sign Up</Text>
             </TouchableOpacity>
             
             <Text style={styles.versionText}>Version 1.0.0</Text>
@@ -341,21 +322,21 @@ const styles = StyleSheet.create({
     color: colors.lightText,
     marginRight: 8,
   },
-  logoutButton: {
+  loginButton: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: colors.error + "10",
+    backgroundColor: colors.primary + "10",
     paddingVertical: 16,
     borderRadius: 8,
     marginBottom: 24,
   },
-  logoutIcon: {
+  loginIcon: {
     marginRight: 8,
   },
-  logoutText: {
+  loginText: {
     ...typography.body,
-    color: colors.error,
+    color: colors.primary,
     fontWeight: "600",
   },
   versionText: {

@@ -2,7 +2,8 @@ import CategoryPill from "@/components/CategoryPill";
 import RestaurantCard from "@/components/RestaurantCard";
 import colors from "@/constants/colors";
 import typography from "@/constants/typography";
-// Remove the import since we're defining them in this file
+import { mockRestaurants } from "@/mocks/restaurants";
+import { Restaurant } from "@/types/restaurant";
 import * as Location from "expo-location";
 import { useRouter } from "expo-router";
 import { ChevronDown, Filter, MapPin, Search, X, Check } from "lucide-react-native";
@@ -19,34 +20,6 @@ import {
   View,
 } from "react-native";
 
-// Define the Restaurant interface with all required properties
-// Import the base Restaurant type and extend it
-import type { Restaurant as BaseRestaurant } from '@/types/restaurant';
-
-// Define the extended Restaurant interface with proper typing
-interface Restaurant extends BaseRestaurant {
-  id: string;
-  name: string;
-  image: string;
-  imageUrl: string;
-  rating: number;
-  deliveryTime: string;
-  minOrder: string;
-  categories: string[];
-  cuisine: string;
-  priceLevel: string; // Changed to only accept string
-  isOpen: boolean;
-  distance: string;
-  address: string;
-  ownerId: string;
-  createdAt: string;
-  updatedAt: string;
-  estimatedDeliveryTime?: string;
-  dietaryOptions?: string[];
-  // Override the openingHours to be more specific about the type
-  openingHours?: Record<string, { open: string; close: string }>;
-}
-
 type PriceRange = [number, number];
 
 const priceRanges = [
@@ -54,97 +27,6 @@ const priceRanges = [
   { label: '100-300 ETB', value: [100, 300] as [number, number] },
   { label: '300-500 ETB', value: [300, 500] as [number, number] },
   { label: '500+ ETB', value: [500, Infinity] as [number, number] },
-];
-
-// Mock data for restaurants
-const mockRestaurants: Restaurant[] = [
-  {
-    id: '1',
-    name: 'Habesha Restaurant',
-    image: 'https://example.com/habesha.jpg',
-    imageUrl: 'https://example.com/habesha.jpg',
-    rating: 4.5,
-    deliveryTime: '30-45 min',
-    minOrder: '100 ETB',
-    categories: ['Ethiopian', 'Traditional'],
-    cuisine: 'Ethiopian',
-    priceLevel: '$$',
-    isOpen: true,
-    distance: '1.2 km',
-    address: '123 Bole Road, Addis Ababa',
-    ownerId: 'owner123',
-    createdAt: '2023-01-01T00:00:00Z',
-    updatedAt: '2023-01-01T00:00:00Z',
-    estimatedDeliveryTime: '45',
-    dietaryOptions: ['Vegetarian', 'Vegan', 'gluten-free', 'halal'],
-    openingHours: {
-      'Monday': { open: '09:00', close: '22:00' },
-      'Tuesday': { open: '09:00', close: '22:00' },
-      'Wednesday': { open: '09:00', close: '22:00' },
-      'Thursday': { open: '09:00', close: '22:00' },
-      'Friday': { open: '09:00', close: '23:00' },
-      'Saturday': { open: '10:00', close: '23:00' },
-      'Sunday': { open: '10:00', close: '22:00' }
-    }
-  },
-  {
-    id: '2',
-    name: 'Tibs Village',
-    image: 'https://example.com/tibs.jpg',
-    imageUrl: 'https://example.com/tibs.jpg',
-    rating: 4.2,
-    deliveryTime: '20-30 min',
-    minOrder: '50 ETB',
-    categories: ['Ethiopian', 'Grill'],
-    cuisine: 'Ethiopian',
-    priceLevel: '$$',
-    isOpen: true,
-    distance: '0.8 km',
-    address: '456 Bole Road, Addis Ababa',
-    ownerId: 'owner456',
-    createdAt: '2023-01-15T00:00:00Z',
-    updatedAt: '2023-01-15T00:00:00Z',
-    estimatedDeliveryTime: '30',
-    dietaryOptions: ['Meat Lovers', 'Spicy', 'halal'],
-    openingHours: {
-      'Monday': { open: '10:00', close: '23:00' },
-      'Tuesday': { open: '10:00', close: '23:00' },
-      'Wednesday': { open: '10:00', close: '23:00' },
-      'Thursday': { open: '10:00', close: '23:00' },
-      'Friday': { open: '10:00', close: '00:00' },
-      'Saturday': { open: '11:00', close: '00:00' },
-      'Sunday': { open: '11:00', close: '22:00' }
-    }
-  },
-  {
-    id: '3',
-    name: 'Injera Time',
-    image: 'https://example.com/injera.jpg',
-    imageUrl: 'https://example.com/injera.jpg',
-    rating: 4.0,
-    deliveryTime: '25-40 min',
-    minOrder: '75 ETB',
-    categories: ['Ethiopian', 'Vegetarian'],
-    cuisine: 'Ethiopian',
-    priceLevel: '$$',
-    isOpen: true,
-    distance: '1.5 km',
-    address: '789 Bole Road, Addis Ababa',
-    ownerId: 'owner789',
-    createdAt: '2023-02-01T00:00:00Z',
-    updatedAt: '2023-02-01T00:00:00Z',
-    estimatedDeliveryTime: '40',
-    dietaryOptions: ['Vegetarian', 'Vegan', 'Gluten-Free'],
-    openingHours: {
-      'Monday': { open: '08:00', close: '21:00' },
-      'Tuesday': { open: '08:00', close: '21:00' },
-      'Wednesday': { open: '08:00', close: '21:00' },
-      'Thursday': { open: '08:00', close: '21:00' },
-      'Friday': { open: '08:00', close: '22:00' },
-      'Saturday': { open: '09:00', close: '22:00' },
-      'Sunday': { open: '10:00', close: '18:00' } // Changed from 'Closed' to a valid time range
-    }
-  }
 ];
 
 const restaurantCategories = ['All', 'Ethiopian', 'Traditional', 'Fast Food'];
@@ -364,7 +246,7 @@ export default function RestaurantsScreen() {
     // Apply rating filter
     if (filters.minRating > 0) {
       filtered = filtered.filter(
-        (restaurant) => restaurant.rating >= filters.minRating
+        (restaurant) => (restaurant.rating ?? 0) >= filters.minRating
       );
     }
     
@@ -381,7 +263,7 @@ export default function RestaurantsScreen() {
     // Apply max delivery time filter
     if (filters.maxDeliveryTime < 60) {
       filtered = filtered.filter(restaurant => {
-        const deliveryTime = parseDeliveryTime(restaurant.deliveryTime);
+        const deliveryTime = parseDeliveryTime(restaurant.estimatedDeliveryTime);
         return deliveryTime > 0 && deliveryTime <= filters.maxDeliveryTime;
       });
     }

@@ -3,10 +3,10 @@ import RecipeCard from "@/components/RecipeCard";
 import colors from "@/constants/colors";
 import typography from "@/constants/typography";
 import { popularTags } from "@/mocks/recipes";
-import { useAuthStore } from "@/store/authStore";
 import { useRecipeStore } from "@/store/recipeStore";
 import { useRestaurantStore } from "@/store/restaurantStore";
 import { Image } from "expo-image";
+import * as Location from "expo-location";
 import { useRouter } from "expo-router";
 import { ChevronRight, MapPin, Star } from "lucide-react-native";
 import React, { useState } from "react";
@@ -21,6 +21,8 @@ import {
   StyleSheet,
   Text,
   TouchableOpacity,
+  Linking,
+  Platform,
   View,
 } from "react-native";
 
@@ -29,12 +31,13 @@ export default function HomeScreen() {
   const { width } = Dimensions.get("window");
   const isTablet = width > 768;
   
-  const { user } = useAuthStore();
   const { recipes, setSelectedTag, isLoading: recipesLoading } = useRecipeStore();
   const { restaurants, isLoading: restaurantsLoading } = useRestaurantStore();
   
   const [refreshing, setRefreshing] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [userLocation, setUserLocation] = useState<Location.LocationObject | null>(null);
+  const [address, setAddress] = useState<string | null>(null);
   
   const featuredRecipe = recipes[0];
   const popularRecipes = recipes.slice(1, 5);
@@ -64,6 +67,34 @@ export default function HomeScreen() {
 
   const handleSeeAllRestaurants = () => {
     router.push("/restaurants");
+  };
+
+  const handleLocationPress = async () => {
+    if (!Location) return;
+    try {
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      if (status === "granted") {
+        const location = await Location.getCurrentPositionAsync({});
+        setUserLocation(location);
+        
+        // Get address from coordinates
+        const addressResponse = await Location.reverseGeocodeAsync({
+          latitude: location.coords.latitude,
+          longitude: location.coords.longitude,
+        });
+        
+        if (addressResponse.length > 0) {
+          const { street, name, city, region } = addressResponse[0];
+          const displayAddress = [street || name, city, region].filter(Boolean).join(', ');
+          setAddress(displayAddress);
+        }
+        
+        Linking.openURL(`geo:${location.coords.latitude},${location.coords.longitude}?q=My+Location`);
+      }
+    } catch (error) {
+      console.error("Error getting location:", error);
+      // Optionally show an error message to the user
+    }
   };
 
   const onRefresh = async () => {
@@ -96,13 +127,24 @@ export default function HomeScreen() {
       }
     >
       <View style={styles.header}>
-        <View>
-          <Text style={styles.greeting}>Hello, {user?.name?.split(" ")[0] || "Guest"}</Text>
-          <Text style={styles.subtitle}>What would you like to explore today?</Text>
+        <View style={styles.locationWrapper}>
+          <TouchableOpacity 
+            onPress={handleLocationPress} 
+            style={styles.locationContainer}
+          >
+            <MapPin size={20} color={colors.primary} />
+            <Text 
+              style={styles.locationText} 
+              numberOfLines={1} 
+              ellipsizeMode="tail"
+            >
+              {address || 'My location'}
+            </Text>
+          </TouchableOpacity>
         </View>
-        <TouchableOpacity onPress={() => router.push("/profile")}>
+        <TouchableOpacity onPress={() => router.push("/profile")} style={styles.profileButton}>
           <Image
-            source={{ uri: user?.avatar || "https://images.unsplash.com/photo-1531123897727-8f129e1688ce?q=80&w=200" }}
+            source={{ uri: "https://images.unsplash.com/photo-1531123897727-8f129e1688ce?q=80&w=200" }}
             style={styles.avatar}
           />
         </TouchableOpacity>
@@ -234,20 +276,38 @@ const styles = StyleSheet.create({
     color: colors.lightText,
   },
   header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingHorizontal: 20,
-    paddingTop: 20,
-    paddingBottom: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
   },
-  greeting: {
-    ...typography.heading3,
-    marginBottom: 4,
+  locationWrapper: {
+    flex: 1,
+    marginRight: 12,
+    maxWidth: '80%',
   },
-  subtitle: {
+  locationContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.lightGray,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 20,
+    maxWidth: '100%',
+  },
+  locationText: {
     ...typography.body,
-    color: colors.lightText,
+    color: colors.text,
+    marginLeft: 8,
+    flexShrink: 1,
+  },
+  profileButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    overflow: 'hidden',
+    backgroundColor: colors.lightGray,
   },
   avatar: {
     width: 48,

@@ -3,7 +3,6 @@ import colors from "@/constants/colors";
 import typography from "@/constants/typography";
 import { restaurants } from "@/mocks/restaurants";
 import { useCartStore } from "@/store/cartStore";
-import { useProfileStore } from "@/store/profileStore";
 import { OrderServiceType } from "@/types/restaurant";
 import { Image } from "expo-image";
 import { useRouter } from "expo-router";
@@ -20,6 +19,40 @@ import {
   View,
 } from "react-native";
 
+const mockAddresses = [
+  {
+    id: '1',
+    type: 'Home',
+    addressLine1: '123 Bole Street, Apt 4B',
+    addressLine2: 'Addis Ababa, Ethiopia',
+    isDefault: true,
+  },
+  {
+    id: '2',
+    type: 'Work',
+    addressLine1: '456 Kazanchis Ave, Office 7',
+    addressLine2: 'Addis Ababa, Ethiopia',
+    isDefault: false,
+  },
+];
+
+const mockPaymentMethods = [
+  {
+    id: '1',
+    type: 'card',
+    last4: '1234',
+    brand: 'Visa',
+    isDefault: true,
+  },
+  {
+    id: '2',
+    type: 'mobile',
+    provider: 'Telebirr',
+    number: '0912345678',
+    isDefault: false,
+  },
+];
+
 export default function CheckoutScreen() {
   const router = useRouter();
   const { 
@@ -33,7 +66,8 @@ export default function CheckoutScreen() {
     serviceType,
     setServiceType
   } = useCartStore();
-  const { addresses, paymentMethods } = useProfileStore();
+  const addresses = mockAddresses;
+  const paymentMethods = mockPaymentMethods;
   
   const [isLoading, setIsLoading] = useState(true);
   const [selectedAddress, setSelectedAddress] = useState<string | null>(null);
@@ -69,14 +103,14 @@ export default function CheckoutScreen() {
       const defaultPayment = paymentMethods.find((pm) => pm.isDefault);
       setSelectedPayment(defaultPayment ? defaultPayment.id : paymentMethods[0].id);
     }
-  }, [addresses, paymentMethods, serviceType]);
+  }, [serviceType]);
 
   const handleAddAddress = () => {
-    router.push("/profile/addresses/add");
+    Alert.alert("Sign Up Required", "Please create an account to save your addresses.");
   };
 
   const handleAddPayment = () => {
-    router.push("/profile/payment/add");
+    Alert.alert("Sign Up Required", "Please create an account to save your payment methods.");
   };
 
   const handlePlaceOrder = () => {
@@ -292,7 +326,7 @@ export default function CheckoutScreen() {
                         style={styles.addressIcon}
                       />
                       <View style={styles.addressDetails}>
-                        <Text style={styles.addressType}>{address.type || address.label || "Address"}</Text>
+                        <Text style={styles.addressType}>{address.type || "Address"}</Text>
                         <Text style={styles.addressText}>{address.addressLine1}</Text>
                         {address.addressLine2 && (
                           <Text style={styles.addressText}>{address.addressLine2}</Text>
@@ -410,8 +444,8 @@ export default function CheckoutScreen() {
                       <Text style={styles.paymentType}>{payment.type}</Text>
                       <Text style={styles.paymentText}>
                         {payment.type === 'card' 
-                          ? `**** **** **** ${payment.last4 || payment.lastFourDigits || "****"}`
-                          : payment.phoneNumber || payment.number || ""}
+                          ? `**** **** **** ${payment.last4 || "****"}`
+                          : payment.number || ""}
                       </Text>
                     </View>
                   </View>

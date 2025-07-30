@@ -1,6 +1,5 @@
 import colors from "@/constants/colors";
 import typography from "@/constants/typography";
-import { useAuthStore } from "@/store/authStore";
 import { Image } from "expo-image";
 import { useRouter } from "expo-router";
 import { ChevronRight } from "lucide-react-native";
@@ -9,30 +8,10 @@ import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 export default function CreateScreen() {
   const router = useRouter();
-  const { isAuthenticated } = useAuthStore();
 
   const handleCreateRecipe = () => {
     router.push("/create-recipe");
   };
-
-  if (!isAuthenticated) {
-    return (
-      <View style={styles.container}>
-        <View style={styles.authPrompt}>
-          <Text style={styles.authTitle}>Sign in to create recipes</Text>
-          <Text style={styles.authText}>
-            Join our community to share your favorite Ethiopian recipes
-          </Text>
-          <TouchableOpacity
-            style={styles.authButton}
-            onPress={() => router.push("/(auth)")}
-          >
-            <Text style={styles.authButtonText}>Sign In</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-    );
-  }
 
   return (
     <View style={styles.container}>
@@ -188,32 +167,5 @@ const styles = StyleSheet.create({
   tipItemText: {
     ...typography.bodySmall,
     color: colors.lightText,
-  },
-  authPrompt: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    padding: 20,
-  },
-  authTitle: {
-    ...typography.heading2,
-    marginBottom: 12,
-    textAlign: "center",
-  },
-  authText: {
-    ...typography.body,
-    color: colors.lightText,
-    textAlign: "center",
-    marginBottom: 24,
-  },
-  authButton: {
-    backgroundColor: colors.primary,
-    paddingVertical: 12,
-    paddingHorizontal: 24,
-    borderRadius: 8,
-  },
-  authButtonText: {
-    ...typography.button,
-    color: colors.white,
   },
 });

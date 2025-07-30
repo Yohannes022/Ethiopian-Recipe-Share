@@ -3,7 +3,6 @@ import Input from "@/components/Input";
 import colors from "@/constants/colors";
 import typography from "@/constants/typography";
 import { popularTags, regions } from "@/mocks/recipes";
-import { useAuthStore } from "@/store/authStore";
 import { useRecipeStore } from "@/store/recipeStore";
 import { Ingredient, Step } from "@/types/recipe";
 import { Image } from "expo-image";
@@ -26,7 +25,6 @@ export default function EditRecipeScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const { recipes, updateRecipe } = useRecipeStore();
-  const { user } = useAuthStore();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const recipe = recipes.find((r) => r.id === id);
@@ -50,32 +48,14 @@ export default function EditRecipeScreen() {
     imageUrl?: string;
     ingredients?: string;
     steps?: string;
-    permission?: string;
   }>({});
 
   useEffect(() => {
-    // Check if user is logged in
-    if (!user) {
-      Alert.alert("Login Required", "Please login to edit recipes", [
-        { text: "OK", onPress: () => router.replace("/(auth)") }
-      ]);
-      return;
-    }
-    
     // Check if recipe exists
     if (!recipe) {
       Alert.alert("Error", "Recipe not found", [
         { text: "OK", onPress: () => router.back() }
       ]);
-      return;
-    }
-    
-    // Check if user is the owner of the recipe
-    if (recipe.authorId !== user.id) {
-      Alert.alert("Permission Denied", "You can only edit your own recipes", [
-        { text: "OK", onPress: () => router.back() }
-      ]);
-      setErrors({ permission: "You don't have permission to edit this recipe" });
       return;
     }
     
@@ -92,7 +72,7 @@ export default function EditRecipeScreen() {
     setIngredients(recipe.ingredients);
     setSteps(recipe.steps);
     setCreditTo(recipe.creditTo || "");
-  }, [recipe, user, router]);
+  }, [recipe, router]);
 
   const pickImage = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
@@ -189,16 +169,6 @@ export default function EditRecipeScreen() {
   };
 
   const handleSubmit = () => {
-    if (!user) {
-      Alert.alert("Login Required", "Please login to edit recipes");
-      return;
-    }
-    
-    if (recipe && recipe.authorId !== user.id) {
-      Alert.alert("Permission Denied", "You can only edit your own recipes");
-      return;
-    }
-    
     if (!validateForm()) {
       return;
     }
@@ -239,18 +209,7 @@ export default function EditRecipeScreen() {
     }
   };
 
-  if (errors.permission) {
-    return (
-      <View style={styles.permissionErrorContainer}>
-        <AlertCircle size={60} color={colors.error} />
-        <Text style={styles.permissionErrorTitle}>Permission Denied</Text>
-        <Text style={styles.permissionErrorText}>{errors.permission}</Text>
-        <Button title="Go Back" onPress={() => router.back()} />
-      </View>
-    );
-  }
-
-  if (!recipe || !user) {
+  if (!recipe) {
     return (
       <View style={styles.loadingContainer}>
         <Text style={styles.loadingText}>Loading...</Text>
@@ -756,25 +715,6 @@ const styles = StyleSheet.create({
     ...typography.caption,
     color: colors.error,
     marginBottom: 8,
-  },
-  permissionErrorContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    padding: 20,
-    backgroundColor: colors.background,
-  },
-  permissionErrorTitle: {
-    ...typography.heading2,
-    color: colors.error,
-    marginTop: 16,
-    marginBottom: 8,
-  },
-  permissionErrorText: {
-    ...typography.body,
-    color: colors.text,
-    textAlign: "center",
-    marginBottom: 24,
   },
   loadingContainer: {
     flex: 1,

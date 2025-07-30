@@ -1,130 +1,76 @@
 import colors from "@/constants/colors";
 import typography from "@/constants/typography";
-import { useAuthStore } from "@/store/authStore";
-import { useProfileStore } from "@/store/profileStore";
-import { User } from "@/types/auth";
 import { Image } from "expo-image";
-import { useLocalSearchParams, useRouter } from "expo-router";
-import { ArrowLeft, UserCheck, UserPlus } from "lucide-react-native";
-import React, { useEffect, useState } from "react";
+import { useRouter } from "expo-router";
+import { ChevronLeft } from "lucide-react-native";
+import React from "react";
 import {
-  ActivityIndicator,
   FlatList,
-  SafeAreaView,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
+  Platform,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+
+const mockFollowers = [
+  {
+    id: "1",
+    name: "John Doe",
+    avatar: "https://i.pravatar.cc/150?u=a042581f4e29026704d",
+    isFollowing: true,
+  },
+  {
+    id: "2",
+    name: "Jane Smith",
+    avatar: "https://i.pravatar.cc/150?u=a042581f4e29026705d",
+    isFollowing: false,
+  },
+];
 
 export default function FollowersScreen() {
   const router = useRouter();
-  const { id } = useLocalSearchParams<{ id: string }>();
-  const { fetchFollowers, followers, isLoading, followUser, unfollowUser, isFollowing } = useProfileStore();
-  const { user } = useAuthStore();
-  const [refreshing, setRefreshing] = useState(false);
 
-  useEffect(() => {
-    loadFollowers();
-  }, [id]);
-
-  const loadFollowers = async () => {
-    if (id) {
-      await fetchFollowers(id);
-    }
+  const handleToggleFollow = (id: string) => {
+    // Disabled: Requires authentication
   };
 
-  const handleRefresh = async () => {
-    setRefreshing(true);
-    await loadFollowers();
-    setRefreshing(false);
-  };
-
-  const handleFollowToggle = async (followerId: string) => {
-    if (isFollowing(followerId)) {
-      await unfollowUser(followerId);
-    } else {
-      await followUser(followerId);
-    }
-  };
-
-  const renderFollowerItem = ({ item }: { item: User }) => {
-    const isCurrentUser = user?.id === item.id;
-    const following = isFollowing(item.id);
-
-    return (
+  const renderItem = ({ item }: { item: typeof mockFollowers[0] }) => (
+    <View style={styles.userRow}>
+      <Image source={{ uri: item.avatar }} style={styles.avatar} />
+      <Text style={styles.name}>{item.name}</Text>
       <TouchableOpacity
-        style={styles.followerItem}
-        onPress={() => router.push(`/profile/${item.id}`)}
+        style={[styles.button, item.isFollowing ? styles.unfollowButton : styles.followButton]}
+        onPress={() => handleToggleFollow(item.id)}
       >
-        <Image
-          source={{ uri: item.avatar }}
-          style={styles.avatar}
-          contentFit="cover"
-        />
-        <View style={styles.followerInfo}>
-          <Text style={styles.followerName}>{item.name}</Text>
-          <Text style={styles.followerBio}>{item.bio || "No bio"}</Text>
-        </View>
-        {!isCurrentUser && (
-          <TouchableOpacity
-            style={[
-              styles.followButton,
-              following && styles.followingButton,
-            ]}
-            onPress={() => handleFollowToggle(item.id)}
-          >
-            {following ? (
-              <UserCheck size={16} color={colors.primary} />
-            ) : (
-              <UserPlus size={16} color={colors.white} />
-            )}
-            <Text
-              style={[
-                styles.followButtonText,
-                following && styles.followingButtonText,
-              ]}
-            >
-              {following ? "Following" : "Follow"}
-            </Text>
-          </TouchableOpacity>
-        )}
+        <Text style={[styles.buttonText, item.isFollowing ? styles.unfollowButtonText : styles.followButtonText]}>
+          {item.isFollowing ? "Unfollow" : "Follow"}
+        </Text>
       </TouchableOpacity>
-    );
-  };
+    </View>
+  );
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.container} edges={["top"]}>
       <View style={styles.header}>
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => router.back()}
-        >
-          <ArrowLeft size={24} color={colors.text} />
+        <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+          <ChevronLeft size={24} color={colors.text} />
         </TouchableOpacity>
-        <Text style={styles.title}>Followers</Text>
-        <View style={{ width: 24 }} />
+        <Text style={styles.headerTitle}>Followers</Text>
+        <View style={{ width: 40 }} />
       </View>
-
-      {isLoading && !refreshing ? (
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color={colors.primary} />
-        </View>
-      ) : (
-        <FlatList
-          data={followers}
-          renderItem={renderFollowerItem}
-          keyExtractor={(item) => item.id}
-          contentContainerStyle={styles.listContent}
-          refreshing={refreshing}
-          onRefresh={handleRefresh}
-          ListEmptyComponent={
-            <View style={styles.emptyContainer}>
-              <Text style={styles.emptyText}>No followers yet</Text>
-            </View>
-          }
-        />
-      )}
+      <FlatList
+        data={mockFollowers}
+        renderItem={renderItem}
+        keyExtractor={(item) => item.id}
+        contentContainerStyle={styles.listContainer}
+        ListEmptyComponent={() => (
+          <View style={styles.emptyContainer}>
+            <Text style={styles.emptyText}>No followers yet.</Text>
+          </View>
+        )}
+      />
     </SafeAreaView>
   );
 }
@@ -141,29 +87,25 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: colors.border,
+    borderBottomColor: colors.gray,
+    backgroundColor: colors.white,
   },
   backButton: {
     padding: 4,
   },
-  title: {
+  headerTitle: {
     ...typography.heading3,
-    color: colors.text,
   },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  listContent: {
+  listContainer: {
     padding: 16,
   },
-  followerItem: {
+  userRow: {
     flexDirection: "row",
     alignItems: "center",
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
+    marginBottom: 16,
+    backgroundColor: colors.white,
+    padding: 12,
+    borderRadius: 8,
   },
   avatar: {
     width: 50,
@@ -171,44 +113,39 @@ const styles = StyleSheet.create({
     borderRadius: 25,
     marginRight: 12,
   },
-  followerInfo: {
+  name: {
+    ...typography.body,
     flex: 1,
   },
-  followerName: {
-    ...typography.bodyLarge,
-    color: colors.text,
-    fontWeight: "600",
-    marginBottom: 4,
-  },
-  followerBio: {
-    ...typography.bodySmall,
-    color: colors.lightText,
+  button: {
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 20,
+    borderWidth: 1,
   },
   followButton: {
-    flexDirection: "row",
-    alignItems: "center",
     backgroundColor: colors.primary,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 16,
-  },
-  followingButton: {
-    backgroundColor: colors.lightGray,
-    borderWidth: 1,
     borderColor: colors.primary,
   },
-  followButtonText: {
-    ...typography.bodySmall,
-    color: colors.white,
-    fontWeight: "600",
-    marginLeft: 4,
+  unfollowButton: {
+    backgroundColor: colors.white,
+    borderColor: colors.gray,
   },
-  followingButtonText: {
-    color: colors.primary,
+  buttonText: {
+    ...typography.body,
+    fontWeight: "bold",
+  },
+  followButtonText: {
+    color: colors.white,
+  },
+  unfollowButtonText: {
+    color: colors.text,
   },
   emptyContainer: {
-    padding: 24,
+    flex: 1,
+    justifyContent: "center",
     alignItems: "center",
+    marginTop: 50,
   },
   emptyText: {
     ...typography.body,

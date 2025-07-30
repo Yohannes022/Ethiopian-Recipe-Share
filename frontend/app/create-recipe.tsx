@@ -3,7 +3,6 @@ import Input from "@/components/Input";
 import colors from "@/constants/colors";
 import typography from "@/constants/typography";
 import { popularTags, regions } from "@/mocks/recipes";
-import { useAuthStore } from "@/store/authStore";
 import { useRecipeStore } from "@/store/recipeStore";
 import { Ingredient, Step } from "@/types/recipe";
 import { Image } from "expo-image";
@@ -38,9 +37,7 @@ const foodKeywords = [
 export default function CreateRecipeScreen() {
   const router = useRouter();
   const { addRecipe } = useRecipeStore();
-  const { user } = useAuthStore();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isValidating, setIsValidating] = useState(false);
 
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -66,7 +63,6 @@ export default function CreateRecipeScreen() {
     ingredients?: string;
     steps?: string;
     content?: string;
-    auth?: string;
   }>({});
 
   const [validationResult, setValidationResult] = useState<{
@@ -74,15 +70,6 @@ export default function CreateRecipeScreen() {
     score: number;
     message: string;
   } | null>(null);
-
-  useEffect(() => {
-    // Check if user is logged in
-    if (!user) {
-      setErrors({
-        auth: "You need to be logged in to create recipes"
-      });
-    }
-  }, [user]);
 
   const pickImage = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
@@ -150,11 +137,6 @@ export default function CreateRecipeScreen() {
   const validateForm = () => {
     const newErrors: any = {};
 
-    if (!user) {
-      newErrors.auth = "You need to be logged in to create recipes";
-      return false;
-    }
-
     if (!title.trim()) {
       newErrors.title = "Title is required";
     }
@@ -184,7 +166,6 @@ export default function CreateRecipeScreen() {
   };
 
   const validateFoodContent = async () => {
-    setIsValidating(true);
     setValidationResult(null);
 
     try {
@@ -227,19 +208,10 @@ export default function CreateRecipeScreen() {
     } catch (error) {
       console.error("Error validating content:", error);
       return true; // Allow submission if validation fails
-    } finally {
-      setIsValidating(false);
     }
   };
 
   const handleSubmit = async () => {
-    if (!user) {
-      Alert.alert("Login Required", "Please login to create recipes", [
-        { text: "OK", onPress: () => router.replace("/(auth)") }
-      ]);
-      return;
-    }
-
     if (!validateForm()) {
       return;
     }
@@ -290,21 +262,6 @@ export default function CreateRecipeScreen() {
       setIsSubmitting(false);
     }
   };
-
-  if (errors.auth) {
-    return (
-      <View style={styles.authErrorContainer}>
-        <AlertCircle size={60} color={colors.error} />
-        <Text style={styles.authErrorTitle}>Login Required</Text>
-        <Text style={styles.authErrorText}>{errors.auth}</Text>
-        <Button 
-          title="Login" 
-          onPress={() => router.replace("/(auth)")}
-          style={styles.loginButton}
-        />
-      </View>
-    );
-  }
 
   return (
     <KeyboardAvoidingView
@@ -678,7 +635,7 @@ export default function CreateRecipeScreen() {
           )}
 
           <View style={styles.submitContainer}>
-            {isValidating ? (
+            {isSubmitting ? (
               <View style={styles.validatingContainer}>
                 <ActivityIndicator color={colors.primary} />
                 <Text style={styles.validatingText}>Validating recipe content...</Text>
@@ -772,9 +729,6 @@ const styles = StyleSheet.create({
   // Style for input when it's empty (showing placeholder)
   emptyInput: {
     color: colors.placeholderText,
-  },
-  inputPlaceholder: {
-    color: colors.lightText + '99', // Slightly transparent light text for placeholders
   },
   imagePickerText: {
     ...typography.body,
@@ -1042,26 +996,5 @@ const styles = StyleSheet.create({
     ...typography.caption,
     color: colors.error,
     marginBottom: 8,
-  },
-  authErrorContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    padding: 20,
-    backgroundColor: colors.background,
-  },
-  authErrorTitle: {
-    ...typography.heading2,
-    marginTop: 16,
-    marginBottom: 8,
-  },
-  authErrorText: {
-    ...typography.body,
-    color: colors.text,
-    textAlign: "center",
-    marginBottom: 24,
-  },
-  loginButton: {
-    width: 200,
   },
 });

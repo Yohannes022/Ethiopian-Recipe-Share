@@ -66,7 +66,7 @@ const menuItems: MenuItem[] = [
 // Mock restaurants
 export const mockRestaurants: Restaurant[] = [
   {
-    id: "rest1",
+    id: "1",
     name: "Habesha Restaurant",
     imageUrl: "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?q=80&w=500",
     coverImageUrl: "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?q=80&w=500",
@@ -102,7 +102,7 @@ export const mockRestaurants: Restaurant[] = [
     updatedAt: ""
   },
   {
-    id: "rest2",
+    id: "2",
     name: "Addis Ababa Cafe",
     imageUrl: "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?q=80&w=500",
     coverImageUrl: "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?q=80&w=500",
@@ -138,7 +138,7 @@ export const mockRestaurants: Restaurant[] = [
     updatedAt: ""
   },
   {
-    id: "rest3",
+    id: "3",
     name: "Lalibela Restaurant",
     imageUrl: "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?q=80&w=500",
     coverImageUrl: "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?q=80&w=500",
@@ -174,7 +174,7 @@ export const mockRestaurants: Restaurant[] = [
     updatedAt: ""
   },
   {
-    id: "rest4",
+    id: "4",
     name: "Merkato Cafe",
     imageUrl: "https://images.unsplash.com/photo-1521017432531-fbd92d768814?q=80&w=500",
     coverImageUrl: "https://images.unsplash.com/photo-1521017432531-fbd92d768814?q=80&w=500",
@@ -210,7 +210,7 @@ export const mockRestaurants: Restaurant[] = [
     updatedAt: ""
   },
   {
-    id: "rest5",
+    id: "5",
     name: "Blue Nile Restaurant",
     imageUrl: "https://images.unsplash.com/photo-1537047902294-62a40c20a6ae?q=80&w=500",
     coverImageUrl: "https://images.unsplash.com/photo-1537047902294-62a40c20a6ae?q=80&w=500",
